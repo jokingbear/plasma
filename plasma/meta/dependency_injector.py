@@ -3,10 +3,10 @@ import networkx as nx
 import re
 import pandas as pd
 
-from ..functional import AutoPipe
+from ..functional import State
 
 
-class DependencyInjector(AutoPipe):
+class DependencyInjector(State):
 
     def __init__(self, stateful=False):
         super().__init__()
@@ -77,31 +77,34 @@ class DependencyInjector(AutoPipe):
     
     def _recursive_init(self, key, object_dict:dict, init_args:dict):
         if key not in object_dict and key in self._dep_graph:
-            arg_maps = {}
-            for arg in self._dep_graph.neighbors(key):
-                if arg in init_args:
-                    arg_object = init_args[arg]
-                else:
-                    node_attributes = self._dep_graph.nodes[arg]
-                    if 'value' in node_attributes:
-                        arg_object = node_attributes['value']
+            if 'value' in self._dep_graph.nodes[key]:
+                object_dict[key] = self._dep_graph.nodes[key]['value']
+            else:
+                arg_maps = {}
+                for arg in self._dep_graph.neighbors(key):
+                    if arg in init_args:
+                        arg_object = init_args[arg]
                     else:
-                        self._recursive_init(arg, object_dict, init_args)
-                        arg_object = object_dict.get(arg, _NotInitialized)
+                        node_attributes = self._dep_graph.nodes[arg]
+                        if 'value' in node_attributes:
+                            arg_object = node_attributes['value']
+                        else:
+                            self._recursive_init(arg, object_dict, init_args)
+                            arg_object = object_dict.get(arg, _NotInitialized)
 
-                if arg_object is _NotInitialized:
-                    error_message = f'{arg} is not in init_args or dependency graph at key: {key}'
-                    raise KeyError(error_message)
+                    if arg_object is _NotInitialized:
+                        error_message = f'{arg} is not in init_args or dependency graph at key: {key}'
+                        raise KeyError(error_message)
 
-                arg_maps[arg] = arg_object
+                    arg_maps[arg] = arg_object
 
-            if len(arg_maps) == self._dep_graph.out_degree(key):
-                try:
-                    object_dict[key] = self._dep_graph.nodes[key]['initiator'](**arg_maps)
-                    if self.stateful:
-                        self._dep_graph.add_node(key, value=object_dict[key])
-                except Exception as e:
-                    raise RuntimeError(f'error at {key}') from e
+                if len(arg_maps) == self._dep_graph.out_degree(key):
+                    try:
+                        object_dict[key] = self._dep_graph.nodes[key]['initiator'](**arg_maps)
+                        if self.stateful:
+                            self._dep_graph.add_node(key, value=object_dict[key])
+                    except Exception as e:
+                        raise RuntimeError(f'error at {key}') from e
 
     def __repr__(self):
         lines = []
@@ -115,6 +118,11 @@ class DependencyInjector(AutoPipe):
         pattern = f'{prefix}{indent}'.replace('|', r'\|')
         text = re.sub(rf'({pattern}){{1,}}', lambda m: m.group(0).replace(prefix + indent, ' ' * (len(indent) + 1)) + prefix + indent, text)
         return text
+
+    def release(self):
+        for n, attr in self._dep_graph.nodes.items():
+            if 'value' in attr and self._dep_graph.out_degree(n) > 0:
+                del attr['value']
 
 
 class _NotInitialized:
