@@ -41,6 +41,9 @@ def _is_configs(t: type):
     while walk:
         is_base_configs = t is BaseConfigs
         walk = not is_base_configs and t is not None
-        t = t.__base__
+        if hasattr(t, '__base__'):
+            t = t.__base__
+        else:
+            walk = False
         
     return is_base_configs
