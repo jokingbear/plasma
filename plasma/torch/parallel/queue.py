@@ -8,10 +8,10 @@ from .helpers import internal_run
 
 class CudaQueue(Queue[list[tmp.Process]]):
     
-    def __init__(self, name=None, num_runner=1, timeout=0):
+    def __init__(self, name=None, num_runner=1, timeout=0, qsize=0):
         super().__init__(name, num_runner)
         
-        self._queue = tmp.JoinableQueue()
+        self._queue = tmp.JoinableQueue(maxsize=qsize)
         self.timeout = timeout
     
     def _init_state(self):
