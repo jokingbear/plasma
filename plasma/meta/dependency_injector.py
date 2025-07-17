@@ -7,7 +7,7 @@ from ..functional import State
 from warnings import deprecated
 
 
-@deprecated('this class is deprecated, please use plasma.meta.object_tree.Manager')
+@deprecated('this class is deprecated, please use plasma.meta.object_graph.Manager')
 class DependencyInjector(State):
 
     def __init__(self, stateful=False):
