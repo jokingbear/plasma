@@ -40,7 +40,7 @@ def _recursive_init(object_graph:nx.DiGraph, key, object_dict:dict, init_args:di
                     if 'value' in node_attributes:
                         arg_object = node_attributes['value']
                     else:
-                        _recursive_init(arg, object_dict, init_args)
+                        _recursive_init(object_graph, arg, object_dict, init_args)
                         arg_object = object_dict.get(arg, _NotInitialized)
 
                 if arg_object is _NotInitialized:
