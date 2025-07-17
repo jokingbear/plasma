@@ -18,8 +18,9 @@ def internal_run(queue:Queue, rank:int, processor:TorchPipe, exception_handler:E
                 processor(data)
         except Exception as e:
             exception_handler(data, e)
-
-        queue.task_done()
+        finally:
+            queue.task_done()
+            del data
 
 
 def init():
