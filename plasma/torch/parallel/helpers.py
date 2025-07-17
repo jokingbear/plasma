@@ -1,13 +1,14 @@
 from torch.multiprocessing import set_start_method
 from queue import Queue
 from ...parallel_processing.queues import Signal, ExceptionHandler
-from .pipe import TorchPipe
+from .pipe import InitPipe
+from typing import Callable
 
 
-def internal_run(queue:Queue, rank:int, processor:TorchPipe, exception_handler:ExceptionHandler):
+def internal_run(queue:Queue, rank:int, processor:InitPipe[Callable], exception_handler:ExceptionHandler):
     is_not_cancelled = True
     exception_handler = exception_handler or ExceptionHandler()
-    processor.process_init(rank)
+    run_func = processor.run(rank)
     
     while is_not_cancelled:
         data = queue.get()
@@ -15,7 +16,7 @@ def internal_run(queue:Queue, rank:int, processor:TorchPipe, exception_handler:E
         is_not_cancelled = data is not Signal.CANCEL
         try:
             if is_not_cancelled:
-                processor(data)
+                run_func(data)
         except Exception as e:
             exception_handler(data, e)
         finally:
