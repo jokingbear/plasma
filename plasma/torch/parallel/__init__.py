@@ -1,3 +1,3 @@
 from .queue import CudaQueue
-from .pipe import TorchPipe
+from .pipe import InitPipe
 from .helpers import init

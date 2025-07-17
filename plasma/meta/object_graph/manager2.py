@@ -1,9 +1,9 @@
-from .dependency_injector import DependencyInjector
-from ..functional import I2O
+from ...functional import I2O
 from typing import Callable
+from .manager1 import Manager
 
 
-class DependencyManager(DependencyInjector):
+class Manager2(Manager):
     
     def add_decorator_provider(self, decorator_provider:I2O[str, Callable, Callable]):
         for n in self._dep_graph:

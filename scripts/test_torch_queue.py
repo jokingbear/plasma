@@ -7,14 +7,13 @@ import torch
 
 class Pipe(ptp.TorchPipe):
     
-    def process_init(self, rank):
+    def run(self, rank):
         a = torch.randn(10, 1000, dtype=torch.float, device=f'cuda:{rank}')
-        self.anchor = a
-    
-    def run(self, x):
-        y = self.anchor * x
-        return y.cpu().numpy()
-
+        
+        def run(x):
+            y = a * x
+            return y.cpu().numpy()
+        return run
 
 
 if __name__ == '__main__':
