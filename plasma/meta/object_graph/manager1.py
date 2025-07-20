@@ -1,7 +1,6 @@
 import inspect
 import networkx as nx
 import re
-import pandas as pd
 
 from ...functional import AutoPipe
 from .injector import DependencyInjector
@@ -11,11 +10,12 @@ class Manager(AutoPipe):
 
     def __init__(self):
         super().__init__()
-
+        
         self._dep_graph = nx.DiGraph()
+        self.injector = DependencyInjector(self._dep_graph)
 
     def run(self, *names, **init_args) -> dict:
-        results = DependencyInjector(self._dep_graph).run(*names, **init_args)
+        results = self.injector.run(*names, **init_args)
         return results
     
     def add_dependency(self, name, value, as_singleton=False):
