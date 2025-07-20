@@ -1,7 +1,6 @@
 from ...functional import State, chain
 from abc import abstractmethod
-from warnings import warn
-from .handler import ExceptionHandler
+from typing import Callable, Any
 
 
 class Queue[T](State):
@@ -49,7 +48,7 @@ class Queue[T](State):
         self._callback = chain(self._callback, callback)
         return self
 
-    def on_exception(self, handler:ExceptionHandler):
+    def on_exception(self, handler:Callable[[Any, Exception], None]):
         assert not self._running, \
             'queue is already running, please release it to register new exception handler'
         self._exception_handler = handler
