@@ -2,7 +2,7 @@ from .tree import TreeFlow
 from ..queues import Queue
 from ...functional import partials
 from ._proxy import ProxyIO
-from .handler import FlowExceptionHandler
+from typing import Callable, Any
 
 
 class StableTree(TreeFlow):
@@ -12,7 +12,7 @@ class StableTree(TreeFlow):
         
         self._exception_handler = None
     
-    def on_exception(self, handler:FlowExceptionHandler):
+    def on_exception(self, handler:Callable[[str, Any, Exception], None]):
         assert not self.running, \
             'tree is already running, please release it to register new exception handler'
         assert handler is not None, 'handler can not be None'

@@ -3,8 +3,7 @@ import multiprocessing as mp
 
 from ...functional import State
 from tqdm.auto import tqdm
-from multiprocessing.managers import SyncManager, ValueProxy
-from warnings import warn
+from multiprocessing.managers import ValueProxy
 
 
 class Aggregator(State):
@@ -13,7 +12,6 @@ class Aggregator(State):
         super().__init__()
         self._results = []
 
-        process_base = process_base
         process_queue = None if not process_base else mp.JoinableQueue()
         self._process_queue = process_queue
         self._finished:int|ValueProxy[int] = 0 if not process_base else mp.Value('i', 0)

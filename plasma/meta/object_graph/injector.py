@@ -10,7 +10,7 @@ class DependencyInjector(F.AutoPipe):
         
         self.object_graph = object_graph
     
-    def run(self, *names, **init_args) -> dict:
+    def run(self, *names:str, **init_args) -> dict:
         if len(names) == 0:
             names = self.object_graph.nodes
         

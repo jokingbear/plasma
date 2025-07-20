@@ -1,6 +1,6 @@
 from functools import wraps
 from dataclasses import dataclass
-from warnings import warn
+from typing import Callable, Any
 
 
 @dataclass
@@ -15,7 +15,9 @@ class ExceptionLogger:
 
     IO = ExceptionIO
     
-    def __init__(self, name=None, log_func=print, raise_on_exception=True, on_exception_return=None) -> None:
+    def __init__(self, name=None, 
+                 log_func:Callable[[ExceptionIO], None]=print, raise_on_exception=True, 
+                 on_exception_return:Callable[[ExceptionIO], Any]|Any=None) -> None:
         self.name = name
         self.log_func = log_func
         self.raise_on_exception = raise_on_exception
