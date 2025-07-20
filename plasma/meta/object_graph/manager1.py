@@ -14,7 +14,7 @@ class Manager(AutoPipe):
         self._dep_graph = nx.DiGraph()
         self.injector = DependencyInjector(self._dep_graph)
 
-    def run(self, *names, **init_args) -> dict:
+    def run(self, *names:str, **init_args) -> dict:
         results = self.injector.run(*names, **init_args)
         return results
     
