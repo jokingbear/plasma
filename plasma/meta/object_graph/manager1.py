@@ -99,8 +99,9 @@ def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
 def _render_annotation(t:type):
     generic_args = typing.get_args(t)
     
-    name = str(t).split('.')[-1]
-    if 'UnionType' in str(t):
+    if hasattr(t, '__name__'):
+        name = t.__name__
+    else:
         name = 'UnionType'
     
     if len(generic_args) == 0:
