@@ -7,6 +7,7 @@ class AutoPipe:
 
     def __init__(self):
         self._marked_attributes = []
+        self.__replace_call()
 
     @abstractmethod
     def run(self, *inputs, **kwargs):
@@ -43,3 +44,7 @@ class AutoPipe:
             rep = '\n' + rep
             rep = re.sub(r'\([\t\n\s]{1,}\)', '()', rep)
         return f'{type(self).__name__}({rep})'
+
+    @classmethod
+    def __replace_call(cls):
+        cls.__call__ = cls.run
