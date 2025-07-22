@@ -3,7 +3,7 @@ import networkx as nx
 import re
 
 from ...functional import AutoPipe
-from .injector import DependencyInjector
+from .decorable_injector import DependencyInjector
 
 
 class Manager(AutoPipe):
