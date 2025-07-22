@@ -99,8 +99,12 @@ def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
 def _render_annotation(t:type):
     generic_args = typing.get_args(t)
     
+    name = str(t).split('.')[-1]
+    if 'UnionType' in str(t):
+        name = 'UnionType'
+    
     if len(generic_args) == 0:
-        return t.__name__
+        return name
     else:
         generic_arg_texts = []
         for a in generic_args:
@@ -110,4 +114,4 @@ def _render_annotation(t:type):
             else:
                 generic_arg_texts.append(_render_annotation(a))
         generic_arg_texts = ','.join(generic_arg_texts)
-        return f'{t.__name__}[{generic_arg_texts}]' 
+        return f'{name}[{generic_arg_texts}]' 
