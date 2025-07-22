@@ -1,6 +1,7 @@
 import inspect
 import networkx as nx
 import re
+import typing
 
 from ...functional import AutoPipe
 from .decorable_injector import DependencyInjector
@@ -80,11 +81,11 @@ class Manager(AutoPipe):
 def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
     node = graph.nodes[key]
     if 'value' in node:
-        lines = [f'{key}= {type(node["value"]).__name__}']
+        lines = [f'{key} = {_render_annotation(type(node['value']))}']
     else:
         lines = [key]
         if 'annotation' in node:
-            lines[0] = f'{key}: {node['annotation'].__name__}'
+            lines[0] = f'{key}: {_render_annotation(node['annotation'])}'
 
         for n in graph.neighbors(key):
             rendered_lines = _render_node(graph, n, prefix, indent)
@@ -93,3 +94,20 @@ def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
             lines.extend(rendered_lines)
     
     return '\n'.join(lines)
+
+
+def _render_annotation(t:type):
+    generic_args = typing.get_args(t)
+    
+    if len(generic_args) == 0:
+        return t.__name__
+    else:
+        generic_arg_texts = []
+        for a in generic_args:
+            if isinstance(a, list):
+                rendered_args = [_render_annotation(g) for g in a]
+                generic_arg_texts.append('[' + ', '.join(rendered_args) + ']')
+            else:
+                generic_arg_texts.append(_render_annotation(a))
+        generic_arg_texts = ','.join(generic_arg_texts)
+        return f'{t.__name__}[{generic_arg_texts}]' 
