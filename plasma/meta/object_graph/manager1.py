@@ -33,7 +33,11 @@ class Manager(AutoPipe):
             parameters = inspect.signature(value).parameters
             for arg_name, p in parameters.items():
                 if arg_name != 'self':
-                    self._dep_graph.add_node(arg_name)
+                    attrs = {}
+                    if p.annotation is not inspect._empty:
+                        attrs['annotation'] = p.annotation
+
+                    self._dep_graph.add_node(arg_name, **attrs)
                     self._dep_graph.add_edge(name, arg_name)
                     
                     if p.default is not inspect.Parameter.empty:
@@ -79,6 +83,9 @@ def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
         lines = [f'{key}={type(node["value"])}']
     else:
         lines = [key]
+        if 'annotation' in node:
+            lines[0] = f'{key}: {node['annotation']}'
+
         for n in graph.neighbors(key):
             rendered_lines = _render_node(graph, n, prefix, indent)
             rendered_lines = rendered_lines.split('\n')
