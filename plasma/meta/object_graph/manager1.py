@@ -80,7 +80,7 @@ class Manager(AutoPipe):
 def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
     node = graph.nodes[key]
     if 'value' in node:
-        lines = [f'{key}={type(node["value"]).__name__}']
+        lines = [f'{key}= {type(node["value"]).__name__}']
     else:
         lines = [key]
         if 'annotation' in node:
