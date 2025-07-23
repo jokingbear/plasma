@@ -35,7 +35,8 @@ class _NotInitialized:
 def _recursive_init(object_graph:nx.DiGraph, wrapper, key, object_dict:dict, init_args:dict):
     if key not in object_dict and key in object_graph:
         if 'value' in object_graph.nodes[key]:
-            object_dict[key] = object_graph.nodes[key]['value']
+            obj = object_graph.nodes[key]['value']
+            object_dict[key] = wrapper(key, obj)
         else:
             arg_maps = {}
             for arg in object_graph.neighbors(key):
