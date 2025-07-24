@@ -13,10 +13,10 @@ class Manager(AutoPipe):
         super().__init__()
         
         self._dep_graph = nx.DiGraph()
-        self.injector = DependencyInjector(self._dep_graph)
+        self.injector = DependencyInjector()
 
     def run(self, *names:str, **init_args) -> dict:
-        results = self.injector.run(*names, **init_args)
+        results = self.injector.run(self._dep_graph, *names, **init_args)
         return results
     
     def add_dependency(self, name, value, as_singleton=False):
@@ -49,7 +49,6 @@ class Manager(AutoPipe):
     def merge(self, manager):
         assert isinstance(manager, Manager), 'manager must be meta.object_graph.Manager instance'
         self._dep_graph = nx.compose(self._dep_graph, manager._dep_graph)
-        self.injector = DependencyInjector(self._dep_graph)
 
         return self
 

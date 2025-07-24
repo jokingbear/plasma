@@ -1,6 +1,6 @@
-from ...functional import I2O
 from typing import Callable
 from .manager1 import Manager
+from .decorable_injector import DependencyInjector
 
 
 class Manager2(Manager):
@@ -15,5 +15,5 @@ class Manager2(Manager):
         return self
     
     def add_wrapper(self, wrapper:Callable[[str, object], object]):
-        self.injector.update_wrapper(wrapper)
+        self.injector = DependencyInjector(wrapper)
         return self

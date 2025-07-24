@@ -7,25 +7,21 @@ from typing import Callable
 
 class DependencyInjector(F.AutoPipe):
     
-    def __init__(self, object_graph:nx.DiGraph):
+    def __init__(self, wrapper:Callable[[str, object], object]=None):
         super().__init__()
         
-        self.object_graph = object_graph
-        self.wrapper = None
+        self.wrapper = wrapper
     
-    def run(self, *names:str, **init_args) -> dict:
+    def run(self, object_graph:nx.DiGraph, *names:str, **init_args) -> dict:
         if len(names) == 0:
-            names = self.object_graph.nodes
+            names = object_graph.nodes
         
         names = list(names)
         object_dict = {}
         for n in names:
-            _recursive_init(self.object_graph, self.wrapper, n, object_dict, init_args)
+            _recursive_init(object_graph, self.wrapper, n, object_dict, init_args)
                 
         return pd.Series({n: object_dict.get(n, _NotInitialized) for n in names}).loc[names]
-    
-    def update_wrapper(self, wrapper:Callable[[str, object], object]):
-        self.wrapper = wrapper
 
 
 class _NotInitialized:
