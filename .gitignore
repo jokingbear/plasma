@@ -40,3 +40,5 @@ dependencies
 .cache
 
 .env
+
+.check*

@@ -49,6 +49,7 @@ class Manager(AutoPipe):
     def merge(self, manager):
         assert isinstance(manager, Manager), 'manager must be meta.object_graph.Manager instance'
         self._dep_graph = nx.compose(self._dep_graph, manager._dep_graph)
+        self.injector = DependencyInjector(self._dep_graph)
 
         return self
 
