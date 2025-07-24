@@ -37,7 +37,7 @@ class ReadableGraph[T](AdaptableGraph[T]):
                 name = f'{obj}'
             else:
                 name = type(obj).__name__
-            line = f'({name})'
+            line = f'({name}, id={key})'
             distributor = node_attributes['distributor']
             if not isinstance(distributor, UniformDistributor):
                 line = f'{line}-{type(distributor).__name__}'
