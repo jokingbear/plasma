@@ -1,6 +1,7 @@
 from ...functional import State, chain
 from abc import abstractmethod
 from typing import Callable, Any
+from .handler import ExceptionHandler
 
 
 class Queue[T](State):
