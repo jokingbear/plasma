@@ -4,7 +4,7 @@ from ...queues import Queue
 from ..distributors import UniformDistributor, Distributor
 
 
-class AdaptableGraph[T](Graph[T]):
+class AdaptableGraph(Graph):
     
     def chain(self, *blocks):
         standardized_blocks = [_standardize_inputs(b).to_tuple() for b in blocks]
@@ -13,9 +13,9 @@ class AdaptableGraph[T](Graph[T]):
 
 @dataclass
 class Link:
-    head:str
+    head:object
     connector:Queue
-    tail:str
+    tail:object
     distributor:Distributor = UniformDistributor()
     
     def to_tuple(self):

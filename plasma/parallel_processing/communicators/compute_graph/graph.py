@@ -5,12 +5,12 @@ from ...queues import Queue
 from ..distributors import Distributor
 
 
-class Graph[T]:
+class Graph:
 
     def __init__(self):
         self._structures = nx.DiGraph()
 
-    def chain(self, *blocks:tuple[T, Queue, T, Distributor]):
+    def chain(self, *blocks:tuple[object, Queue, object, Distributor]):
         for head, connector, tail, distributor in blocks:            
             assert not isinstance(head, Queue) \
                     and not isinstance(tail, Queue), f'Queue cannot be used as a block'

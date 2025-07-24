@@ -6,7 +6,7 @@ from ..distributors import UniformDistributor
 from ....functional import proxy_func
 
 
-class ReadableGraph[T](AdaptableGraph[T]):
+class ReadableGraph(AdaptableGraph):
 
     @property
     def input(self) -> Queue:
