@@ -31,8 +31,13 @@ class StableTree(TreeFlow):
                     exception_handler = partials(exception_handler, n)
                     q.on_exception(exception_handler)
 
-        self._initiated = True
-        return super().run()
+        if not self._initiated:
+            self._initiated = True
+            return super().run()
+        else:
+            for n, q in self.queues.items():
+                q.run()
+            return self
     
     @property
     def queues(self) -> dict[str, Queue]:
