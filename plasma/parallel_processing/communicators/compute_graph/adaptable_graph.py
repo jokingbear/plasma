@@ -6,7 +6,9 @@ from ..distributors import UniformDistributor, Distributor
 
 class AdaptableGraph(Graph):
     
-    def chain(self, *blocks):
+    def chain(self, *blocks:tuple[Queue, object]|tuple[object, Queue]|tuple[object, object]\
+                            |tuple[object, Queue, object]|tuple[object, object, Queue]|tuple[Queue, object, Distributor]\
+                            |tuple[object, Queue, object, Distributor]|tuple[object, object, Queue, Distributor]):
         standardized_blocks = [_standardize_inputs(b).to_tuple() for b in blocks]
         return super().chain(*standardized_blocks)
 
@@ -37,6 +39,8 @@ def _standardize_inputs(block:tuple) -> Link:
         block = [a for a in block if a is not None]
         if len(block) == 2:
             block = _standardize_inputs(block)
+        elif isinstance(block[0], Queue):
+            block = Link(None, *block)
         else:
             link1 = _standardize_inputs(block[:2])
             link2 = _standardize_inputs(block[1:])
