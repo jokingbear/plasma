@@ -54,4 +54,5 @@ class Graph:
             if n != id(connector):
                 redundant_nodes.append(n)
         
-        self._structures.remove_nodes_from(redundant_nodes)
+        if len(redundant_nodes) > 0:
+            self._structures = nx.relabel_nodes(self._structures, {n: id(connector) for n in redundant_nodes})
