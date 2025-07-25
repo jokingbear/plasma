@@ -19,9 +19,6 @@ class Queue[T](State):
     def run(self):
         if self._callback is None:
             raise AttributeError('register_callback has not been called on this queue')
-
-        handler = self._exception_handler or ExceptionHandler()
-        self._exception_handler = handler
         
         if not self._running:
             self._running = True

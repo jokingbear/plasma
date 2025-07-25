@@ -11,6 +11,7 @@ class StableTree(TreeFlow):
         super().__init__()
         
         self._exception_handler = None
+        self._initiated = False
     
     def on_exception(self, handler:Callable[[str, Any, Exception], None]):
         assert not self.running, \
@@ -26,11 +27,18 @@ class StableTree(TreeFlow):
             if n is not ProxyIO:
                 assert q is not None, f'no queue registered for block {n}'
                 exception_handler = self._exception_handler
-                if exception_handler is not None:
+                if exception_handler is not None and not self._initiated:
                     exception_handler = partials(exception_handler, n)
                     q.on_exception(exception_handler)
 
-        return super().run()
+        if not self._initiated:
+            self._initiated = True
+            return super().run()
+        else:
+            for n, q in self.queues.items():
+                if n is not ProxyIO:
+                    q.run()
+            return self
     
     @property
     def queues(self) -> dict[str, Queue]:

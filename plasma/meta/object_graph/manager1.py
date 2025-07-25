@@ -1,9 +1,10 @@
 import inspect
 import networkx as nx
 import re
+import typing
 
 from ...functional import AutoPipe
-from .injector import DependencyInjector
+from .decorable_injector import DependencyInjector
 
 
 class Manager(AutoPipe):
@@ -12,10 +13,10 @@ class Manager(AutoPipe):
         super().__init__()
         
         self._dep_graph = nx.DiGraph()
-        self.injector = DependencyInjector(self._dep_graph)
+        self.injector = DependencyInjector()
 
     def run(self, *names:str, **init_args) -> dict:
-        results = self.injector.run(*names, **init_args)
+        results = self.injector.run(self._dep_graph, *names, **init_args)
         return results
     
     def add_dependency(self, name, value, as_singleton=False):
@@ -33,7 +34,11 @@ class Manager(AutoPipe):
             parameters = inspect.signature(value).parameters
             for arg_name, p in parameters.items():
                 if arg_name != 'self':
-                    self._dep_graph.add_node(arg_name)
+                    attrs = {}
+                    if p.annotation is not inspect._empty:
+                        attrs['annotation'] = p.annotation
+
+                    self._dep_graph.add_node(arg_name, **attrs)
                     self._dep_graph.add_edge(name, arg_name)
                     
                     if p.default is not inspect.Parameter.empty:
@@ -76,9 +81,12 @@ class Manager(AutoPipe):
 def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
     node = graph.nodes[key]
     if 'value' in node:
-        lines = [f'{key}={type(node["value"])}']
+        lines = [f'{key} = {_render_annotation(type(node['value']))}']
     else:
         lines = [key]
+        if 'annotation' in node:
+            lines[0] = f'{key}: {_render_annotation(node['annotation'])}'
+
         for n in graph.neighbors(key):
             rendered_lines = _render_node(graph, n, prefix, indent)
             rendered_lines = rendered_lines.split('\n')
@@ -86,3 +94,25 @@ def _render_node(graph:nx.DiGraph, key, prefix='|', indent=' ' * 2):
             lines.extend(rendered_lines)
     
     return '\n'.join(lines)
+
+
+def _render_annotation(t:type):
+    generic_args = typing.get_args(t)
+    
+    if hasattr(t, '__name__'):
+        name = t.__name__
+    else:
+        name = 'UnionType'
+    
+    if len(generic_args) == 0:
+        return name
+    else:
+        generic_arg_texts = []
+        for a in generic_args:
+            if isinstance(a, list):
+                rendered_args = [_render_annotation(g) for g in a]
+                generic_arg_texts.append('[' + ', '.join(rendered_args) + ']')
+            else:
+                generic_arg_texts.append(_render_annotation(a))
+        generic_arg_texts = ','.join(generic_arg_texts)
+        return f'{name}[{generic_arg_texts}]' 
