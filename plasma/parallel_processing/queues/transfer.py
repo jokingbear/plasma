@@ -27,5 +27,7 @@ class TransferQueue(Queue[Thread]):
         self._receiver.put(Signal.CANCEL)
         self._state.join()
 
+        super().release()
+
     def is_alive(self):
         return self.running and self._state.is_alive()

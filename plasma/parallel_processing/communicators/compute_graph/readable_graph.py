@@ -29,7 +29,7 @@ class ReadableGraph(AdaptableGraph):
         node_attributes = structures.nodes[key]
         if isinstance(node_attributes['object'], Queue):
             queue:Queue = node_attributes['object']
-            line = f'[{type(queue).__name__}(name={queue.name}, runner={queue.num_runner})]'
+            line = f'[{type(queue).__name__}(name={queue.name}, runner={queue.num_runner}, id={key})]'
         else:
             obj = node_attributes['object']
             
@@ -54,3 +54,14 @@ class ReadableGraph(AdaptableGraph):
         if '...' != line[-3:]:
             for n in structures.successors(key):
                 self._render_lines(n, rendered, prefix + ' ' * 2, lines)
+
+    @property
+    def graph(self):
+        return self._structures
+    
+    @property
+    def queues(self):
+        objects = nx.get_node_attributes(self._structures, 'object')
+        for o in objects.values():
+            if isinstance(o, Queue):
+                yield o
