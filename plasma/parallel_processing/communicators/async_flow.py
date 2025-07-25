@@ -1,3 +1,5 @@
+import time
+
 from .compute_graph import Graph
 from ...functional import State
 from ..queues import Queue
@@ -39,7 +41,7 @@ class AsyncFlow(Graph, State):
         
     def release(self):
         for q in self.queues:
-            if q.running:
+            if self.graph.out_degree(id(q)) > 0:
                 q.release()
 
     def on_exception(self, handler:Callable[[int, object, Exception], None]):
@@ -55,3 +57,10 @@ class AsyncFlow(Graph, State):
     
     def __exit__(self, *args, **kwargs):
         self.release()
+
+    def block(self):
+        while True:
+            time.sleep(2 * 60 * 60)
+
+    def alive(self):
+        return all(q.is_alive() for q in self.queues if self.graph.out_degree(id(q)) > 0)
