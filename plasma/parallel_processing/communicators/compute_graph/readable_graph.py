@@ -65,3 +65,10 @@ class ReadableGraph(AdaptableGraph):
         for o in objects.values():
             if isinstance(o, Queue):
                 yield o
+
+    @property
+    def internal_queues(self):
+        objects = nx.get_node_attributes(self._structures, 'object')
+        for oid, o in objects.items():
+            if isinstance(o, Queue) and self._structures.out_degree(oid) > 0:
+                yield o

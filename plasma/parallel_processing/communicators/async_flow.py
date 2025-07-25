@@ -17,7 +17,7 @@ class AsyncFlow(Graph, State):
         self._running = False
     
     def run(self):
-        for q in self.queues:
+        for q in self.internal_queues:
             for block_id in self.graph.successors(id(q)):
                 block = self.graph.nodes[block_id]['object']
                 
@@ -45,7 +45,7 @@ class AsyncFlow(Graph, State):
                 q.release()
 
     def on_exception(self, handler:Callable[[int, object, Exception], None]):
-        for q in self.queues:
+        for q in self.internal_queues:
             q.on_exception(partials(handler, id(q)))
     
     @property
