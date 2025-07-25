@@ -36,7 +36,8 @@ class StableTree(TreeFlow):
             return super().run()
         else:
             for n, q in self.queues.items():
-                q.run()
+                if n is not ProxyIO:
+                    q.run()
             return self
     
     @property
