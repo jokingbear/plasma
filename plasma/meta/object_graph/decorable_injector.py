@@ -16,10 +16,11 @@ class DependencyInjector(F.AutoPipe):
         if len(names) == 0:
             names = object_graph.nodes
         
+        wrapper = self.wrapper or (lambda _, obj: obj)
         names = list(names)
         object_dict = {}
         for n in names:
-            _recursive_init(object_graph, self.wrapper, n, object_dict, init_args)
+            _recursive_init(object_graph, wrapper, n, object_dict, init_args)
                 
         return pd.Series({n: object_dict.get(n, _NotInitialized) for n in names}).loc[names]
 
