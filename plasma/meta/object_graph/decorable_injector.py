@@ -39,12 +39,8 @@ def _recursive_init(object_graph:nx.DiGraph, wrapper, key, object_dict:dict, ini
                 if arg in init_args:
                     arg_object = init_args[arg]
                 else:
-                    node_attributes = object_graph.nodes[arg]
-                    if 'value' in node_attributes:
-                        arg_object = node_attributes['value']
-                    else:
-                        _recursive_init(object_graph, wrapper, arg, object_dict, init_args)
-                        arg_object = object_dict.get(arg, _NotInitialized)
+                    _recursive_init(object_graph, wrapper, arg, object_dict, init_args)
+                    arg_object = object_dict.get(arg, _NotInitialized)
 
                 if arg_object is _NotInitialized:
                     error_message = f'{arg} is not in init_args or dependency graph at key: {key}'
