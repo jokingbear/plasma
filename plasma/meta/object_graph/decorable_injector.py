@@ -16,10 +16,11 @@ class DependencyInjector(F.AutoPipe):
         if len(names) == 0:
             names = object_graph.nodes
         
+        wrapper = self.wrapper or (lambda _, obj: obj)
         names = list(names)
         object_dict = {}
         for n in names:
-            _recursive_init(object_graph, self.wrapper, n, object_dict, init_args)
+            _recursive_init(object_graph, wrapper, n, object_dict, init_args)
                 
         return pd.Series({n: object_dict.get(n, _NotInitialized) for n in names}).loc[names]
 
@@ -39,12 +40,8 @@ def _recursive_init(object_graph:nx.DiGraph, wrapper, key, object_dict:dict, ini
                 if arg in init_args:
                     arg_object = init_args[arg]
                 else:
-                    node_attributes = object_graph.nodes[arg]
-                    if 'value' in node_attributes:
-                        arg_object = node_attributes['value']
-                    else:
-                        _recursive_init(object_graph, wrapper, arg, object_dict, init_args)
-                        arg_object = object_dict.get(arg, _NotInitialized)
+                    _recursive_init(object_graph, wrapper, arg, object_dict, init_args)
+                    arg_object = object_dict.get(arg, _NotInitialized)
 
                 if arg_object is _NotInitialized:
                     error_message = f'{arg} is not in init_args or dependency graph at key: {key}'
