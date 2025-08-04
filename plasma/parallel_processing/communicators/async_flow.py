@@ -17,22 +17,24 @@ class AsyncFlow(Graph, State):
         self._running = False
     
     def run(self):
-        for q in self.internal_queues:
-            for block_id in self.graph.successors(id(q)):
-                block = self.graph.nodes[block_id]['object']
-                
-                if isinstance(block, Distributor):
-                    distributor = block
-                    block = Identity()
-                else:
-                    distributor = self.graph.nodes[block_id]['distributor']
+        if not self._running:
+            for q in self.internal_queues:
+                for block_id in self.graph.successors(id(q)):
+                    block = self.graph.nodes[block_id]['object']
+                    
+                    if isinstance(block, Distributor):
+                        distributor = block
+                        block = Identity()
+                    else:
+                        distributor = self.graph.nodes[block_id]['distributor']
 
-                next_queues:list[Queue] = [self.graph.nodes[next_id]['object'] for next_id in self.graph.successors(block_id)]
-                un_named_queues = [nq for nq in next_queues if nq.name is None]
-                named_queues = {nq.name: nq for nq in next_queues if nq.name is not None}
-                q.register_callback(block)\
-                    .chain(partials(distributor, *un_named_queues, **named_queues, pre_apply_before=False))\
-                        .run()
+                    next_queues:list[Queue] = [self.graph.nodes[next_id]['object'] for next_id in self.graph.successors(block_id)]
+                    un_named_queues = [nq for nq in next_queues if nq.name is None]
+                    named_queues = {nq.name: nq for nq in next_queues if nq.name is not None}
+                    q.register_callback(block)\
+                        .chain(partials(distributor, *un_named_queues, **named_queues, pre_apply_before=False))\
+                            .run()
+
         self._running = True
         return self
     

@@ -4,24 +4,20 @@ import multiprocessing as mp
 from ...functional import State
 from tqdm.auto import tqdm
 from multiprocessing.managers import ValueProxy
-from warnings import deprecated
+from ..queues import Signal
 
 
-@deprecated('this class is deprecated, please use Accumulator instead')
-class Aggregator(State):
+class Accumulator(State):
 
-    def __init__(self, total:int, sleep=1e-2, process_base=False, ignore_none=True, count_none=True):
+    def __init__(self, total:int, sleep=1e-2, ignore_none=True, count_none=True):
         super().__init__()
         self._results = []
 
-        process_queue = None if not process_base else mp.JoinableQueue()
-        self._process_queue = process_queue
-        self._finished:int|ValueProxy[int] = 0 if not process_base else mp.Value('i', 0)
-
+        self._finished:int|ValueProxy[int] = 0
+        
         self._marked_attributes.append('finished')
         self.total = total
         self.sleep = sleep
-        self.process_base = process_base
         self.ignore_none = ignore_none
         self.count_none = count_none
     
@@ -30,13 +26,12 @@ class Aggregator(State):
             self._update_step()
 
         if data is not None or (data is None and not self.ignore_none):
-            self._aggregate(data)
-
-        if self._process_queue is not None and self._finished.value == self.total:
-            self._process_queue.put(self._results)
+            self.aggregate(data)
         
         if self.finished == self.total:
-            return self._results
+            return self.finalize()
+        
+        return Signal.IGNORE
 
     def wait(self, **tqdm_kwargs):
         with tqdm(total=self.total, **tqdm_kwargs) as prog:
@@ -75,5 +70,8 @@ class Aggregator(State):
         else:
             self._finished.value += 1
 
-    def _aggregate(self, data):
+    def aggregate(self, data):
         self._results.append(data)
+    
+    def finalize(self):
+        return self.results
