@@ -29,7 +29,7 @@ class Accumulator(State):
             self._update_step()
 
         if data is not None or (data is None and not self.ignore_none):
-            self._aggregate(data)
+            self.aggregate(data)
 
         if self._process_queue is not None and self._finished.value == self.total:
             self._process_queue.put(self._results)
