@@ -45,6 +45,8 @@ class AsyncFlow(Graph, State):
         for q in self.queues:
             if self.graph.out_degree(id(q)) > 0:
                 q.release()
+        
+        self._running = False
 
     def on_exception(self, handler:Callable[[int, object, Exception], None]):
         for q in self.internal_queues:
