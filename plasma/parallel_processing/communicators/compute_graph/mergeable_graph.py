@@ -2,7 +2,6 @@ import networkx as nx
 
 from .readable_graph import ReadableGraph
 from ...queues import Queue
-from ..distributors import Distributor
 
 
 class MergeableGraph(ReadableGraph):
