@@ -65,7 +65,7 @@ class Graph:
     def _validate(self):
         for obj_id, obj in self._structures.nodes(data='object'):
             if isinstance(obj, Queue):
-                assert self._structures.out_degree(obj_id) == 1, \
+                assert self._structures.out_degree(obj_id) < 2, \
                     f'Queue can only connect to one block - qid={obj_id}'
                 
                 for block in self._structures.successors(obj_id):
