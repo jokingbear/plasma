@@ -6,11 +6,11 @@ from ..distributors import UniformDistributor, Distributor
 
 class AdaptableGraph(Graph):
     
-    def chain(self, *blocks:tuple[Queue, object]|tuple[object, Queue]|tuple[object, object]\
+    def chain(self, *chains:tuple[Queue, object]|tuple[object, Queue]|tuple[object, object]\
                             |tuple[object, Queue, object]|tuple[object, object, Queue]|tuple[Queue, object, Distributor]\
                             |tuple[object, Queue, object, Distributor]|tuple[object, object, Queue, Distributor]):
-        standardized_blocks = [_standardize_inputs(b).to_tuple() for b in blocks]
-        return super().chain(*standardized_blocks)
+        standardized_chains = [_standardize_inputs(b).to_tuple() for b in chains]
+        return super().chain(*standardized_chains)
 
 
 @dataclass
