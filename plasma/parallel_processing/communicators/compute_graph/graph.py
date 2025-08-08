@@ -10,8 +10,8 @@ class Graph:
     def __init__(self):
         self._structures = nx.DiGraph()
 
-    def chain(self, *blocks:tuple[object, Queue, object, Distributor]):
-        for head, connector, tail, distributor in blocks:            
+    def chain(self, *chains:tuple[object, Queue, object, Distributor]):
+        for head, connector, tail, distributor in chains:            
             assert not isinstance(head, Queue) \
                     and not isinstance(tail, Queue), f'Queue cannot be used as a block'
             
@@ -32,9 +32,7 @@ class Graph:
                 self._structures.add_edges_from([(id(head), id(connector)), 
                                                  (id(connector), id(tail))])
             
-            if connector is not None and tail is not None:
-                self._check_consistency(connector, tail)
-        
+        self._check_consistency(connector, tail)
         return self
 
     @decorators.propagate(None)
@@ -49,10 +47,12 @@ class Graph:
             self._structures.add_node(id(block), distributor=distributor)
 
     def _check_consistency(self, connector, tail):
-        redundant_nodes = []
-        for n in self._structures.predecessors(id(tail)):
-            if n != id(connector):
-                redundant_nodes.append(n)
-        
-        if len(redundant_nodes) > 0:
-            self._structures = nx.relabel_nodes(self._structures, {n: id(connector) for n in redundant_nodes})
+        mappings = {}
+        for n, obj in self._structures.nodes(data='object'):
+            if not isinstance(obj, Queue):
+                qids = [*self._structures.predecessors(n)]
+                if len(qids) > 0:
+                    mappings.update({qid: qids[0] for qid in qids[1:]})
+
+        if len(mappings) > 0:
+            self._structures = nx.relabel_nodes(self._structures, mappings)
