@@ -32,7 +32,7 @@ class Graph:
                 self._structures.add_edges_from([(id(head), id(connector)), 
                                                  (id(connector), id(tail))])
             
-        self._check_consistency(connector, tail)
+        self._check_consistency()
         return self
 
     @decorators.propagate(None)
@@ -46,13 +46,13 @@ class Graph:
         if distributor is not None:
             self._structures.add_node(id(block), distributor=distributor)
 
-    def _check_consistency(self, connector, tail):
+    def _check_consistency(self):
         mappings = {}
         for n, obj in self._structures.nodes(data='object'):
             if not isinstance(obj, Queue):
                 qids = [*self._structures.predecessors(n)]
                 if len(qids) > 0:
-                    mappings.update({qid: qids[0] for qid in qids[1:]})
+                    mappings.update({qid: qids[-1] for qid in qids[:-1]})
 
         if len(mappings) > 0:
             self._structures = nx.relabel_nodes(self._structures, mappings)
