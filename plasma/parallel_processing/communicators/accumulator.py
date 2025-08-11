@@ -35,7 +35,7 @@ class Accumulator(State):
             self._process_queue.put(self._results)
         
         if self.finished == self.total:
-            return self._results
+            return self.results
         
         return Signal.IGNORE
 
@@ -57,7 +57,7 @@ class Accumulator(State):
 
     @property
     def results(self):
-        return self._results.copy()
+        return self.finalize()
 
     @property
     def finished(self):
@@ -80,4 +80,4 @@ class Accumulator(State):
         self._results.append(data)
     
     def finalize(self):
-        return self.results
+        return self._results
