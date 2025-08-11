@@ -12,4 +12,4 @@ class LambdaPipe(AutoPipe):
         return self.func(*inputs, **kwargs)
 
     def __repr__(self):
-        return repr(self.func)
+        return f'Lambda({repr(self.func)})'
