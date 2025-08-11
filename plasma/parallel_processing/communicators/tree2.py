@@ -3,8 +3,10 @@ from ..queues import Queue
 from ...functional import partials
 from ._proxy import ProxyIO
 from typing import Callable, Any
+from warnings import deprecated
 
 
+@deprecated('this class is deprecated, please use AsyncFlow')
 class StableTree(TreeFlow):
     
     def __init__(self):
