@@ -8,7 +8,7 @@ from .token_matcher import TokenMatcher
 from .path_set_walker2 import PathWalker
 
 
-class GraphIndexer(F.SimplePipe[str, pd.DataFrame]):
+class GraphIndexer(F.AutoPipe):
     
     def __init__(self, data:list[str], 
                  group_splitter=r'([^\.\n]+)', tokenizer=r'(\w+)', 
@@ -43,8 +43,8 @@ class GraphIndexer(F.SimplePipe[str, pd.DataFrame]):
         
         return graph, pd.DataFrame(dbs, columns=['data_index', 'text', 'path'])
 
-    def run(self, inputs):
-        sentence_frame = self.sentence_splitter.run(inputs.lower()).rename(columns={'token': 'sentence'})
+    def run(self, text:str):
+        sentence_frame = self.sentence_splitter.run(text.lower()).rename(columns={'token': 'sentence'})
         path_frames = [self._run_sentence(s) for s in sentence_frame['sentence']]
         path_frames = [f for f in path_frames if len(f) > 0]
         
