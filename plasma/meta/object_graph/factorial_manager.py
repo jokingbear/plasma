@@ -5,6 +5,10 @@ class FactoryManager(DependencyManager):
     
     def init_factory(self, name:str):
         factory = DependencyFactory(name, self)
+        
+        if name in self._dep_graph:
+            self._dep_graph.remove_node(name)
+        
         self._dep_graph.add_node(name, factory=factory)
         return factory
     
