@@ -1,10 +1,10 @@
 from .pipe import AutoPipe
-from typing import Callable
+from typing import Callable, Any
 
 
 class Wrapper[T](AutoPipe):
     
-    def __init__(self, func:Callable[[T]]):
+    def __init__(self, func:Callable[[T], Any]):
         super().__init__()
         
         self.func = func
