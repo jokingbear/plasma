@@ -1,12 +1,7 @@
-import networkx as nx
-import typing
-import re
-
-from .manager2 import Manager2
-from .helpers import render_annotation
+from .dependency_manager import DependencyManager
 
 
-class FactoryManager(Manager2):
+class FactoryManager(DependencyManager):
     
     def init_factory(self, name:str):
         factory = DependencyFactory(name, self)
@@ -33,7 +28,7 @@ class DependencyFactory:
         def decorate(cls):
             for n in names:
                 self._dep_manager.add_dependency(n, cls)\
-                    ._link_factory(self.name, *names)
+                        ._link_factory(self.name, *names)
                 
             return cls
         

@@ -14,17 +14,30 @@ class ReadableManager(FactoryManager):
                 lines.append('-' * 100)
         text = '\n'.join(lines)
         return text
-    
+
+    @property
+    def entries(self):
+        leaves = {}
+        for n, val in self._dep_graph.nodes(data='value', default=NotInitalized):
+            if self._dep_graph.out_degree(n) == 0:
+                leaves[n] = val
+        
+        return leaves
+
+
+class NotInitalized:
+    pass
+
 
 def _render_node(graph:nx.DiGraph, key, prefix:str, lines:list):
     node = graph.nodes[key]
     if 'value' in node:
         lines.append(f'{prefix}|->{key} = {render_annotation(type(node['value']))}')
     else:
-        if 'annotation' in node:
-            lines.append(f'{prefix}|->{key}: {render_annotation(node['annotation'])}')
-        elif 'factory' in node:
+        if 'factory' in node:
             lines.append(f'{prefix}|->{key}: {type(node['factory']).__name__}')
+        elif 'annotation' in node:
+            lines.append(f'{prefix}|->{key}: {render_annotation(node['annotation'])}')
         else:
             lines.append(f'{prefix}|->{key}')
 

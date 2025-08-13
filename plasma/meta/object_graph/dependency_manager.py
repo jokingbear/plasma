@@ -1,23 +1,13 @@
 import inspect
 import networkx as nx
-import re
-import typing
-
-from ...functional import AutoPipe
-from .decorable_injector import DependencyInjector
 
 
-class Manager(AutoPipe):
+class DependencyManager:
 
     def __init__(self):
         super().__init__()
         
         self._dep_graph = nx.DiGraph()
-        self.injector = DependencyInjector()
-
-    def run(self, *names:str, **init_args) -> dict:
-        results = self.injector.run(self._dep_graph, *names, **init_args)
-        return results
     
     def add_dependency(self, name, value, as_singleton=False):
         assert as_singleton or callable(value), 'depdency should be callable'
@@ -47,7 +37,7 @@ class Manager(AutoPipe):
         return self
 
     def merge(self, manager):
-        assert isinstance(manager, Manager), 'manager must be meta.object_graph.Manager instance'
+        assert isinstance(manager, DependencyManager), 'manager must be meta.object_graph.Manager instance'
         self._dep_graph = nx.compose(self._dep_graph, manager._dep_graph)
 
         return self
