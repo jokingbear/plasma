@@ -31,9 +31,9 @@ class DependencyFactory:
               
         def decorate(cls):
             for n in names:
-                self._dep_manager.add_dependency(n, cls)\
-                        ._link_factory(self.name, *names)
-                
+                self._dep_manager.add_dependency(n, cls)
+            
+            self._dep_manager._link_factory(self.name, *names)
             return cls
         
         return decorate
