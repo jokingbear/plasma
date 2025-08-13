@@ -29,9 +29,11 @@ class NotInitalized:
     pass
 
 
-def _render_node(graph:nx.DiGraph, key, prefix:str, lines:list):
+def _render_node(graph:nx.DiGraph, key, prefix:str, lines:list, rendered:set):
     node = graph.nodes[key]
-    if 'value' in node:
+    if key in rendered:
+        lines.append(f'{prefix}|->{key}...')
+    elif 'value' in node:
         lines.append(f'{prefix}|->{key} = {render_annotation(type(node['value']))}')
     else:
         if 'factory' in node:
@@ -42,7 +44,7 @@ def _render_node(graph:nx.DiGraph, key, prefix:str, lines:list):
             lines.append(f'{prefix}|->{key}')
 
         for n in graph.neighbors(key):
-            _render_node(graph, n, prefix + ' ' * 2, lines)
+            _render_node(graph, n, prefix + ' ' * 2, lines, rendered)
 
 
 def render_annotation(t:type):
