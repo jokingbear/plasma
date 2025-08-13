@@ -19,3 +19,16 @@ class Manager2(Manager):
     def add_wrapper(self, wrapper:Callable[[str, object], object]):
         self.injector = DependencyInjector(wrapper)
         return self
+
+    @property
+    def entries(self):
+        leaves = {}
+        for n, val in self._dep_graph.nodes(data='value', default=NotInitalized):
+            if self._dep_graph.out_degree(n) == 0:
+                leaves[n] = val
+        
+        return leaves
+
+
+class NotInitalized:
+    pass
