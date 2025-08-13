@@ -1,1 +1,1 @@
-from .manager2 import Manager2 as Manager
+from .readable_manager import ReadableManager as Manager

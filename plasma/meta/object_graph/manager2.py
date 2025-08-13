@@ -1,5 +1,5 @@
 from typing import Callable
-from .manager1 import Manager
+from .dependency_manager import Manager
 from .decorable_injector import DependencyInjector
 from warnings import deprecated
 
