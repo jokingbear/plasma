@@ -1,13 +1,15 @@
 import inspect
 import networkx as nx
 
+from warnings import warn
+
 
 class DependencyManager:
 
-    def __init__(self):
+    def __init__(self, dep_graph:nx.DiGraph=None):
         super().__init__()
         
-        self._dep_graph = nx.DiGraph()
+        self._dep_graph = dep_graph or nx.DiGraph()
     
     def add_dependency(self, name, value, as_singleton=False):
         assert as_singleton or callable(value), 'depdency should be callable'
@@ -38,9 +40,13 @@ class DependencyManager:
 
     def merge(self, manager):
         assert isinstance(manager, DependencyManager), 'manager must be meta.object_graph.Manager instance'
-        self._dep_graph = nx.compose(self._dep_graph, manager._dep_graph)
-
-        return self
+        
+        collisions = set(self._dep_graph).intersection(manager._dep_graph)
+        if len(collisions) > 0:
+            warn(f'name collision after merging at: {collisions}')
+        
+        new_graph = nx.compose(self._dep_graph, manager._dep_graph)
+        return type(self)(new_graph)
 
     def duplicate(self, current_name:str, new_name:str):
         assert current_name in self._dep_graph, 'current name must be in dep graph'
