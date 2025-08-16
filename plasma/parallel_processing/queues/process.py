@@ -36,7 +36,7 @@ class ProcessQueue(Queue[list[mp.Process]]):
                 p.join()
                 p.terminate()
         
-        old_queue = self._queue#.close()
+        old_queue = self._queue
         old_queue.close()
         
         new_queue = mp.JoinableQueue(self._qsize)
