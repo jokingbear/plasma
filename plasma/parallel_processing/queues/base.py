@@ -57,6 +57,9 @@ class Queue[T](State):
         self.__clean_state()
 
     def __clean_state(self):
+        if hasattr(self, '_state'):
+            del self._state
+
         self._state = None
         self._running = False
 
