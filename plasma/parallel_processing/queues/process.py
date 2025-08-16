@@ -13,6 +13,7 @@ class ProcessQueue(Queue[list[mp.Process]]):
 
         self._queue = mp.JoinableQueue(qsize)
         self.timeout = timeout
+        self._qsize = qsize
 
     def _init_state(self):
         processes = [mp.Process(target=internal_run, args=(self._queue, self._callback, self._exception_handler)) 
@@ -34,6 +35,13 @@ class ProcessQueue(Queue[list[mp.Process]]):
             for p in self._state:
                 p.join()
                 p.terminate()
+        
+        old_queue = self._queue#.close()
+        old_queue.close()
+        
+        new_queue = mp.JoinableQueue(self._qsize)
+        self._queue = new_queue
+        del old_queue
         
         super().release()
 

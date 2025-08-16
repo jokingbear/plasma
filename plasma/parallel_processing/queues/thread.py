@@ -37,6 +37,12 @@ class ThreadQueue(Queue[list[threading.Thread]]):
 
             for t in self._state:
                 t.join()
+        
+        self._queue.shutdown()
+
+        old_queue = self._queue
+        self._queue = queue.Queue(old_queue.maxsize)
+        del old_queue
         super().release()
 
     def is_alive(self):
