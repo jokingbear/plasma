@@ -8,9 +8,10 @@ class ReadableManager(FactoryManager):
     
     def __repr__(self):
         lines = []
+        rendered = set()
         for r in self._dep_graph:
             if self._dep_graph.in_degree(r) == 0:
-                _render_node(self._dep_graph, r, '', lines)
+                _render_node(self._dep_graph, r, '', lines, rendered)
                 lines.append('-' * 100)
         text = '\n'.join(lines)
         return text
@@ -31,7 +32,7 @@ class NotInitalized:
 
 def _render_node(graph:nx.DiGraph, key, prefix:str, lines:list, rendered:set):
     node = graph.nodes[key]
-    if key in rendered:
+    if key in rendered and graph.out_degree(key) > 0:
         lines.append(f'{prefix}|->{key}...')
     elif 'value' in node:
         lines.append(f'{prefix}|->{key} = {render_annotation(type(node['value']))}')
@@ -45,6 +46,7 @@ def _render_node(graph:nx.DiGraph, key, prefix:str, lines:list, rendered:set):
 
         for n in graph.neighbors(key):
             _render_node(graph, n, prefix + ' ' * 2, lines, rendered)
+    rendered.add(key)
 
 
 def render_annotation(t:type):

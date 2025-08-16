@@ -31,9 +31,9 @@ class DependencyFactory:
               
         def decorate(cls):
             for n in names:
-                self._dep_manager.add_dependency(n, cls)\
-                        ._link_factory(self.name, *names)
-                
+                self._dep_manager.add_dependency(n, cls)
+            
+            self._dep_manager._link_factory(self.name, *names)
             return cls
         
         return decorate
@@ -42,7 +42,11 @@ class DependencyFactory:
         self._registered_names.append(name)
         self._dep_manager.add_dependency(name, obj, as_singleton=True)
         self._dep_manager._link_factory(self.name, name)
-        
+        return self
+    
+    def __setitem__(self, key, obj):
+        self.register_singleton(key, obj)
+            
     def __repr__(self):
         return (
             f'{type(self).__name__}(\n'
@@ -50,4 +54,3 @@ class DependencyFactory:
             f'\tegistered_names={self._registered_names}\n'
             ')'
         )
-
