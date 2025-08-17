@@ -72,3 +72,10 @@ class ReadableGraph(AdaptableGraph):
             o = attrs['object']
             if isinstance(o, Queue) and self._structures.out_degree(oid) > 0:
                 yield o
+
+    def chain(self, *chains):
+        try:
+            return super().chain(*chains)
+        except SyntaxError as e:
+            print(self)
+            raise e

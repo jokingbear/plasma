@@ -12,6 +12,7 @@ class TransferQueue(Queue[Thread]):
         super().__init__(name)
 
         self._receiver = JoinableQueue(qsize)
+        self._qsize = qsize
 
     @decorators.propagate(Signal.IGNORE)
     def put(self, x):
@@ -27,6 +28,13 @@ class TransferQueue(Queue[Thread]):
         self._receiver.put(Signal.CANCEL)
         self._state.join()
 
+        old_queue = self._receiver
+        old_queue.close()
+        
+        new_queue = JoinableQueue(self._qsize)
+        self._receiver = new_queue
+        del old_queue
+        
         super().release()
 
     def is_alive(self):
