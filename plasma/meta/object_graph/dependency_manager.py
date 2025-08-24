@@ -15,6 +15,7 @@ class DependencyManager:
         assert as_singleton or callable(value), 'depdency should be callable'
         
         if name in self._dep_graph:
+            warn(f'{name} is already registered, overwriting it.')
             neighbors = [*self._dep_graph.neighbors(name)]
             self._dep_graph.remove_edges_from([(name, n) for n in neighbors])
         
@@ -58,14 +59,18 @@ class DependencyManager:
         new_graph = nx.compose(current_graph, overwriter)
         return type(self)(new_graph)
 
-    def duplicate(self, current_name:str, new_name:str):
+    def duplicate(self, current_name:str, new_name:str, inplace=True):
         assert current_name in self._dep_graph, 'current name must be in dep graph'
         assert new_name not in self._dep_graph, 'new name must not be in dep graph'
         
-        node = self._dep_graph.nodes[current_name]
-        neighbors = [*self._dep_graph.successors(current_name)]
-        self._dep_graph.add_node(new_name, **node)
-        for n in neighbors:
-            self._dep_graph.add_edge(new_name, n)
+        current_graph = self._dep_graph
+        if not inplace:
+            current_graph = current_graph.copy()
         
-        return self
+        node = current_graph.nodes[current_name]
+        neighbors = [*current_graph.successors(current_name)]
+        current_graph.add_node(new_name, **node)
+        for n in neighbors:
+            current_graph.add_edge(new_name, n)
+        
+        return type(self)(current_graph)
