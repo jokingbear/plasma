@@ -47,7 +47,8 @@ class DependencyManager:
             warn(f'name collision after merging at: {collisions}')
 
             for n in collisions:
-                current_graph.remove_node(n)
+                edges = current_graph.edges(n)
+                current_graph.remove_edges_from(edges)
         
         new_graph = nx.compose(current_graph, manager._dep_graph)
         return type(self)(new_graph)
