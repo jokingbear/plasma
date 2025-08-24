@@ -38,18 +38,24 @@ class DependencyManager:
 
         return self
 
-    def merge(self, manager):
+    def merge(self, manager, **collision_maps):
         assert isinstance(manager, DependencyManager), 'manager must be meta.object_graph.Manager instance'
         
         current_graph = self._dep_graph.copy()
-        collisions = set(self._dep_graph).intersection(manager._dep_graph)
+        overwriter = manager._dep_graph.copy()
+        
+        if len(collision_maps) > 0:
+            overwriter = nx.relabel_nodes(overwriter, collision_maps)
+
+        collisions = set(current_graph).intersection(overwriter)
         if len(collisions) > 0:
             warn(f'name collision after merging at: {collisions}')
 
             for n in collisions:
-                current_graph.remove_node(n)
+                edges = [*current_graph.edges(n)]
+                current_graph.remove_edges_from(edges)
         
-        new_graph = nx.compose(current_graph, manager._dep_graph)
+        new_graph = nx.compose(current_graph, overwriter)
         return type(self)(new_graph)
 
     def duplicate(self, current_name:str, new_name:str):
