@@ -20,7 +20,7 @@ class ReadableManager(FactoryManager):
     def entries(self):
         leaves = {}
         for n, val in self._dep_graph.nodes(data='value', default=NotInitalized):
-            if self._dep_graph.out_degree(n) == 0:
+            if self._dep_graph.out_degree(n) == 0 and 'initiator' not in self._dep_graph.nodes[n]:
                 leaves[n] = val
         
         return leaves
