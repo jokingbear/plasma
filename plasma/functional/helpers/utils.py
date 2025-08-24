@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
-from .pipes import SequentialPipe
+from ..pipes import SequentialPipe
 
 
 class proxy_func(ABC):
