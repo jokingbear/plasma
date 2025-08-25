@@ -3,7 +3,7 @@ import networkx as nx
 from typing import Hashable
 from warnings import warn
 from .links import Link
-from .context import Context
+from .context.context import Context
 
 
 class ContextGraph:

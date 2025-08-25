@@ -1,6 +1,6 @@
 from .context import Context
-from .types import Node
-from .links import Link
+from ..types import Node
+from ..links import Link
 
 
 class FactorialContext(Context):
