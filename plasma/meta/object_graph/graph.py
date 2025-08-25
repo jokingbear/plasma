@@ -3,12 +3,16 @@ import networkx as nx
 from typing import Hashable
 from warnings import warn
 from .links import Link
+from .context import Context
 
 
 class ContextGraph:
     
     def __init__(self, graph:nx.MultiDiGraph=None):
         self._graph = graph
+    
+    def add(self, context:Context):
+        pass
     
     def merge(self, other, **collision_maps:Hashable):
         assert isinstance(other, ContextGraph)
@@ -47,7 +51,7 @@ class ContextGraph:
             self._graph.add_edge(namespace_head, namespace_tail, Link.DEPEND_ON)
             
         return self
-        
+          
     @property
     def contexts(self):
         contexts = {n[0] for n in self._graph}

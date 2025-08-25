@@ -6,3 +6,4 @@ class Node(Enum):
     INITATOR = auto()
     SINGLETON = auto()
     LEAF = auto()
+    FACTORY = auto()

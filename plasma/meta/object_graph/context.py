@@ -55,18 +55,24 @@ class Context:
 
         return self
 
-    def duplicate(self, current_name:str, new_name:str):
-        current_name = self.context, current_name
-        new_name = self.context, new_name
+    def duplicate(self, current_name:str, new_name:str):        
+        assert current_name in self, 'current name must be in dep graph'
+        assert new_name not in self, 'new name must not be in dep graph'
         
-        assert current_name in self.graph, 'current name must be in dep graph'
-        assert new_name not in self.graph, 'new name must not be in dep graph'
+        current_node = self.node_id(current_name)
+        new_node = self.node_id(new_name)
         
         current_graph = self.graph        
-        node_attr = current_graph.nodes[current_name]
-        neighbors = [*current_graph.successors(current_name)]
-        current_graph.add_node(new_name, **node_attr)
+        node_attr = current_graph.nodes[current_node]
+        neighbors = [*current_graph.successors(current_node)]
+        current_graph.add_node(new_node, **node_attr)
         for n in neighbors:
-            current_graph.add_edge(new_name, n)
+            current_graph.add_edge(new_node, n)
         
         return self
+
+    def __contains__(self, node:str):
+        return (self.context, node) in self.graph
+    
+    def node_id(self, node:str):
+        return self.context, node
