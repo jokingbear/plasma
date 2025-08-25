@@ -1,21 +1,19 @@
 import networkx as nx
 
-from typing import Hashable
 from warnings import warn
-from .links import Link
-from .context.context import Context
+from ..links import Link
+from ..contexts import Context
+from ..types import Node
 
 
-class ContextGraph:
+class Manager:
     
     def __init__(self, graph:nx.MultiDiGraph=None):
+        graph = graph if graph is not None else nx.MultiDiGraph()
         self._graph = graph
-    
-    def add(self, context:Context):
-        pass
-    
-    def merge(self, other, **collision_maps:Hashable):
-        assert isinstance(other, ContextGraph)
+
+    def merge(self, other):
+        assert isinstance(other, Manager)
         
         current_graph = self._graph.copy()
         other_graph = other._graph.copy()
@@ -26,15 +24,8 @@ class ContextGraph:
         if len(collisions) > 0:
             warn(f'context collisions: {collisions}', stacklevel=2)
         
-        rename_maps = {c: collision_maps[c] for c in collisions if c in collision_maps}
-        drop_maps = collisions.difference(rename_maps)
-        
-        if len(rename_maps) > 0:
-            other_graph = nx.relabel_nodes(other_graph, rename_maps)
-        
-        if len(drop_maps) > 0:
-            for m in drop_maps:
-                nodes = [n for _, n, t in current_graph.edges(m) if t is Link.CONTAIN]
+            for m in collisions:
+                nodes = [n for _, n, t in current_graph.edges(m) if t is Link.CONTAINS]
                 current_graph.remove_nodes_from([m, *nodes])
         
         merged_graph = nx.compose(current_graph, other_graph )
@@ -42,8 +33,8 @@ class ContextGraph:
     
     def link(self, *links:tuple[str, str]):
         for namespace_head, namespace_tail in links:
-            nh, h = namespace_head
-            nt, t = namespace_tail
+            nh, h = namespace_head.split('.')
+            nt, t = namespace_tail.split('.')
             
             assert (nh, h) in self._graph, f'graph must contain context {nh} with node {h}'
             assert (nt, t) in self._graph, f'graph must contain context {nt} with node {t}'
@@ -51,8 +42,11 @@ class ContextGraph:
             self._graph.add_edge(namespace_head, namespace_tail, Link.DEPEND_ON)
             
         return self
+    
+    def init_context(self, context:str):
+        return Context(self._graph, context)
           
     @property
     def contexts(self):
-        contexts = {n[0] for n in self._graph}
+        contexts = {n for n, ntype in self._graph.nodes('type') if ntype is Node.CONTEXT}
         return contexts

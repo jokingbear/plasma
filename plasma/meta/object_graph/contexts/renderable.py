@@ -1,7 +1,7 @@
 import typing
 import networkx as nx
 
-from .factorial_context import FactorialContext
+from .factorial import FactorialContext
 from ..types import Node
 
 

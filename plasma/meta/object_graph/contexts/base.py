@@ -10,7 +10,7 @@ from ..links import Link
 
 class Context:
     
-    def __init__(self, *, graph:nx.MultiDiGraph=None, name:Hashable=None):        
+    def __init__(self, graph:nx.MultiDiGraph=None, name:Hashable=None):        
         if name is None:
             caller = inspect.stack()[1][0]
             caller = inspect.getmodule(caller)
@@ -18,11 +18,8 @@ class Context:
             parent_path = path.parent
             name = parent_path.name
         
-        graph = graph or nx.MultiDiGraph()
-        if name in graph:
-            warn(f'context {name} already exists, reusing it!')
-        else:
-            graph.add_node(name, type=Node.CONTEXT)
+        graph = graph if graph is not None else nx.MultiDiGraph()
+        graph.add_node(name, type=Node.CONTEXT)
 
         self.name = name
         self.graph = graph
