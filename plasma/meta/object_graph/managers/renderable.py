@@ -1,7 +1,7 @@
-from .base import Manager
+from .base import Base
 
 
-class RenderableManager(Manager):
+class RenderableManager(Base):
     
     def __repr__(self):
         lines = []

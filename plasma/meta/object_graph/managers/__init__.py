@@ -1,1 +1,1 @@
-from .renderable import RenderableManager
+from .renderable import RenderableManager as Manager

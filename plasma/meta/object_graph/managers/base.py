@@ -6,14 +6,14 @@ from ..contexts import Context
 from ..types import Node
 
 
-class Manager:
+class Base:
     
     def __init__(self, graph:nx.MultiDiGraph=None):
         graph = graph if graph is not None else nx.MultiDiGraph()
         self._graph = graph
 
     def merge(self, other):
-        assert isinstance(other, Manager)
+        assert isinstance(other, Base)
         
         current_graph = self._graph.copy()
         other_graph = other._graph.copy()
@@ -31,20 +31,28 @@ class Manager:
         merged_graph = nx.compose(current_graph, other_graph )
         return type(self)(merged_graph)
     
-    def link(self, *links:tuple[str, str]):
-        for namespace_head, namespace_tail in links:
-            nh, h = namespace_head.split('.')
-            nt, t = namespace_tail.split('.')
+    def link(self, *links:tuple[str, str], inplace=False):
+        self = self if inplace else type(self)(self._graph.copy())
+        
+        for context_head, context_tail in links:
+            head_namespace, head = context_head.split('.')
+            tail_namespace, tail = context_tail.split('.')
             
-            assert (nh, h) in self._graph, f'graph must contain context {nh} with node {h}'
-            assert (nt, t) in self._graph, f'graph must contain context {nt} with node {t}'
+            assert head_namespace in self._graph, f'manager does not contain {head_namespace}'
+            assert tail_namespace in self._graph, f'manager does not contain {tail_namespace}'
+            assert head_namespace != tail_namespace, f'{head_namespace} is the same as {tail_namespace}'
             
-            self._graph.add_edge(namespace_head, namespace_tail, Link.DEPEND_ON)
+            head_context = Context(self._graph, head_namespace)
+            tail_context = Context(self._graph, tail_namespace)            
+            if head_context.out_degree(head) > 0:
+                warn(f'{head_namespace}.{head} contains dependency, removing it')
+                head_context.remove_dependency(head)
+            
+            hid = head_context.node_id(head)
+            tid = tail_context.node_id(tail)
+            self._graph.add_edge(hid, tid, Link.DELEGATE_TO)
             
         return self
-    
-    def init_context(self, context:str):
-        return Context(self._graph, context)
           
     @property
     def contexts(self):

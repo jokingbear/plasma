@@ -1,3 +1,5 @@
 from .runnable_manager import RunnableManager as Manager
-from .contexts import Context
-from .managers import RenderableManager as ContextManager
+from .managed_context import (
+    ManagedContext as Context,
+    ContextManager
+)
