@@ -6,6 +6,7 @@ from pathlib import Path
 from warnings import warn
 from ..types import Node
 from ..context_graph import ContextGraph
+from ..links import Link
 
 
 class Base:
@@ -26,67 +27,73 @@ class Base:
         assert as_singleton or callable(value), 'dependency should be callable'
         
         graph = self.graph
-        if (name, self.name) in graph and graph[name, self.name]['type'] is not Node.LEAF:
+        node_id = self.name, name
+        if node_id in graph and graph.type(*node_id) is not Node.LEAF:
             warn(f'{name} is already registered for context {self.name}, overwriting it.')
             self.remove_dependency(name)
 
         if as_singleton:
-            graph.add_node(name, self.name, type=Node.SINGLETON, value=value)
+            graph.add_node(*node_id, type=Node.SINGLETON, value=value)
         else:
-            graph.add_node(name, self.name, type=Node.INITATOR, value=value)
+            graph.add_node(*node_id, type=Node.INITATOR, value=value)
             
             parameters = inspect.signature(value).parameters
             for arg_name, p in parameters.items():
                 if arg_name != 'self':
+                    arg_id = self.name, arg_name
                     attrs = {}
                     if p.annotation is not inspect._empty:
                         attrs['annotation'] = p.annotation
                     
-                    if arg_name not in self:
+                    if arg_id not in self.graph:
                         attrs['type'] = Node.LEAF
                     
                     if p.default is not inspect.Parameter.empty:
                         attrs['value'] = p.default
 
-                    graph.add_node(arg_name, self.name, **attrs)
-                    graph.add_edge(name, self.name, 
-                                   arg_name, self.name)
+                    graph.add_node(*arg_id, **attrs)
+                    graph.add_edge(node_id, arg_id)
 
         return self
 
-    def duplicate(self, current_name:Hashable, new_name:Hashable):        
-        assert current_name in self, 'current name must be in dep graph'
-        assert new_name not in self, 'new name must not be in dep graph'
-               
+    def duplicate(self, current_name:Hashable, new_name:Hashable): 
         graph = self.graph
-        node_attrs = graph[current_name, self.name]
-        neighbors = graph.neighbors(current_name, self.name)
-        self.graph.add_node(new_name, self.name, **node_attrs)
-        for n, _ in neighbors:
-            context, name = graph.node_context_name(n)
+        current_id = self.name, current_name
+        new_id = self.name, new_name
+               
+        assert current_id in graph, 'current name must be in dep graph'
+        assert new_id not in graph, 'new name must not be in dep graph'
+
+        node_attrs = graph[*current_id]
+        graph.add_node(*new_id, **node_attrs)
+        
+        neighbors = graph.successors(*new_id, link=Link.DEPEND_ON)
+        for n in neighbors:
+            context, _ = n
             if context == self.name:
-                self.graph.add_edge(new_name, self.name, name, self.name)
+                self.graph.add_edge(new_id, n)
         
         return self
 
     def remove_dependency(self, name:Hashable):
         graph = self.graph
-        check_nodes = []
-        node_attrs = graph[name, self.name]
+        node_id = self.name, name
+        
+        node_attrs = graph[*node_id]
         for k in list(node_attrs.keys()):
             del node_attrs[k]
 
-        graph.add_node(name, self.name, type=Node.LEAF)
-        check_nodes.append((self.name, name))
+        graph.add_node(*node_id, type=Node.LEAF)
+        check_nodes = [node_id]
         
-        neighbors = graph.neighbors(name, self.name)
-        for n, _ in neighbors:
-            contexted_name = graph.node_context_name(n)            
-            graph.remove_edge(name, self.name, contexted_name[::-1])
-
-            if contexted_name[0] == self.name:
-                check_nodes.append(contexted_name)
+        neighbors = [*graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO)]
+        for n, _ in neighbors:     
+            graph.remove_edge(node_id, n)
+            
+            context, _ = n
+            if context == self.name:
+                check_nodes.append(n)
     
-        for context, node_name in check_nodes:
-            if graph.in_degree(node_name, context) < 2 and graph[n]['type'] is Node.LEAF:
-                graph.remove_node(node_name, contexted_name)
+        for n in check_nodes:
+            if graph.type(*n) is Node.LEAF:
+                graph.remove_node(*n)

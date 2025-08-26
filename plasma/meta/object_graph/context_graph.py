@@ -7,99 +7,80 @@ from .links import Link
 
 class ContextGraph:
     
-    def __init__(self, backend:nx.MultiDiGraph=None):
-        self.backend = backend if backend is not None else nx.MultiDiGraph()
+    def __init__(self, backend:nx.DiGraph=None):
+        self.backend = backend if backend is not None else nx.DiGraph()
     
-    @overload
-    def __contains__(self, node:Hashable):
-        return node in self.backend
-    
-    @overload
-    def __contains__(self, name:Hashable, context:Hashable):
-        return self.node_id(name, context) in self.backend
-    
-    @overload
-    def node_id(self, name:Hashable, context:Hashable):
-        node_id = context, name
-        return node_id
-    
-    @overload
-    def node_id(self, context:Hashable):
-        return context
-    
-    def node_context_name(self, node_id):
-        return node_id
+    def __contains__(self, *args):
+        assert len(args) < 3
+        if len(args) == 1:
+            node_id = args[0]
+        else:
+            node_id = tuple(args)
+            
+        return node_id in self.backend
 
     # add/update
     def add_context(self, name:Hashable):
         self.backend.add_node(name, type=Node.CONTEXT)
 
-    def add_node(self, name:Hashable, context:Hashable, **attrs):
-        node_id = self.node_id(context, name)
+    def add_node(self, context:Hashable, name:Hashable, **attrs):
+        node_id = context, name
         self.backend.add_node(node_id, **attrs)
-        self.backend.add_edge(name, node_id, Link.CONTAINS)
+        self.backend.add_edge(context, node_id, type=Link.CONTAINS)
         
-        if name not in self.backend:
+        if context not in self.backend:
             self.add_context(context)
     
-    def add_edge(self, head_name:Hashable, head_context:Hashable, 
-                tail_name:Hashable, tail_context:Hashable, type=Link.DEPEND_ON):
-        hid = self.node_id(head_name, head_context)
-        tid = self.node_id(tail_name, tail_context or head_context)
-        self.backend.add_edge(hid, tid, type)
+    def add_edge(self, head:tuple[Hashable, Hashable], tail:tuple[Hashable, Hashable], link=Link.DEPEND_ON):
+        self.backend.add_edge(head, tail, type=link)
 
     # get
-    def __getitem__(self, context:Hashable, name:Hashable) -> dict:
-        return self.backend.nodes[self.node_id(context, name)]
+    def __getitem__(self, node_id) -> dict:
+        return self.backend.nodes[*node_id]
 
-    def neighbors(self, name:Hashable, context:Hashable, *data):
-        node_id = self.node_id(name, context)
-        for n in self.backend.neighbors(node_id):
-            attrs = self.backend.nodes[n]
-            new_attrs = {d: attrs[d] for d in data}
-            yield n, new_attrs
-    
-    def predecessors(self, name:Hashable, context:Hashable, *data):
-        node_id = self.node_id(name, context)
-        for n in self.backend.predecessors(node_id):
-            attrs = self.backend.nodes[n]
-            new_attrs = {d: attrs[d] for d in data}
-            yield n, new_attrs
-    
-    def in_degree(self, name:Hashable, context:Hashable, link_type=Link.CONTAINS):
-        edges = [*self.in_edges(name, context, link_type)]
-        return len(edges)
-    
-    def out_degree(self, name:Hashable, context:Hashable, link_type=Link.CONTAINS):
-        edges = [*self.out_edges(name, context, link_type)]
-        return len(edges)
+    @property
+    def contexts(self):
+        for n, ntype in self.backend.nodes(data='type'):
+            if ntype is Node.CONTEXT:
+                yield n
 
     def nodes(self, context:Hashable, *data):
         for n in self.backend.successors(context):
             attrs = self.backend.nodes[n]
-            picked_attrs = {d: attrs[d] for d in data}
-            yield self.node_context_name(n), picked_attrs
+            picked_attrs = tuple(attrs[d] for d in data)
+            yield n, picked_attrs
     
-    def out_edges(self, name:Hashable, context:Hashable, link_type=Link.CONTAINS):
-        node_id = self.node_id(name, context)
-        for h, _, rel in self.backend.out_edges(node_id, keys=True):
-            if link_type is None or link_type == rel:
-                yield h
+    def successors(self, context:Hashable, name:Hashable, *data, link=Link.CONTAINS):
+        node_id = context, name
+        for _, t, rel in self.backend.out_edges(node_id, data='type'):
+            if link is None or rel in link:
+                attrs = self[*t]
+                picked_attrs = tuple(attrs[d] for d in data)
+                yield t, picked_attrs
     
-    def in_edges(self, name:Hashable, context:Hashable, link_type=Link.CONTAINS):
-        node_id = self.node_id(name, context)
-        for _, t, rel in self.backend.in_edges(node_id, keys=True):
-            if link_type is None or rel in link_type:
-                yield self.node_context_name(t)
+    def predecessors(self, context:Hashable, name:Hashable, *data, link=Link.CONTAINS):
+        node_id = context, name
+        for h, _, rel in self.backend.in_edges(node_id, data='type'):
+            if link is None or rel in link:
+                attrs = self.backend.nodes[h]
+                picked_attrs = tuple(attrs[d] for d in data)
+                yield h, picked_attrs
+
+    def in_degree(self, context:Hashable, name:Hashable, link=Link.CONTAINS):
+        nodes = [*self.predecessors(context, name, link=link)]
+        return len(nodes)
+    
+    def out_degree(self, context:Hashable, name:Hashable, link=Link.CONTAINS):
+        nodes = [*self.successors(context, name, link=link)]
+        return len(nodes)
+
+    def type(self, context:Hashable, name: Hashable):
+        return self.backend.nodes[(context, name)]['type']
     
     # delete
-    def remove_node(self, name:Hashable, context:Hashable):        
-        node_id = self.node_id(name, context)
+    def remove_node(self, context:Hashable, name:Hashable):        
+        node_id = context, name
         self.backend.remove_node(node_id)
-        self.backend.remove_edge(context, node_id)
     
-    def remove_edge(self, head_name:Hashable, head_context:Hashable, 
-                    tail_name:Hashable, tail_context:Hashable, type=Link.DEPEND_ON):
-        hid = self.node_id(head_name, head_context)
-        tid = self.node_id(tail_name, tail_context)
-        self.backend.remove_edge(hid, tid, type)
+    def remove_edge(self, head:tuple[Hashable, Hashable], tail:tuple[Hashable, Hashable],):
+        self.backend.remove_edge(head, tail)

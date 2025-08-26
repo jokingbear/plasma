@@ -8,14 +8,17 @@ class FactorialContext(Base):
     def init_factory(self, name:str, overwrite=False):
         if (self.name, name) in self and overwrite:
             self.remove_dependency(name)
-            
+        
+        factory_id = self.name, name
         factory = DependencyFactory(name, self)
-        self.graph.add_node(name, type=Node.FACTORY, value=factory)
+        self.graph.add_node(*factory_id, type=Node.FACTORY, value=factory)
         return factory
     
     def _link_components(self, factory_name, *names):
+        factory_id = self.name, factory_name
         for n in names:
-            self.graph.add_edge(factory_name, self.name, n, self.name, Link.CONTAINS)
+            node_id = self.name, n
+            self.graph.add_edge(factory_id, node_id, Link.CONTAINS)
 
 
 class DependencyFactory:
