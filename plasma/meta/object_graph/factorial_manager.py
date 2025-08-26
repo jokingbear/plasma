@@ -27,6 +27,7 @@ class DependencyFactory:
         self._registered_names = []
     
     def register(self, *names):  
+        assert len(names) > 0, 'must at least have one name'
         self._registered_names.extend(names)
               
         def decorate(cls):
