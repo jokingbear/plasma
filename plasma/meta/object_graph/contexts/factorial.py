@@ -1,19 +1,19 @@
-from .base import Context
+from .base import Base
 from ..types import Node
 from ..links import Link
 
 
-class FactorialContext(Context):
+class FactorialContext(Base):
 
     def init_factory(self, name:str):
         factory = DependencyFactory(name, self)
         
         factory_id = self.node_id(name)
-        if factory_id in self.graph:
-            self.graph.remove_node(factory_id)
+        if factory_id in self._graph:
+            self._graph.remove_node(factory_id)
         
-        self.graph.add_node(factory_id, type=Node.FACTORY, value=factory)
-        self.graph.add_edge(self.name, factory_id, Link.CONTAINS)
+        self._graph.add_node(factory_id, type=Node.FACTORY, value=factory)
+        self._graph.add_edge(self.name, factory_id, Link.CONTAINS)
         return factory
     
     def _link_factory(self, factory_name, *names):
@@ -21,8 +21,8 @@ class FactorialContext(Context):
         
         for n in names:
             node_id = self.node_id(n)
-            self.graph.add_edge(factory_node_id, node_id, Link.CONTAINS)
-            self.graph.add_edge(self.name, node_id, Link.CONTAINS)
+            self._graph.add_edge(factory_node_id, node_id, Link.CONTAINS)
+            self._graph.add_edge(self.name, node_id, Link.CONTAINS)
 
 
 class DependencyFactory:

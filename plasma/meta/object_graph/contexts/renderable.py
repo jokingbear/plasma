@@ -10,10 +10,10 @@ class RenderableContext(FactorialContext):
     def __repr__(self):
         lines = []
         rendered = set()
-        for n in self.graph.neighbors(self.name):
-            if self.graph.in_degree(n) == 1:
+        for n in self._graph.neighbors(self.name):
+            if self._graph.in_degree(n) == 1:
                 lines.append(self.name)
-                _render_node(self.graph, self.name, n, '  ', lines, rendered)
+                _render_node(self._graph, self.name, n, '  ', lines, rendered)
                 lines.append('-' * 100)
         text = '\n'.join(lines)
         return text
@@ -25,23 +25,23 @@ def _render_node(graph:nx.DiGraph, current_context, key, prefix:str, lines:list,
     
     context, name = key
     if context != current_context:
-        lines.append(f'{prefix}|->{context}.{name}')
+        lines[-1] += f' --> {context}.{name}'
         if graph.out_degree(key) > 0:
             lines[-1] += '...'
     elif key in rendered:
-        lines.append(f'{prefix}|->{name}')
+        lines.append(f'{prefix}|-> {name}')
         
         if graph.out_degree(key) > 0:
             lines[-1] += '...'
     elif node_type is Node.SINGLETON:
-        lines.append(f'{prefix}|->{name} = {render_annotation(type(node_attr['value']))}')
+        lines.append(f'{prefix}|-> {name} = {render_annotation(type(node_attr['value']))}')
     else:
         if node_type is Node.FACTORY:
-            lines.append(f'{prefix}|->{name}: {type(node_attr['value']).__name__}')
+            lines.append(f'{prefix}|-> {name}: {type(node_attr['value']).__name__}')
         elif 'annotation' in node_attr:
-            lines.append(f'{prefix}|->{name}: {render_annotation(node_attr['annotation'])}')
+            lines.append(f'{prefix}|-> {name}: {render_annotation(node_attr['annotation'])}')
         else:
-            lines.append(f'{prefix}|->{name}')
+            lines.append(f'{prefix}|-> {name}')
 
         for n in graph.neighbors(key):
             _render_node(graph, current_context, n, prefix + ' ' * 2, lines, rendered)
