@@ -14,7 +14,7 @@ class DependencyManager:
     def add_dependency(self, name, value, as_singleton=False):
         assert as_singleton or callable(value), 'depdency should be callable'
         
-        if name in self._dep_graph:
+        if name in self._dep_graph and self._dep_graph.out_degree(name) > 0:
             warn(f'{name} is already registered, overwriting it.')
             neighbors = [*self._dep_graph.neighbors(name)]
             self._dep_graph.remove_edges_from([(name, n) for n in neighbors])

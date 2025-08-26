@@ -7,7 +7,7 @@ class ManagedContext(Context):
     
     @property
     def manager(self):
-        return ContextManager(self._graph)
+        return ContextManager(self.graph)
 
 
 class ContextManager(Manager):

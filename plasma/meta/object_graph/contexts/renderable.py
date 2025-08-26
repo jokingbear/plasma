@@ -1,8 +1,8 @@
 import typing
-import networkx as nx
 
 from .factorial import FactorialContext
 from ..types import Node
+from ..context_graph import ContextGraph
 
 
 class RenderableContext(FactorialContext):
@@ -10,8 +10,8 @@ class RenderableContext(FactorialContext):
     def __repr__(self):
         lines = []
         rendered = set()
-        for n in self._graph.neighbors(self.name):
-            if self._graph.in_degree(n) == 1:
+        for n, _ in self.graph.nodes(self.name):
+            if self.graph.in_degree(n) == 1:
                 lines.append(self.name)
                 _render_node(self._graph, self.name, n, '  ', lines, rendered)
                 lines.append('-' * 100)
@@ -19,8 +19,9 @@ class RenderableContext(FactorialContext):
         return text
 
 
-def _render_node(graph:nx.DiGraph, current_context, key, prefix:str, lines:list, rendered:set):
-    node_attr = graph.nodes[key]
+
+def _render_node(graph:ContextGraph, current_context, key, prefix:str, lines:list, rendered:set):
+    node_attr = graph[key]
     node_type = node_attr.get('type', Node.LEAF)
     
     context, name = key

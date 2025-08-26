@@ -5,33 +5,35 @@ from typing import Hashable
 from pathlib import Path
 from warnings import warn
 from ..types import Node
-from ..links import Link
-from .primitive import Primitive
+from ..context_graph import ContextGraph
 
 
-class Base(Primitive):
+class Base:
     
-    def __init__(self, graph:nx.MultiDiGraph=None, name:Hashable=None):
+    def __init__(self, graph:ContextGraph, name:Hashable=None):
         if name is None:
             caller = inspect.stack()[1][0]
             caller = inspect.getmodule(caller)
             path = Path(caller.__file__)
             parent_path = path.parent
             name = parent_path.name
-
-        super().__init__(graph, name)
+            
+        graph.add_context(name)
+        self.graph = graph
+        self.name = name
             
     def add_dependency(self, name:Hashable, value, as_singleton=False):
         assert as_singleton or callable(value), 'dependency should be callable'
         
-        if name in self:
+        graph = self.graph
+        if (name, self.name) in graph and graph[name, self.name]['type'] is not Node.LEAF:
             warn(f'{name} is already registered for context {self.name}, overwriting it.')
             self.remove_dependency(name)
 
         if as_singleton:
-            self._add_node(name, type=Node.SINGLETON, value=value)
+            graph.add_node(name, self.name, type=Node.SINGLETON, value=value)
         else:
-            self._add_node(name, type=Node.INITATOR, value=value)
+            graph.add_node(name, self.name, type=Node.INITATOR, value=value)
             
             parameters = inspect.signature(value).parameters
             for arg_name, p in parameters.items():
@@ -46,8 +48,9 @@ class Base(Primitive):
                     if p.default is not inspect.Parameter.empty:
                         attrs['value'] = p.default
 
-                    self._add_node(arg_name, **attrs)
-                    self._add_edge(name, arg_name)
+                    graph.add_node(arg_name, self.name, **attrs)
+                    graph.add_edge(name, self.name, 
+                                   arg_name, self.name)
 
         return self
 
@@ -55,28 +58,35 @@ class Base(Primitive):
         assert current_name in self, 'current name must be in dep graph'
         assert new_name not in self, 'new name must not be in dep graph'
                
-        node_attrs = self[current_name]
-        neighbors = self.neighbors(current_name)
-        self._add_node(new_name, **node_attrs)
-        for n in neighbors:
-            self._add_edge(new_name, n)
+        graph = self.graph
+        node_attrs = graph[current_name, self.name]
+        neighbors = graph.neighbors(current_name, self.name)
+        self.graph.add_node(new_name, self.name, **node_attrs)
+        for n, _ in neighbors:
+            context, name = graph.node_context_name(n)
+            if context == self.name:
+                self.graph.add_edge(new_name, self.name, name, self.name)
         
         return self
 
     def remove_dependency(self, name:Hashable):
+        graph = self.graph
         check_nodes = []
-        node_attrs = self[name]
+        node_attrs = graph[name, self.name]
         for k in list(node_attrs.keys()):
             del node_attrs[k]
 
-        self._add_node(name, type=Node.LEAF)
-        check_nodes.append(name)
+        graph.add_node(name, self.name, type=Node.LEAF)
+        check_nodes.append((self.name, name))
         
-        neighbors = self.neighbors(name)
-        for n in neighbors:
-            self._remove_edge(name, n)
-            check_nodes.append(n)
+        neighbors = graph.neighbors(name, self.name)
+        for n, _ in neighbors:
+            contexted_name = graph.node_context_name(n)            
+            graph.remove_edge(name, self.name, contexted_name[::-1])
+
+            if contexted_name[0] == self.name:
+                check_nodes.append(contexted_name)
     
-        for n in check_nodes:
-            if self.in_degree(n) < 2 and self[n]['type'] is Node.LEAF:
-                self._remove_node(n)
+        for context, node_name in check_nodes:
+            if graph.in_degree(node_name, context) < 2 and graph[n]['type'] is Node.LEAF:
+                graph.remove_node(node_name, contexted_name)

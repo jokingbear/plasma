@@ -4,12 +4,13 @@ from warnings import warn
 from ..links import Link
 from ..contexts import Context
 from ..types import Node
+from ..context_graph import ContextGraph
 
 
 class Base:
     
-    def __init__(self, graph:nx.MultiDiGraph=None):
-        graph = graph if graph is not None else nx.MultiDiGraph()
+    def __init__(self, graph:ContextGraph=None):
+        graph = graph if graph is not None else ContextGraph()
         self._graph = graph
 
     def merge(self, other):

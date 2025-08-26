@@ -1,22 +1,21 @@
 from .base import Base
 from ..types import Node
 from ..links import Link
-from warnings import warn
 
 
 class FactorialContext(Base):
 
     def init_factory(self, name:str, overwrite=False):
-        if name in self and overwrite:
+        if (self.name, name) in self and overwrite:
             self.remove_dependency(name)
             
         factory = DependencyFactory(name, self)
-        self._add_node(name, type=Node.FACTORY, value=factory)
+        self.graph.add_node(name, type=Node.FACTORY, value=factory)
         return factory
     
     def _link_components(self, factory_name, *names):
         for n in names:
-            self._add_edge(factory_name, n, Link.CONTAINS)
+            self.graph.add_edge(factory_name, self.name, n, self.name, Link.CONTAINS)
 
 
 class DependencyFactory:
