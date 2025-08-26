@@ -1,28 +1,22 @@
 from .base import Base
 from ..types import Node
 from ..links import Link
+from warnings import warn
 
 
 class FactorialContext(Base):
 
-    def init_factory(self, name:str):
+    def init_factory(self, name:str, overwrite=False):
+        if name in self and overwrite:
+            self.remove_dependency(name)
+            
         factory = DependencyFactory(name, self)
-        
-        factory_id = self.node_id(name)
-        if factory_id in self._graph:
-            self._graph.remove_node(factory_id)
-        
-        self._graph.add_node(factory_id, type=Node.FACTORY, value=factory)
-        self._graph.add_edge(self.name, factory_id, Link.CONTAINS)
+        self._add_node(name, type=Node.FACTORY, value=factory)
         return factory
     
-    def _link_factory(self, factory_name, *names):
-        factory_node_id = self.node_id(factory_name)
-        
+    def _link_components(self, factory_name, *names):
         for n in names:
-            node_id = self.node_id(n)
-            self._graph.add_edge(factory_node_id, node_id, Link.CONTAINS)
-            self._graph.add_edge(self.name, node_id, Link.CONTAINS)
+            self._add_edge(factory_name, n, Link.CONTAINS)
 
 
 class DependencyFactory:
@@ -30,25 +24,22 @@ class DependencyFactory:
     def __init__(self, factory_name:str, context:FactorialContext):
         self.name = factory_name
         self.context = context
-        self._registered_names = []
     
     def register(self, *names):  
         assert len(names) > 0, 'must at least have one name'
-        self._registered_names.extend(names)
               
         def decorate(cls):
             for n in names:
                 self.context.add_dependency(n, cls)
             
-            self.context._link_factory(self.name, *names)
+            self.context._link_components(self.name, *names)
             return cls
         
         return decorate
     
     def register_singleton(self, name, obj):
-        self._registered_names.append(name)
         self.context.add_dependency(name, obj, as_singleton=True)
-        self.context._link_factory(self.name, name)
+        self.context._link_components(self.name, name)
         return self
     
     def __setitem__(self, key, obj):
@@ -58,6 +49,5 @@ class DependencyFactory:
         return (
             f'{type(self).__name__}(\n'
             f'\tname={self.name},\n'
-            f'\tregistered_names={self._registered_names}\n'
             ')'
         )
