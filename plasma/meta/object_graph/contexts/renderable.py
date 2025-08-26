@@ -44,7 +44,7 @@ def _render_node(graph:ContextGraph, current_context, node_id, prefix:str, lines
         else:
             lines.append(f'{prefix}|-> {name}')
 
-        for n, _ in graph.successors(*node_id, link=Link.DEPEND_ON|Link.CONTAINS):
+        for n, _ in graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO):
             _render_node(graph, current_context, n, prefix + ' ' * 2, lines, rendered)
     rendered.add(node_id)
 

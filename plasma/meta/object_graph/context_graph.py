@@ -19,6 +19,9 @@ class ContextGraph:
             
         return node_id in self.backend
 
+    def copy(self):
+        return ContextGraph(self.backend.copy())
+    
     # add/update
     def add_context(self, name:Hashable):
         self.backend.add_node(name, type=Node.CONTEXT)
@@ -37,7 +40,13 @@ class ContextGraph:
     # get
     def __getitem__(self, node_id) -> dict:
         return self.backend.nodes[*node_id]
-
+    
+    def merge(self, other):
+        assert isinstance(other, ContextGraph)
+        current_backend = self.backend
+        other_backend = other.backend
+        return ContextGraph(nx.compose(current_backend, other_backend))
+    
     @property
     def contexts(self):
         for n, ntype in self.backend.nodes(data='type'):
@@ -84,3 +93,8 @@ class ContextGraph:
     
     def remove_edge(self, head:tuple[Hashable, Hashable], tail:tuple[Hashable, Hashable],):
         self.backend.remove_edge(head, tail)
+
+    def remove_context(self, context:Hashable):
+        successors = [*self.backend.successors(context)]
+        self.backend.remove_edges_from(successors)
+        self.backend.remove_node(context)
