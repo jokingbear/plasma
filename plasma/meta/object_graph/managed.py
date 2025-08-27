@@ -9,12 +9,12 @@ from pathlib import Path
 class AutoContext(Context):
     
     def __init__(self, graph=None, name=None):
-        if context is None:
+        if name is None:
             caller = inspect.stack()[1][0]
             caller = inspect.getmodule(caller)
             path = Path(caller.__file__)
             parent_path = path.parent
-            context = parent_path.name
+            name = parent_path.name
         
         graph = graph or ContextManager().graph
         super().__init__(graph, name)
