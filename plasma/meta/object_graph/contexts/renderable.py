@@ -33,7 +33,7 @@ def _render_node(graph:ContextGraph, current_context, node_id, prefix:str, lines
     elif node_id in rendered:
         lines.append(f'{prefix}|-> {name}')
         
-        if graph.out_degree(node_id, child_link) > 0:
+        if graph.out_degree(*node_id, link=None) > 0:
             lines[-1] += '...'
     elif node_type is Node.SINGLETON:
         lines.append(f'{prefix}|-> {name} = {render_annotation(type(node_attr['value']))}')
