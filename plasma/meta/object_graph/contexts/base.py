@@ -79,8 +79,9 @@ class Base:
         graph.add_node(*node_id, type=Node.LEAF)
         check_nodes = [node_id]
         
-        neighbors = [*graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO)]
-        for n, _ in neighbors:     
+        child_link = Link.DEPEND_ON|Link.DELEGATE_TO|Link.SUBITEM
+        neighbors = [*graph.successors(*node_id, link=child_link)]
+        for n, in neighbors:     
             graph.remove_edge(node_id, n)
             
             context, _ = n
@@ -88,5 +89,5 @@ class Base:
                 check_nodes.append(n)
     
         for n in check_nodes:
-            if graph.type(*n) is Node.LEAF:
+            if graph.type(*n) is Node.LEAF and graph.in_degree(*n, child_link) == 0:
                 graph.remove_node(*n)

@@ -12,7 +12,7 @@ class RenderableContext(FactorialContext):
         lines = []
         rendered = set()
         for n, in self.graph.nodes(self.name):
-            if self.graph.in_degree(*n, link=Link.DEPEND_ON) == 0:
+            if self.graph.in_degree(*n, link=Link.DEPEND_ON|Link.SUBITEM) == 0:
                 lines.append(self.name)
                 _render_node(self.graph, self.name, n, '  ', lines, rendered)
                 lines.append('-' * 100)
@@ -25,14 +25,15 @@ def _render_node(graph:ContextGraph, current_context, node_id, prefix:str, lines
     node_type = graph.type(*node_id)
     
     context, name = node_id
+    child_link = Link.DEPEND_ON|Link.DELEGATE_TO|Link.SUBITEM
     if context != current_context:
         lines[-1] += f' --> {context}.{name}'
-        if graph.out_degree(*node_id, Link.DEPEND_ON) > 0:
+        if graph.out_degree(*node_id, child_link) > 0:
             lines[-1] += '...'
     elif node_id in rendered:
         lines.append(f'{prefix}|-> {name}')
         
-        if graph.out_degree(node_id, Link.DEPEND_ON|Link.DELEGATE_TO) > 0:
+        if graph.out_degree(node_id, child_link) > 0:
             lines[-1] += '...'
     elif node_type is Node.SINGLETON:
         lines.append(f'{prefix}|-> {name} = {render_annotation(type(node_attr['value']))}')
@@ -44,7 +45,7 @@ def _render_node(graph:ContextGraph, current_context, node_id, prefix:str, lines
         else:
             lines.append(f'{prefix}|-> {name}')
 
-        for n, in graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO):
+        for n, in graph.successors(*node_id, link=child_link):
             _render_node(graph, current_context, n, prefix + ' ' * 2, lines, rendered)
     rendered.add(node_id)
 

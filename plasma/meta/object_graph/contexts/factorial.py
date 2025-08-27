@@ -5,7 +5,7 @@ from ..links import Link
 
 class FactorialContext(Base):
 
-    def init_factory(self, name:str, overwrite=False):
+    def factory(self, name:str, overwrite=False):
         if (self.name, name) in self.graph and overwrite:
             self.remove_dependency(name)
         
@@ -18,7 +18,7 @@ class FactorialContext(Base):
         factory_id = self.name, factory_name
         for n in names:
             node_id = self.name, n
-            self.graph.add_edge(factory_id, node_id, Link.CONTAINS)
+            self.graph.add_edge(factory_id, node_id, Link.SUBITEM)
 
 
 class DependencyFactory:
