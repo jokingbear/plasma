@@ -10,11 +10,12 @@ class AutoContext(Context):
     
     def __init__(self, graph=None, name=None):
         if name is None:
-            caller = inspect.stack()[1][0]
-            caller = inspect.getmodule(caller)
-            path = Path(caller.__file__)
-            parent_path = path.parent
-            name = parent_path.name
+            for s in inspect.stack():
+                if 'plasma' not in s.filename:
+                    path = Path(s.filename)
+                    parent_path = path.parent
+                    name = parent_path.name
+                    break
         
         graph = graph or ContextManager().graph
         super().__init__(graph, name)
