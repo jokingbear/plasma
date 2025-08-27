@@ -1,7 +1,7 @@
-from enum import Enum, auto
+from enum import Enum, auto, Flag
 
 
-class Link(Enum):
-    CONTAINS = 0
-    DEPEND_ON = 1
-    DELEGATE_TO = 2
+class Link(Flag):
+    CONTAINS = auto()
+    DEPEND_ON = auto()
+    DELEGATE_TO = auto()

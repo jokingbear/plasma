@@ -1,8 +1,9 @@
 import typing
-import networkx as nx
 
 from .factorial import FactorialContext
 from ..types import Node
+from ..context_graph import ContextGraph
+from ..links import Link
 
 
 class RenderableContext(FactorialContext):
@@ -10,28 +11,28 @@ class RenderableContext(FactorialContext):
     def __repr__(self):
         lines = []
         rendered = set()
-        for n in self._graph.neighbors(self.name):
-            if self._graph.in_degree(n) == 1:
+        for n, in self.graph.nodes(self.name):
+            if self.graph.in_degree(*n, link=Link.DEPEND_ON) == 0:
                 lines.append(self.name)
-                _render_node(self._graph, self.name, n, '  ', lines, rendered)
+                _render_node(self.graph, self.name, n, '  ', lines, rendered)
                 lines.append('-' * 100)
         text = '\n'.join(lines)
         return text
 
 
-def _render_node(graph:nx.DiGraph, current_context, key, prefix:str, lines:list, rendered:set):
-    node_attr = graph.nodes[key]
-    node_type = node_attr.get('type', Node.LEAF)
+def _render_node(graph:ContextGraph, current_context, node_id, prefix:str, lines:list, rendered:set):
+    node_attr = graph[*node_id]
+    node_type = graph.type(*node_id)
     
-    context, name = key
+    context, name = node_id
     if context != current_context:
         lines[-1] += f' --> {context}.{name}'
-        if graph.out_degree(key) > 0:
+        if graph.out_degree(*node_id, Link.DEPEND_ON) > 0:
             lines[-1] += '...'
-    elif key in rendered:
+    elif node_id in rendered:
         lines.append(f'{prefix}|-> {name}')
         
-        if graph.out_degree(key) > 0:
+        if graph.out_degree(node_id, Link.DEPEND_ON|Link.DELEGATE_TO) > 0:
             lines[-1] += '...'
     elif node_type is Node.SINGLETON:
         lines.append(f'{prefix}|-> {name} = {render_annotation(type(node_attr['value']))}')
@@ -43,9 +44,9 @@ def _render_node(graph:nx.DiGraph, current_context, key, prefix:str, lines:list,
         else:
             lines.append(f'{prefix}|-> {name}')
 
-        for n in graph.neighbors(key):
+        for n, in graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO):
             _render_node(graph, current_context, n, prefix + ' ' * 2, lines, rendered)
-    rendered.add(key)
+    rendered.add(node_id)
 
 
 def render_annotation(t:type):

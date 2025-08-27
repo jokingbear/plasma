@@ -7,10 +7,10 @@ class ManagedContext(Context):
     
     @property
     def manager(self):
-        return ContextManager(self._graph)
+        return ContextManager(self.graph)
 
 
 class ContextManager(Manager):
     
-    def init_context(self, context:Hashable):
-        return ManagedContext(self._graph, context)
+    def context(self, context:Hashable):
+        return ManagedContext(self.graph, context)

@@ -2,9 +2,11 @@ import networkx as nx
 import pandas as pd
 
 from .readable_manager import ReadableManager
+from warnings import deprecated
 
 
-class RunnableManager(ReadableManager):
+@deprecated('this class is deprecated, use ContextManager instead')
+class Manager(ReadableManager):
     
     def run(self, *names, **init_args):
         assert len(names) > 0, 'there must be at least one component'

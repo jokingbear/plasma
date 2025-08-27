@@ -2,21 +2,22 @@ import networkx as nx
 
 from warnings import warn
 from ..links import Link
-from ..contexts import Context
 from ..types import Node
+from ..context_graph import ContextGraph
+from ..contexts import Context
 
 
 class Base:
     
-    def __init__(self, graph:nx.MultiDiGraph=None):
-        graph = graph if graph is not None else nx.MultiDiGraph()
-        self._graph = graph
+    def __init__(self, graph:ContextGraph=None):
+        graph = graph if graph is not None else ContextGraph()
+        self.graph = graph
 
     def merge(self, other):
-        assert isinstance(other, Base)
+        assert isinstance(other, (Base))
         
-        current_graph = self._graph.copy()
-        other_graph = other._graph.copy()
+        current_graph = self.graph.copy()
+        other_graph = other.graph.copy()
         
         current_contexts = self.contexts
         other_contexts = other.contexts
@@ -24,37 +25,32 @@ class Base:
         if len(collisions) > 0:
             warn(f'context collisions: {collisions}', stacklevel=2)
         
-            for m in collisions:
-                nodes = [n for _, n, t in current_graph.edges(m) if t is Link.CONTAINS]
-                current_graph.remove_nodes_from([m, *nodes])
+            for c in collisions:
+                current_graph.remove_context(c)
         
-        merged_graph = nx.compose(current_graph, other_graph )
+        merged_graph = current_graph.merge(other_graph)
         return type(self)(merged_graph)
     
     def link(self, *links:tuple[str, str], inplace=False):
-        self = self if inplace else type(self)(self._graph.copy())
+        self = self if inplace else type(self)(self.graph.copy())
         
         for context_head, context_tail in links:
-            head_namespace, head = context_head.split('.')
-            tail_namespace, tail = context_tail.split('.')
+            head = tuple(context_head.split('.'))
+            tail = tuple(context_tail.split('.'))
             
-            assert head_namespace in self._graph, f'manager does not contain {head_namespace}'
-            assert tail_namespace in self._graph, f'manager does not contain {tail_namespace}'
-            assert head_namespace != tail_namespace, f'{head_namespace} is the same as {tail_namespace}'
+            assert head[0] != tail[0], f'{head[0]} is the same as {tail[0]}'
+            assert head in self.graph, f'manager does not contain {head[1]} in context {head[0]}'
+            assert tail in self.graph, f'manager does not contain {tail[1]} in context {tail[0]}'
+                     
+            if self.graph.out_degree(*head, link=None) > 0:
+                warn(f'{head[0]}.{head[1]} contains dependency, removing it')
+                Context(self.graph, head[0]).remove_dependency(head[1])
             
-            head_context = Context(self._graph, head_namespace)
-            tail_context = Context(self._graph, tail_namespace)            
-            if head_context.out_degree(head) > 0:
-                warn(f'{head_namespace}.{head} contains dependency, removing it')
-                head_context.remove_dependency(head)
-            
-            hid = head_context.node_id(head)
-            tid = tail_context.node_id(tail)
-            self._graph.add_edge(hid, tid, Link.DELEGATE_TO)
+            self.graph.add_edge(head, tail, Link.DELEGATE_TO)
+            self.graph.add_node(*head, type=Node.INITATOR)
             
         return self
           
     @property
     def contexts(self):
-        contexts = {n for n, ntype in self._graph.nodes('type') if ntype is Node.CONTEXT}
-        return contexts
+        return set(self.graph.contexts)
