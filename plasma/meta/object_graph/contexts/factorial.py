@@ -6,7 +6,7 @@ from ..links import Link
 class FactorialContext(Base):
 
     def init_factory(self, name:str, overwrite=False):
-        if (self.name, name) in self and overwrite:
+        if (self.name, name) in self.graph and overwrite:
             self.remove_dependency(name)
         
         factory_id = self.name, name
