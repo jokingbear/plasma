@@ -42,12 +42,13 @@ class AutoContext(Context):
         self_manager.link(*standardized_links, inplace=True)
         return self
 
-    def link_name(self, other_context):
+    def link_name(self, other_context, *exceptions:str):
         assert isinstance(other_context, AutoContext)
         
         names = {n for (_, n), in self.graph.nodes(self.name)}
         other_names = {n for (_, n), in self.graph.nodes(other_context.name)}
         matched_names = names.intersection(other_names)
+        matched_names = matched_names.difference(exceptions)
         return self.link(other_context, *matched_names)
 
 
