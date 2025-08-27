@@ -46,10 +46,3 @@ class DependencyFactory:
     
     def __setitem__(self, key, obj):
         self.register_singleton(key, obj)
-            
-    def __repr__(self):
-        return (
-            f'{type(self).__name__}(\n'
-            f'\tname={self.name},\n'
-            ')'
-        )

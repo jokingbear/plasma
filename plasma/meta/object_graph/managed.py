@@ -12,5 +12,5 @@ class ManagedContext(Context):
 
 class ContextManager(Manager):
     
-    def init_context(self, context:Hashable):
+    def context(self, context:Hashable):
         return ManagedContext(self.graph, context)

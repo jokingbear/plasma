@@ -11,7 +11,7 @@ class RenderableContext(FactorialContext):
     def __repr__(self):
         lines = []
         rendered = set()
-        for n, _ in self.graph.nodes(self.name):
+        for n, in self.graph.nodes(self.name):
             if self.graph.in_degree(*n, link=Link.DEPEND_ON) == 0:
                 lines.append(self.name)
                 _render_node(self.graph, self.name, n, '  ', lines, rendered)
@@ -44,7 +44,7 @@ def _render_node(graph:ContextGraph, current_context, node_id, prefix:str, lines
         else:
             lines.append(f'{prefix}|-> {name}')
 
-        for n, _ in graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO):
+        for n, in graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO):
             _render_node(graph, current_context, n, prefix + ' ' * 2, lines, rendered)
     rendered.add(node_id)
 

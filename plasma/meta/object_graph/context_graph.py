@@ -10,12 +10,11 @@ class ContextGraph:
     def __init__(self, backend:nx.DiGraph=None):
         self.backend = backend if backend is not None else nx.DiGraph()
     
-    def __contains__(self, *args):
-        assert len(args) < 3
-        if len(args) == 1:
-            node_id = args[0]
+    def __contains__(self, obj):
+        if isinstance(obj, str):
+            node_id = obj
         else:
-            node_id = tuple(args)
+            node_id = tuple(obj)
             
         return node_id in self.backend
 
@@ -53,11 +52,11 @@ class ContextGraph:
             if ntype is Node.CONTEXT:
                 yield n
 
-    def nodes(self, context:Hashable, *data):
+    def nodes(self, context:Hashable, *data, default=None):
         for n in self.backend.successors(context):
             attrs = self.backend.nodes[n]
-            picked_attrs = tuple(attrs[d] for d in data)
-            yield n, picked_attrs
+            picked_attrs = tuple(attrs.get(d, default) for d in data)
+            yield n, *picked_attrs
     
     def successors(self, context:Hashable, name:Hashable, *data, link=Link.CONTAINS):
         node_id = context, name
@@ -65,7 +64,7 @@ class ContextGraph:
             if link is None or rel in link:
                 attrs = self[*t]
                 picked_attrs = tuple(attrs[d] for d in data)
-                yield t, picked_attrs
+                yield t, *picked_attrs
     
     def predecessors(self, context:Hashable, name:Hashable, *data, link=Link.CONTAINS):
         node_id = context, name
@@ -73,7 +72,7 @@ class ContextGraph:
             if link is None or rel in link:
                 attrs = self.backend.nodes[h]
                 picked_attrs = tuple(attrs[d] for d in data)
-                yield h, picked_attrs
+                yield h, *picked_attrs
 
     def in_degree(self, context:Hashable, name:Hashable, link=Link.CONTAINS):
         nodes = [*self.predecessors(context, name, link=link)]
@@ -85,6 +84,9 @@ class ContextGraph:
 
     def type(self, context:Hashable, name: Hashable):
         return self.backend.nodes[(context, name)]['type']
+    
+    def value(self, context:Hashable, name: Hashable, default=None):
+        return self.backend.nodes[context, name].get('value', default)
     
     # delete
     def remove_node(self, context:Hashable, name:Hashable):        

@@ -47,6 +47,7 @@ class Base:
                 Context(self.graph, head[0]).remove_dependency(head[1])
             
             self.graph.add_edge(head, tail, Link.DELEGATE_TO)
+            self.graph.add_node(*head, type=Node.INITATOR)
             
         return self
           
