@@ -10,11 +10,12 @@ class AutoContext(Context):
     
     def __init__(self, graph=None, name=None):
         if name is None:
-            caller = inspect.stack()[1][0]
-            caller = inspect.getmodule(caller)
-            path = Path(caller.__file__)
-            parent_path = path.parent
-            name = parent_path.name
+            for s in inspect.stack():
+                if 'plasma' not in s.filename:
+                    path = Path(s.filename)
+                    parent_path = path.parent
+                    name = parent_path.name
+                    break
         
         graph = graph or ContextManager().graph
         super().__init__(graph, name)
@@ -42,12 +43,13 @@ class AutoContext(Context):
         self_manager.link(*standardized_links, inplace=True)
         return self
 
-    def link_name(self, other_context):
+    def link_name(self, other_context, *exceptions:str):
         assert isinstance(other_context, AutoContext)
         
         names = {n for (_, n), in self.graph.nodes(self.name)}
         other_names = {n for (_, n), in self.graph.nodes(other_context.name)}
         matched_names = names.intersection(other_names)
+        matched_names = matched_names.difference(exceptions)
         return self.link(other_context, *matched_names)
 
 

@@ -13,11 +13,11 @@ class RunnableContext(RenderableContext, AutoPipe):
         AutoPipe.__init__(self)
         RenderableContext.__init__(self, graph, name)
 
-    def run(self, *names, **kwargs):
+    def run(self, *names, allow_global=True, **kwargs):
         for n in names:
             assert (self.name, n) in self.graph, f'context {self.name} does not contain {n}'
         
-        initiator = GraphInitiator(self.graph, self.name, kwargs)
+        initiator = GraphInitiator(self.graph, self.name, allow_global, kwargs)
         for n in names:
             initiator.run((self.name, n))
         
@@ -29,11 +29,12 @@ class NotIntialized: pass
 
 class GraphInitiator(AutoPipe):
     
-    def __init__(self, graph:ContextGraph, context, inputs:dict[str, object]):
+    def __init__(self, graph:ContextGraph, context, allow_global:bool, inputs:dict[str, object]):
         super().__init__()
 
         self.graph = graph
         self.context = context
+        self.allow_global = allow_global
         
         initiated = {}
         for k, v in inputs.items():
@@ -47,13 +48,16 @@ class GraphInitiator(AutoPipe):
     
     def run(self, node_id):
         if node_id not in self._initiated:
-            if self.graph.type(*node_id) is Node.SINGLETON:
+            if (self.context, node_id[1]) in self._initiated and self.allow_global:
+                self._initiated[node_id] = self._initiated[self.context, node_id[1]]
+            elif self.graph.type(*node_id) is Node.SINGLETON:
                 self._initiated[*node_id] = self.graph.value(*node_id)
             elif self.graph.type(*node_id) is Node.LEAF:
                 raise ReferenceError(f'no input for {node_id[1]} in context {node_id[0]}')
             else:
                 ntype = self.graph.type(*node_id)
-                successors = self.graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO)
+                child_link = Link.DEPEND_ON|Link.DELEGATE_TO|Link.SUBITEM
+                successors = self.graph.successors(*node_id, link=child_link)
                 arg_names = []
                 for n, in successors:
                     self.run(n)
