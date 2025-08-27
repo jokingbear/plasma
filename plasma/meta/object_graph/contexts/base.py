@@ -43,6 +43,7 @@ class Base:
                     
                     if p.default is not inspect.Parameter.empty:
                         attrs['value'] = p.default
+                        attrs['type'] = Node.SINGLETON
 
                     graph.add_node(*arg_id, **attrs)
                     graph.add_edge(node_id, arg_id)
