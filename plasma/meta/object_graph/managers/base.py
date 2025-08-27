@@ -31,7 +31,7 @@ class Base:
         merged_graph = current_graph.merge(other_graph)
         return type(self)(merged_graph)
     
-    def link(self, *links:tuple[str, str], inplace=False):
+    def link(self, *links:tuple[str, str], inplace=True):
         self = self if inplace else type(self)(self.graph.copy())
         
         for context_head, context_tail in links:

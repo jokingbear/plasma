@@ -11,14 +11,7 @@ from ..links import Link
 
 class Base:
     
-    def __init__(self, graph:ContextGraph, name:Hashable=None):
-        if name is None:
-            caller = inspect.stack()[1][0]
-            caller = inspect.getmodule(caller)
-            path = Path(caller.__file__)
-            parent_path = path.parent
-            name = parent_path.name
-            
+    def __init__(self, graph:ContextGraph, name:Hashable):
         graph.add_context(name)
         self.graph = graph
         self.name = name
