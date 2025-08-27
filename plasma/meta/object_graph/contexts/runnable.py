@@ -56,7 +56,8 @@ class GraphInitiator(AutoPipe):
                 raise ReferenceError(f'no input for {node_id[1]} in context {node_id[0]}')
             else:
                 ntype = self.graph.type(*node_id)
-                successors = self.graph.successors(*node_id, link=Link.DEPEND_ON|Link.DELEGATE_TO)
+                child_link = Link.DEPEND_ON|Link.DELEGATE_TO|Link.SUBITEM
+                successors = self.graph.successors(*node_id, link=child_link)
                 arg_names = []
                 for n, in successors:
                     self.run(n)
