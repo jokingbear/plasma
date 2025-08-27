@@ -46,7 +46,7 @@ class AutoContext(Context):
         assert isinstance(other_context, AutoContext)
         
         names = {n for (_, n), in self.graph.nodes(self.name)}
-        other_names = {n for (_, n), in self.graph.nodes(other_names)}
+        other_names = {n for (_, n), in self.graph.nodes(other_context.name)}
         matched_names = names.intersection(other_names)
         return self.link(other_context, *matched_names)
 
