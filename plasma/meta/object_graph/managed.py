@@ -9,7 +9,7 @@ from pathlib import Path
 class ManagedContext(Context):
     
     @property
-    def manager(self):
+    def context_manager(self):
         return ContextManager(self.graph)
 
 
