@@ -15,7 +15,7 @@ class RenderableContext(FactorialContext):
             if self.graph.in_degree(*n, link=Link.DEPEND_ON|Link.SUBITEM) == 0:
                 lines.append(self.name)
                 _render_node(self.graph, self.name, n, '  ', lines, rendered)
-                lines.append('-' * 100)
+                lines.append('-' * 42)
         text = '\n'.join(lines)
         return text
 
