@@ -1,17 +1,17 @@
 import pandas as pd
 
-from .renderable import RenderableContext
+from .opened import OpenedContext
 from ....functional import AutoPipe
 from ..context_graph import ContextGraph
 from ..links import Link
 from ..types import Node
 
 
-class RunnableContext(RenderableContext, AutoPipe):
+class RunnableContext(OpenedContext, AutoPipe):
     
     def __init__(self, graph, name = None):
         AutoPipe.__init__(self)
-        RenderableContext.__init__(self, graph, name)
+        OpenedContext.__init__(self, graph, name)
 
     def run(self, *names, allow_global=True, **kwargs):
         for n in names:
@@ -22,9 +22,6 @@ class RunnableContext(RenderableContext, AutoPipe):
             initiator.run((self.name, n))
         
         return pd.Series(initiator.results)[list(names)]
-
-
-class NotIntialized: pass
 
 
 class GraphInitiator(AutoPipe):
