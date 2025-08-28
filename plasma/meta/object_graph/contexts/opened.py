@@ -5,10 +5,14 @@ from .renderable import RenderableContext
 from typing import Hashable
 from ..context_graph import ContextGraph
 from ..types import Node
-from ..links import Link
 
 
 class OpenedContext(RenderableContext):
+    
+    def __init__(self, graph, name):
+        super().__init__(graph, name)
+    
+        self.requirement = Required
     
     def inputs(self, *names:Hashable):
         for n in names:
