@@ -41,7 +41,11 @@ class GraphChecker:
         if node_id[0] != self.context:
             checker = GraphChecker(self.graph, *node_id)
             checker.run()
-            self._state[node_id[0]] = checker.results
+            
+            other_context = self._state.get(node_id[0], {})
+            other_context.update(checker.results)
+            
+            self._state[node_id[0]] = other_context
         elif ntype in Node.LEAF|Node.SINGLETON:
             self._state[node_id[1]] = self.graph.value(*node_id, default=Required)
         else:
