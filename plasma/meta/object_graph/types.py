@@ -1,7 +1,7 @@
-from enum import Enum, auto
+from enum import Flag, auto
 
 
-class Node(Enum):
+class Node(Flag):
     CONTEXT = auto()
     INITATOR = auto()
     SINGLETON = auto()
