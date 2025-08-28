@@ -18,48 +18,48 @@ class OpenedContext(RenderableContext):
         for n in names:
             assert (self.name, n) in self.graph
         
-        results = {}
+        checker = GraphChecker(self.graph, self.name)
+        fields = set()
         for n in names:
-            checker = GraphChecker(self.graph, self.name, n)
-            checker.run()
-            results.update(checker.results)
+            checker.run(self.name, n)
+            fields.update(checker.results)
+        
+        field_values = pd.Series({node_id: self.graph.value(*node_id, default=self.requirement) 
+                                  for node_id in fields})
+        field_values = field_values.sort_index()
+        
+        results = {}
+        for k in field_values.index.get_level_values(0).unique():
+            if k == self.name:
+                results.update(field_values.loc[k])
+            else:
+                results[k] = field_values.loc[k].to_dict()
         
         return BeautifulDict(results)
 
 
 class GraphChecker:
     
-    def __init__(self, graph:ContextGraph, context, name):
+    def __init__(self, graph:ContextGraph, context):
         super().__init__()
 
         self.graph = graph
         self.context = context
-        self.name = name
-        
-        initiated = {}
-        self._state = initiated
+        self._state = set()
     
-    def run(self, node_id=None):
-        node_id = node_id or (self.context, self.name)
+    def run(self, context, name):
+        node_id = context, name
         ntype = self.graph.type(*node_id)
-        if node_id[0] != self.context:
-            checker = GraphChecker(self.graph, *node_id)
-            checker.run()
-            
-            other_context = self._state.get(node_id[0], {})
-            other_context.update(checker.results)
-            
-            self._state[node_id[0]] = other_context
-        elif ntype in Node.LEAF|Node.SINGLETON:
-            self._state[node_id[1]] = self.graph.value(*node_id, default=Required)
+        if ntype in Node.LEAF|Node.SINGLETON:
+            self._state.add(node_id)
         else:
             successors = self.graph.successors(*node_id, link=None)
             for n, in successors:
-                self.run(n)
+                self.run(*n)
 
     @property
     def results(self):
-        return BeautifulDict(self._state)
+        return self._state
 
 
 class Required: pass
