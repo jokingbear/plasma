@@ -72,6 +72,26 @@ class BeautifulDict(dict):
             yield v
     
     def __repr__(self):
-        text = json.dumps(self, indent=2, default=lambda _: Required.__name__)
-        text = text.replace(f'"{Required.__name__}"', Required.__name__)
-        return text
+        return rendered(self)
+
+
+def rendered(d:dict):
+    lines = ['{']
+    indent = ' ' * 4
+    for k, v in d.items():
+        if isinstance(v, str):
+            v = f'"{v}"'
+        elif v is Required:
+            v = Required.__name__
+        
+        if isinstance(v, dict):
+            rendered_dict = rendered(v)
+            dict_lines = rendered_dict.split('\n')
+            dict_lines[0] = f'{k}: {{'
+            dict_lines[-1] += ','
+            lines.extend(f'{indent}{l}' for l in dict_lines)
+        else:
+            lines.append(f'{indent}{k}: {v},')
+
+    lines.append('}')
+    return '\n'.join(lines)
