@@ -14,11 +14,11 @@ class OpenedContext(RenderableContext):
     
         self.requirement = Required
     
-    def inputs(self, *names:Hashable):
+    def inputs(self, *names:Hashable, include_singleton=False):
         for n in names:
             assert (self.name, n) in self.graph
         
-        checker = GraphChecker(self.graph, self.name)
+        checker = GraphChecker(self.graph, self.name, include_singleton)
         fields = set()
         for n in names:
             checker.run(self.name, n)
@@ -40,17 +40,18 @@ class OpenedContext(RenderableContext):
 
 class GraphChecker:
     
-    def __init__(self, graph:ContextGraph, context):
+    def __init__(self, graph:ContextGraph, context, include_singleton):
         super().__init__()
 
         self.graph = graph
         self.context = context
+        self.include_singleton = include_singleton
         self._state = set()
     
     def run(self, context, name):
         node_id = context, name
         ntype = self.graph.type(*node_id)
-        if ntype in Node.LEAF|Node.SINGLETON:
+        if ntype is Node.LEAF or (ntype is Node.SINGLETON and self.include_singleton):
             self._state.add(node_id)
         else:
             successors = self.graph.successors(*node_id, link=None)
