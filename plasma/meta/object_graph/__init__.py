@@ -1,1 +1,5 @@
-from .runnable_manager import RunnableManager as Manager
+from .legacy import  Manager
+from .managed import (
+    AutoContext as Context,
+    ContextManager
+)
