@@ -1,17 +1,17 @@
 import json
 import re
 
-from .file_reader import ReadInputs
+from .functional import InitiableInputs as Inputs
 
 
-class RenderableInputs(ReadInputs):
+class RenderableInputs(Inputs):
     
     def to_dict(self):
         results = {}
         for k in self.__annotations__:
             if hasattr(self, k):
                 value = getattr(self, k)
-                if isinstance(value, ReadInputs):
+                if isinstance(value, Inputs):
                     value = value.to_dict()
                 
                 results[k] = value
