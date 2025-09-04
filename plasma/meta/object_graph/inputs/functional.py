@@ -26,11 +26,12 @@ class InitiableInputs(ReadInputs):
         
         inputs = {}
         for r in requirements.keys():
-            attr = getattr(self, r)
-            if isinstance(attr, type(self)):
-                attr = attr.to_dict()
-            
-            inputs[r] = attr
+            if hasattr(self, r):
+                attr = getattr(self, r)
+                if isinstance(attr, type(self)):
+                    attr = attr.to_dict()
+                
+                inputs[r] = attr
         
         return context.run(*names, **inputs)
         
