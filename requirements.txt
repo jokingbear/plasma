@@ -5,6 +5,3 @@ tqdm
 networkx
 pyyaml
 setuptools
-huggingface_hub
-tensorboard
-torch
