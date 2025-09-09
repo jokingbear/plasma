@@ -8,9 +8,8 @@ from enum import Enum
 class InitiableInputs(ReadInputs):
     
     def init(self, context:AutoContext, *names:str, verbose=True):
-        requirements = context.inputs(*names)
-        
         if verbose:
+            requirements = context.inputs(*names, include_singleton=True)
             context_rep = repr(context)
             for n in names:
                 context_rep = re.sub(rf'\W({n})\W', Color.GREEN.render, context_rep)
@@ -19,6 +18,8 @@ class InitiableInputs(ReadInputs):
                 color = Color.RED
                 if k in context.context_manager:
                     color = Color.CYAN
+                elif req is not context.requirement:
+                    color = Color.YELLOW
 
                 context_rep = re.sub(rf'\W({k})\W', color.render, context_rep)
             
