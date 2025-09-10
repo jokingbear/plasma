@@ -1,2 +1,2 @@
-from .graph_matcher import GraphMatcher
-from .graph_indexer import GraphIndexer
+#from .graph_indexer import GraphIndexer
+from .segment_indexer import SegmentIndexer as GraphIndexer

@@ -3,7 +3,7 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 
-from .regex_splitter import RegexTokenizer
+from .regex_tokenizer import RegexTokenizer
 from .token_matcher import TokenMatcher
 from .path_set_walker2 import PathWalker
 
