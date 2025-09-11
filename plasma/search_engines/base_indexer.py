@@ -1,12 +1,10 @@
 import plasma.functional as F
 import pandas as pd
 import networkx as nx
-import numpy as np
 import itertools as iter
 
 from .regex_tokenizer import RegexTokenizer
 from .token_matcher2 import TokenMatcher
-from .path_set_walker2 import PathWalker
 from .token_graph import TokenGraph
 from scipy.stats import hmean
 
