@@ -16,7 +16,8 @@ class SegmentIndexer(TopkIndexer):
         
         self.group_splitter = group_splitter
     
-    def run(self, query):
+    def run(self, query:str):
+        query = query.lower()
         segmented_query = self.group_splitter.run(query)
         
         results = []
