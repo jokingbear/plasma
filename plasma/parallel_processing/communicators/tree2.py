@@ -7,7 +7,7 @@ from warnings import deprecated
 
 
 @deprecated('this class is deprecated, please use AsyncFlow')
-class StableTree(TreeFlow):
+class TreeFlow(TreeFlow):
     
     def __init__(self):
         super().__init__()
