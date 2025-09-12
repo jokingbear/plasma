@@ -59,5 +59,7 @@ class ContextManager(Manager):
         return AutoContext(self.graph, context)
 
     def __eq__(self, value):
-        
         return isinstance(value, ContextManager) and self.graph is value.graph
+    
+    def __contains__(self, context:str):
+        return context in self.graph

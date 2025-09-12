@@ -3,3 +3,4 @@ from .managed import (
     AutoContext as Context,
     ContextManager
 )
+from .inputs import Inputs, Registrator
