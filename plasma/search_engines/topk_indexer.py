@@ -50,4 +50,4 @@ def sort_candidate(df:pd.DataFrame, topk):
         'data_index', 'text', 'text_start', 'text_end', 
         'matching_score', 'matched_len', 'coverage_score', 'harmonic_score'
     ]
-    return df[columns].sort_values('harmonic_score', ascending=False).reset_index(drop=True).iloc[:topk]
+    return df[columns].sort_values(['matching_score', 'coverage_score'], ascending=False).reset_index(drop=True).iloc[:topk]

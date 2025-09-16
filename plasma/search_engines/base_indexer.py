@@ -81,31 +81,38 @@ def solve_components(position_graph:nx.DiGraph, final_candidates:list):
     paths = iter.chain(*[nx.all_simple_paths(position_graph, r, leaves) for r in roots])
     
     for p in paths:
-        candidate_counts, candidate_offsets = generate_candicate_stats(p, position_graph)                
+        candidate_offsets = generate_candicate_stats(p, position_graph)                
         
-        for k, c in candidate_counts.items():
-            if c > 1:
-                offset = candidate_offsets[k]
-                start, _ = p[offset]
-                end, _ = p[offset + c]
-                end += 1
-                _, db_path = zip(*p[offset:offset + c + 1])
-                final_candidates.append([start, end, db_path, k])
+        for k, offset, offset_end in candidate_offsets:
+            start, _ = p[offset]
+            end, _ = p[offset_end - 1]
+            end += 1
+            _, db_path = zip(*p[offset:offset_end])
+            final_candidates.append([start, end, db_path, k])
 
 
 def generate_candicate_stats(path, position_graph:nx.DiGraph):
-    candidate_counts = {}
-    candidate_offsets = {}
-                
-    for i, n in enumerate(path[:-1]):
-        candiates:set = position_graph.nodes[n]['paths']
-        next_candidates:set = position_graph.nodes[path[i + 1]]['paths']
-        intersection = candiates.intersection(next_candidates)
-        for candidate_path in intersection:
-            candidate_counts[candidate_path] = candidate_counts.get(candidate_path, 0) + 1
-            candidate_offsets[candidate_path] = candidate_offsets.get(candidate_path, i)
+    candidate_offsets = []
     
-    return candidate_counts, candidate_offsets
+    candidates = set()
+    current_start = 0            
+    for i, n in enumerate(path):
+        current_node_paths:set = position_graph.nodes[n]['paths']
+        new_candidates = candidates.intersection(current_node_paths)
+        
+        if len(new_candidates) == 0:
+            for c in candidates:
+                candidate_offsets.append([c, current_start, i])
+            candidates = current_node_paths
+            current_start = i
+        else:
+            candidates = new_candidates
+            
+            if i + 1 == len(path):
+                for c in candidates:
+                    candidate_offsets.append([c, current_start, i + 1])
+
+    return candidate_offsets
 
 
 def solve_singleton(graph:nx.DiGraph, node, final_candidates:list):

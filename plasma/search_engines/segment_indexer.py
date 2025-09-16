@@ -13,7 +13,6 @@ class SegmentIndexer(TopkIndexer):
         if isinstance(group_splitter, str):
             group_splitter = RegexTokenizer(group_splitter)
         
-        
         self.group_splitter = group_splitter
     
     def run(self, query:str):
