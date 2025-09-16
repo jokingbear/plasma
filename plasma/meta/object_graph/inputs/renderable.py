@@ -1,8 +1,6 @@
-import json
 import re
 
 from .functional import InitiableInputs as Inputs
-from ....functional import AutoPipe
 
 
 class RenderableInputs(Inputs):
@@ -20,10 +18,24 @@ class RenderableInputs(Inputs):
         return results
     
     def __repr__(self):
-        rep = json.dumps(self.to_dict(), indent=2, ensure_ascii=False, default=default)
-        rep = re.sub(r'"(.+?)"\:', r'\1:', rep)
-        return rep
+        return rendered(self.to_dict())
 
 
-def default(obj):
-    return type(obj).__name__
+def rendered(d:dict):
+    lines = ['{']
+    indent = ' ' * 4
+    for k, v in d.items():
+        if isinstance(v, str):
+            v = f'"{v}"'
+        
+        if isinstance(v, dict):
+            rendered_dict = rendered(v)
+            dict_lines = rendered_dict.split('\n')
+            dict_lines[0] = f'{k}: {{'
+            dict_lines[-1] += ','
+            lines.extend(f'{indent}{l}' for l in dict_lines)
+        else:
+            lines.append(f'{indent}{k}: {v},')
+
+    lines.append('}')
+    return '\n'.join(lines)
