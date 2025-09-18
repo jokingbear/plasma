@@ -31,13 +31,18 @@ class TopkIndexer(OverlapFilterIndexer):
         results['harmonic_score'] = hmean(results[['matching_score', 'coverage_score']].values, axis=1)
         
         # group and get topk
-        results = results.merge(self._data, left_on='db_candidate', right_on='path')
-        results = results.groupby(['query_start_idx', 'query_end_idx']).apply(sort_candidate, topk=self.topk, 
-                                                                              include_groups=False)
+        results = results\
+                    .groupby(['query_start_idx', 'query_end_idx'])\
+                        .apply(
+                            sort_candidate, 
+                            topk=self.topk, full_data=self._data,
+                            include_groups=False
+                        )
         return results
 
 
 def find_match(tokenized_offsets:dict[tuple, pd.DataFrame], db_path, db_candidate):
+    
     _, offset, size = difflib.SequenceMatcher(None, db_path, db_candidate).find_longest_match()
     start = tokenized_offsets[db_candidate].iloc[offset]['start_idx']
     end = tokenized_offsets[db_candidate].iloc[offset + size - 1]['end_idx'] 
@@ -45,9 +50,15 @@ def find_match(tokenized_offsets:dict[tuple, pd.DataFrame], db_path, db_candidat
     return start, end, size
 
 
-def sort_candidate(df:pd.DataFrame, topk):
+def sort_candidate(df:pd.DataFrame, topk, full_data:pd.DataFrame):
     columns = [
         'data_index', 'text', 'text_start', 'text_end', 
         'matching_score', 'matched_len', 'coverage_score', 'harmonic_score'
     ]
-    return df[columns].sort_values(['matching_score', 'coverage_score'], ascending=False).reset_index(drop=True).iloc[:topk]
+    
+    new_frame = df.sort_values(['matching_score', 'coverage_score'], ascending=False)\
+                    .rename(columns={'db_index': 'data_index'})\
+                        .iloc[:topk].copy()
+
+    new_frame['text'] = full_data.iloc[new_frame['data_index'].values]['text'].values
+    return new_frame[columns]
