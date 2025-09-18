@@ -33,12 +33,12 @@ def tokenize_data(data:list[str], tokenizer:RegexTokenizer):
 def build_graph(tokenized_data:pd.DataFrame):
     graph = nx.DiGraph()
     
-    for path in tokenized_data['path']:
+    for i, path in enumerate(tokenized_data['path']):
         nx.add_path(graph, path)
         
         for tk in path:
             paths:set = graph.nodes[tk].get('paths', set())
-            paths.add(path)
+            paths.add((i, path))
             graph.add_node(tk, paths=paths)
 
     return graph

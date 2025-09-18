@@ -30,7 +30,7 @@ class BaseIndexer(TokenGraph, F.AutoPipe):
         candidates['query_start_idx'] = token_data.iloc[candidates['start'].values]['start_idx'].values
         candidates['query_end_idx'] = token_data.iloc[candidates['end'].values - 1]['end_idx'].values
         
-        columns = ['query_start_idx', 'query_end_idx', 'db_path', 'db_candidate', 'matching_score']
+        columns = ['query_start_idx', 'query_end_idx', 'db_path', 'db_index', 'db_candidate', 'matching_score']
         return candidates[columns]
 
 
@@ -68,7 +68,7 @@ def generate_candidates(position_graph:nx.DiGraph):
             node, = list(c)
             solve_singleton(position_graph, node, final_candidates)
 
-    final_candidates = pd.DataFrame(final_candidates, columns=['start', 'end', 'db_path', 'db_candidate'])
+    final_candidates = pd.DataFrame(final_candidates, columns=['start', 'end', 'db_path', 'db_index','db_candidate'])
     candidate_scores = [hmean(scores.loc[zip(range(start, end), db_path)]) 
                         for start, end, db_path in final_candidates[['start', 'end', 'db_path']].itertuples(index=False)]
     final_candidates['matching_score'] = candidate_scores
@@ -83,12 +83,12 @@ def solve_components(position_graph:nx.DiGraph, final_candidates:list):
     for p in paths:
         candidate_offsets = generate_candicate_stats(p, position_graph)                
         
-        for k, offset, offset_end in candidate_offsets:
+        for (db_id, db_candidate), offset, offset_end in candidate_offsets:
             start, _ = p[offset]
             end, _ = p[offset_end - 1]
             end += 1
             _, db_path = zip(*p[offset:offset_end])
-            final_candidates.append([start, end, db_path, k])
+            final_candidates.append([start, end, db_path, db_id, db_candidate])
 
 
 def generate_candicate_stats(path, position_graph:nx.DiGraph):
@@ -120,5 +120,5 @@ def solve_singleton(graph:nx.DiGraph, node, final_candidates:list):
     candidates = node_attr['paths']
     start, db_token = node
     
-    for c in candidates:
-        final_candidates.append([start, start + 1, (db_token,), c])
+    for (db_id, db_path) in candidates:
+        final_candidates.append([start, start + 1, (db_token,), db_id, db_path])
