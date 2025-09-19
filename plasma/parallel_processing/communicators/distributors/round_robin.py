@@ -15,6 +15,7 @@ class RoundRobin(Distributor):
         while is_pushing:
             try:
                 queues[self._counters].put(data)
+                is_pushing = False
             except Full:
                 print('load balancing')
             finally:
