@@ -77,8 +77,9 @@ class Timer:
             with self:
                 results = func(*args, **kwargs)
             
-            timeio = TimeIO(name, Counter(self.start, self.end, self.duration), args, kwargs)
-            self.log_func(timeio)
+            if self.log_func is not None:
+                timeio = TimeIO(name, Counter(self.start, self.end, self.duration), args, kwargs)
+                self.log_func(timeio)
             return results
         
         return timed_func
