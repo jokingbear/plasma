@@ -27,6 +27,9 @@ class auto_map_func(proxy_func):
             return self.func()
         else:
             return self.func(inputs)
+    
+    def __repr__(self):
+        return repr(self.func)
 
 
 class partials(proxy_func):
