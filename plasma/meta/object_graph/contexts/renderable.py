@@ -1,4 +1,5 @@
 import typing
+import re
 
 from .factorial import FactorialContext
 from ..types import Node
@@ -17,6 +18,7 @@ class RenderableContext(FactorialContext):
                 _render_node(self.graph, self.name, n, '  ', lines, rendered)
                 lines.append('-' * 42)
         text = '\n'.join(lines)
+        text = re.sub(r'Callable(\[.*?\])', r'F\1', text)
         return text
 
 
