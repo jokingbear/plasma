@@ -85,8 +85,7 @@ def generate_candidates_from_path(position_graph:nx.DiGraph, path):
 def combine(position_graph:nx.DiGraph, path_data:list):
     data = pd.DataFrame(path_data, columns=['db_index', 'db_candidate', 'start', 'end', 'db_path'])
     
-    with Timer():
-        data['matching_score'] = [hmean([position_graph.nodes[n]['score'] for n in  zip(range(start, end), db_path)])
-                                  for start, end, db_path in data[['start', 'end', 'db_path']].itertuples(index=False)]
+    data['matching_score'] = [hmean([position_graph.nodes[n]['score'] for n in  zip(range(start, end), db_path)]) 
+                              for start, end, db_path in data[['start', 'end', 'db_path']].itertuples(index=False)]
 
     return data
