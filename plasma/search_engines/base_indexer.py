@@ -7,6 +7,9 @@ from .regex_tokenizer import RegexTokenizer
 from .token_matcher2 import TokenMatcher
 from .token_graph import TokenGraph
 from scipy.stats import hmean
+from ..parallel_processing.communicators import AsyncFlow, Accumulator
+from ..parallel_processing.queues import ProcessQueue, TransferQueue
+from .candidate_generator import generate_candidates_async, generate_candidates
 
 
 class BaseIndexer(TokenGraph, F.AutoPipe):
@@ -55,70 +58,3 @@ def build_position_graph(db_graph:nx.DiGraph, token_matching_data:pd.DataFrame):
                 position_graph.add_edge((o, otk), (next_o, ntk))
 
     return position_graph
-
-
-def generate_candidates(position_graph:nx.DiGraph):
-    final_candidates = []
-    scores = pd.Series({n:score for n, score in position_graph.nodes(data='score')})
-    for c in nx.connected_components(position_graph.to_undirected()):
-        if len(c) > 1:
-            sub_position_graph:nx.DiGraph = position_graph.subgraph(c)
-            solve_components(sub_position_graph, final_candidates)
-        else:
-            node, = list(c)
-            solve_singleton(position_graph, node, final_candidates)
-
-    final_candidates = pd.DataFrame(final_candidates, columns=['start', 'end', 'db_path', 'db_index','db_candidate'])
-    candidate_scores = [hmean(scores.loc[zip(range(start, end), db_path)]) 
-                        for start, end, db_path in final_candidates[['start', 'end', 'db_path']].itertuples(index=False)]
-    final_candidates['matching_score'] = candidate_scores
-    return final_candidates
-
-
-def solve_components(position_graph:nx.DiGraph, final_candidates:list):
-    roots = [n for n in position_graph if position_graph.in_degree(n) == 0]
-    leaves = [n for n in position_graph if position_graph.out_degree(n) == 0]
-    paths = iter.chain(*[nx.all_simple_paths(position_graph, r, leaves) for r in roots])
-    
-    for p in paths:
-        candidate_offsets = generate_candicate_stats(p, position_graph)                
-        
-        for (db_id, db_candidate), offset, offset_end in candidate_offsets:
-            start, _ = p[offset]
-            end, _ = p[offset_end - 1]
-            end += 1
-            _, db_path = zip(*p[offset:offset_end])
-            final_candidates.append([start, end, db_path, db_id, db_candidate])
-
-
-def generate_candicate_stats(path, position_graph:nx.DiGraph):
-    candidate_offsets = []
-    
-    candidates = set()
-    current_start = 0            
-    for i, n in enumerate(path):
-        current_node_paths:set = position_graph.nodes[n]['paths']
-        new_candidates = candidates.intersection(current_node_paths)
-        
-        if len(new_candidates) == 0:
-            for c in candidates:
-                candidate_offsets.append([c, current_start, i])
-            candidates = current_node_paths
-            current_start = i
-        else:
-            candidates = new_candidates
-            
-            if i + 1 == len(path):
-                for c in candidates:
-                    candidate_offsets.append([c, current_start, i + 1])
-
-    return candidate_offsets
-
-
-def solve_singleton(graph:nx.DiGraph, node, final_candidates:list):
-    node_attr = graph.nodes[node]
-    candidates = node_attr['paths']
-    start, db_token = node
-    
-    for (db_id, db_path) in candidates:
-        final_candidates.append([start, start + 1, (db_token,), db_id, db_path])
