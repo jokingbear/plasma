@@ -3,8 +3,6 @@ import datetime
 
 from functools import wraps
 from dataclasses import dataclass
-from warnings import warn
-from ..functional import State, AutoPipe
 from typing import Callable
 
 
@@ -27,7 +25,7 @@ class Timer:
 
     IO = TimeIO
 
-    def __init__(self, log_func=None) -> None:
+    def __init__(self, log_func:Callable[[TimeIO], None]=None) -> None:
         self.log_func = log_func
         self._start = None
         self._end = None
