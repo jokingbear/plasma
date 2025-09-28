@@ -25,8 +25,9 @@ class Timer:
 
     IO = TimeIO
 
-    def __init__(self, log_func:Callable[[TimeIO], None]=None) -> None:
+    def __init__(self, log_func:Callable[[TimeIO], None]=None, name=None) -> None:
         self.log_func = log_func
+        self.name = name
         self._start = None
         self._end = None
 
@@ -38,7 +39,8 @@ class Timer:
     def __exit__(self, *_):
         self._end = time.time()
         if self.log_func is None:
-            print(self.duration)
+            name = self.name or ''
+            print(name, self.duration)
 
     @property
     def duration(self):
