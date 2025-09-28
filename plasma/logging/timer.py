@@ -17,8 +17,6 @@ class Counter:
 class TimeIO:
     name:str
     timer: Counter
-    args:list
-    kwargs:dict
 
 
 class Timer:
