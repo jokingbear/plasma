@@ -38,9 +38,10 @@ class Timer:
 
     def __exit__(self, *_):
         self._end = time.time()
-        if self.log_func is None:
-            name = self.name or ''
-            print(name, self.duration)
+        name = self.name or ''
+        timeio = TimeIO(name, Counter(self.start, self.end, self.duration))
+        log_func = self.log_func or print
+        log_func(timeio)
 
     @property
     def duration(self):
@@ -71,15 +72,13 @@ class Timer:
 
     def __call__(self, func):
         name = func.__qualname__
+        self.name = name
         
         @wraps(func)
         def timed_func(*args, **kwargs):
             with self:
                 results = func(*args, **kwargs)
-            
-            if self.log_func is not None:
-                timeio = TimeIO(name, Counter(self.start, self.end, self.duration), args, kwargs)
-                self.log_func(timeio)
+
             return results
         
         return timed_func
