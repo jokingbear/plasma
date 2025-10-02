@@ -1,5 +1,9 @@
+from warnings import deprecated, warn
+
+
+@deprecated('this method will be removed')
 def as_tuple(cls):
-    
+
     def __iter__(self):
         class_dict:dict = type(self).__dict__
         instance_dict:dict = self.__dict__
