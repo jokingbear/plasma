@@ -1,10 +1,10 @@
 import time
 import multiprocessing as mp
 
-from ...functional import State
+from ....functional import State
 from tqdm.auto import tqdm
 from multiprocessing.managers import ValueProxy
-from ..queues import Signal
+from ...queues import Signal
 
 
 class Accumulator(State):
