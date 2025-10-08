@@ -2,9 +2,9 @@ from .base import BaseDataset
 from functools import cached_property
 
 
-class ChainDataset(BaseDataset):
+class ChainDataset[T](BaseDataset[T]):
 
-    def __init__(self, *datasets:BaseDataset):
+    def __init__(self, *datasets:BaseDataset[T]):
         super().__init__()
 
         self.datasets = datasets

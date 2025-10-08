@@ -4,7 +4,7 @@ from torch.utils import data
 from torch.utils.data import RandomSampler, SequentialSampler, DistributedSampler
 
 
-class BaseDataset(data.Dataset):
+class BaseDataset[T](data.Dataset):
 
     def __len__(self):
         return self.get_len()
@@ -12,14 +12,11 @@ class BaseDataset(data.Dataset):
     def __getitem__(self, idx):
         return self.get_item(idx)
 
-    @abstractmethod
     def get_len(self):
         return 0
 
-    @abstractmethod
-    def get_item(self, idx):
-        return idx
-
+    def get_item(self, idx) -> T:...
+    
     def get_torch_loader(self, 
         batch_size=32, 
         workers=20, 

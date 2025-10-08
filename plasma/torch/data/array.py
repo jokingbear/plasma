@@ -1,12 +1,11 @@
 import pandas as pd
 
-from abc import abstractmethod
-from .sample_base import SampleBase
+from .sample import SampleBase
 
 
-class DynamicDataset(SampleBase):
+class DynamicDataset[V, T](SampleBase[T]):
 
-    def __init__(self, data) -> None:
+    def __init__(self, data:list[V]) -> None:
         super().__init__()
 
         self._data = data
@@ -25,6 +24,4 @@ class DynamicDataset(SampleBase):
         else:
             return data[idx]
 
-    @abstractmethod
-    def process_item(self, item):
-        pass
+    def process_item(self, item:V) -> T:...

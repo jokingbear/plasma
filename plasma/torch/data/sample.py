@@ -4,7 +4,7 @@ import numpy as np
 from .base import BaseDataset
 
 
-class SampleBase(BaseDataset):
+class SampleBase[T](BaseDataset[T]):
     
     def sample(self, num_sample, replace=False, seed=None):
         np.random.seed(seed)
@@ -12,16 +12,17 @@ class SampleBase(BaseDataset):
         return SampledDataset(self, indices)
 
 
-class SampledDataset(SampleBase):
+class SampledDataset[T](SampleBase[T]):
     
-    def __init__(self, original:SampleBase, indices):
+    def __init__(self, original:SampleBase[T], indices):
         super().__init__()
         
         self.original = original
         self.indices = indices
     
     def get_item(self, idx):
-        return self.original[self.indices[idx]]
+        idx = self.indices[idx]
+        return self.original[idx]
     
     def get_len(self):
         return len(self.indices)
