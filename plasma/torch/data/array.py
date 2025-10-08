@@ -1,10 +1,10 @@
 import pandas as pd
 
-from .base import BaseDataset
 from abc import abstractmethod
+from .sample_base import SampleBase
 
 
-class DynamicDataset(BaseDataset):
+class DynamicDataset(SampleBase):
 
     def __init__(self, data) -> None:
         super().__init__()

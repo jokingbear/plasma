@@ -1,9 +1,9 @@
 import pandas as pd
 
-from .base import BaseDataset
+from .sample_base import SampleBase
 
 
-class AdhocData(BaseDataset):
+class AdhocData(SampleBase):
 
     def __init__(self, arr, mapping, kwargs=None):
         super().__init__()
