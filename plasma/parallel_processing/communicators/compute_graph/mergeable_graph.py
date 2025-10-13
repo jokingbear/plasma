@@ -18,6 +18,10 @@ class MergeableGraph(ReadableGraph):
         
         return super().chain(*simple_chains)
 
+    def merge(self, graph:ReadableGraph):
+        new_structures = nx.compose(self._structures, graph)
+        self._structures = new_structures
+
 
 def validate_chains(chains:list[tuple]):
     try:

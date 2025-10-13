@@ -1,11 +1,12 @@
 import pandas as pd
 
-from .base import BaseDataset
+from .sample import SampleBase
+from typing import Callable
 
 
-class AdhocData(BaseDataset):
+class AdhocData[V, T](SampleBase[T]):
 
-    def __init__(self, arr, mapping, kwargs=None):
+    def __init__(self, arr:list[V], mapping:Callable[[V], T], kwargs:dict=None):
         super().__init__()
 
         self.source = arr
