@@ -1,9 +1,9 @@
 import typing
 
-from .tuple_pipe import TuplePipe
+from .pipe import AutoPipe
 
 
-class BaseConfigs(TuplePipe):
+class BaseConfigs(AutoPipe):
 
     def __init__(self):
         super().__init__()
