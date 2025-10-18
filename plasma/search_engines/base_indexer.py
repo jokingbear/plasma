@@ -6,10 +6,7 @@ import itertools as iter
 from .regex_tokenizer import RegexTokenizer
 from .token_matcher2 import TokenMatcher
 from .token_graph import TokenGraph
-from scipy.stats import hmean
-from ..parallel_processing.communicators import AsyncFlow, Accumulator
-from ..parallel_processing.queues import ProcessQueue, TransferQueue
-from .candidate_generator import generate_candidates_async, generate_candidates
+from .candidate_generator import generate_candidates
 
 
 class BaseIndexer(TokenGraph, F.AutoPipe):
