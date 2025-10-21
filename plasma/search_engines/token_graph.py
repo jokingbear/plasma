@@ -26,7 +26,7 @@ def tokenize_data(data:list[str], tokenizer:RegexTokenizer):
         path = tuple(token_frame['token'].tolist())
         insert_path(graph, pid, path)
         path_data.append([txt, path])
-        path_token_maps[path] = token_frame
+        path_token_maps[pid] = token_frame
         
     return pd.DataFrame(path_data, columns=['text', 'path']), path_token_maps, graph
     

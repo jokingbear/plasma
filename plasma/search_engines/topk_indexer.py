@@ -17,10 +17,10 @@ class TopkIndexer(OverlapFilterIndexer):
         results = super().run(query)
         
         # find matching block in db path
-        db_matches = results[['db_path', 'db_candidate']].itertuples(index=False)
+        db_matches = results[['db_path', 'db_index']].itertuples(index=False)
         matches = pd.DataFrame(
-                    [find_match(self._path_token_maps, db_path, db_candidate) 
-                    for db_path, db_candidate in db_matches],
+                    [find_match(self._path_token_maps, self._data['path'], db_path, db_index) 
+                    for db_path, db_index in db_matches],
                     columns=['text_start', 'text_end', 'matched_len']
                 )
         results = pd.concat([results, matches], axis=1)
@@ -41,10 +41,11 @@ class TopkIndexer(OverlapFilterIndexer):
         return results
 
 
-def find_match(path_token_maps:dict[tuple, pd.DataFrame], db_path, db_candidate):
+def find_match(path_token_maps:dict[int, pd.DataFrame], db_candidates:pd.Series, db_path, db_index):
+    db_candidate = db_candidates.iloc[db_index]
     _, offset, size = difflib.SequenceMatcher(None, db_path, db_candidate).find_longest_match()
-    start = path_token_maps[db_candidate].iloc[offset]['start_idx']
-    end = path_token_maps[db_candidate].iloc[offset + size - 1]['end_idx'] 
+    start = path_token_maps[db_index].iloc[offset]['start_idx']
+    end = path_token_maps[db_index].iloc[offset + size - 1]['end_idx'] 
     
     return start, end, size
 
