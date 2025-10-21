@@ -19,7 +19,7 @@ class TopkIndexer(OverlapFilterIndexer):
         # find matching block in db path
         db_matches = results[['db_path', 'db_candidate']].itertuples(index=False)
         matches = pd.DataFrame(
-                    [find_match(self._tokenized_offsets, db_path, db_candidate) 
+                    [find_match(self._path_token_maps, db_path, db_candidate) 
                     for db_path, db_candidate in db_matches],
                     columns=['text_start', 'text_end', 'matched_len']
                 )
@@ -41,11 +41,10 @@ class TopkIndexer(OverlapFilterIndexer):
         return results
 
 
-def find_match(tokenized_offsets:dict[tuple, pd.DataFrame], db_path, db_candidate):
-    
+def find_match(path_token_maps:dict[tuple, pd.DataFrame], db_path, db_candidate):
     _, offset, size = difflib.SequenceMatcher(None, db_path, db_candidate).find_longest_match()
-    start = tokenized_offsets[db_candidate].iloc[offset]['start_idx']
-    end = tokenized_offsets[db_candidate].iloc[offset + size - 1]['end_idx'] 
+    start = path_token_maps[db_candidate].iloc[offset]['start_idx']
+    end = path_token_maps[db_candidate].iloc[offset + size - 1]['end_idx'] 
     
     return start, end, size
 

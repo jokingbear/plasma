@@ -11,34 +11,29 @@ class TokenGraph:
         
         self.tokenizer = tokenizer
 
-        tokenized_data, tokenized_offsets = tokenize_data(data, tokenizer)
-        graph = build_graph(tokenized_data)
+        tokenized_data, tokenized_offsets, graph = tokenize_data(data, tokenizer)
         self._data = tokenized_data
-        self._tokenized_offsets = tokenized_offsets
+        self._path_token_maps = tokenized_offsets
         self._graph = graph
 
 
 def tokenize_data(data:list[str], tokenizer:RegexTokenizer):
-    tokenized_offsets = {}
-    tokenized_data = []
-    for i, txt in enumerate(data):
+    path_token_maps = {}
+    path_data = []
+    graph = nx.DiGraph()
+    for pid, txt in enumerate(data):
         token_frame = tokenizer.run(txt.lower())
         path = tuple(token_frame['token'].tolist())
-        tokenized_data.append([i, txt, path])
-        tokenized_offsets[path] = token_frame
-    
-    return pd.DataFrame(tokenized_data, columns=['data_index', 'text', 'path']), tokenized_offsets
-    
-
-def build_graph(tokenized_data:pd.DataFrame):
-    graph = nx.DiGraph()
-    
-    for i, path in enumerate(tokenized_data['path']):
-        nx.add_path(graph, path)
+        insert_path(graph, pid, path)
+        path_data.append([txt, path])
+        path_token_maps[path] = token_frame
         
-        for tk in path:
-            paths:set = graph.nodes[tk].get('paths', set())
-            paths.add((i, path))
-            graph.add_node(tk, paths=paths)
+    return pd.DataFrame(path_data, columns=['text', 'path']), path_token_maps, graph
+    
 
-    return graph
+def insert_path(graph:nx.DiGraph, path_id, path:list):
+    for start, end in zip(path[:-1], path[1:]):
+        graph.add_edge(start, end)
+        paths:set = graph.edges[start, end].get('path_args', set())
+        paths.add(path_id)
+        graph.edges[start, end]['path_args'] = paths
