@@ -3,9 +3,9 @@ import pandas as pd
 import networkx as nx
 import itertools as iter
 
-from .regex_tokenizer import RegexTokenizer
-from .token_matcher2 import TokenMatcher
-from .token_graph import TokenGraph
+from ..regex_tokenizer import RegexTokenizer
+from ..token_matcher import TokenMatcher
+from ..token_graph import TokenGraph
 from .candidate_generator import generate_candidates
 
 
@@ -39,10 +39,10 @@ class BaseIndexer(TokenGraph, F.AutoPipe):
             path_candidate_data = pd.concat([path_candidate_data, matched_singletons], axis=0, ignore_index=True)
         
         path_candidate_data['db_candidate'] = self._data.iloc[path_candidate_data['db_index'].values]['path'].values
-        path_candidate_data['query_start_idx'] = token_data.iloc[path_candidate_data['start'].values]['start_idx'].values
-        path_candidate_data['query_end_idx'] = token_data.iloc[path_candidate_data['end'].values - 1]['end_idx'].values
+        # path_candidate_data['query_start_idx'] = token_data.iloc[path_candidate_data['start'].values]['start_idx'].values
+        # path_candidate_data['query_end_idx'] = token_data.iloc[path_candidate_data['end'].values - 1]['end_idx'].values
         
-        columns = ['query_start_idx', 'query_end_idx', 'db_path', 'db_index', 'db_candidate', 'matching_score']
+        columns = ['start', 'end', 'db_path', 'db_index', 'db_candidate', 'matching_score']
         return path_candidate_data[columns]
 
 

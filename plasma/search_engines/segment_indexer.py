@@ -1,10 +1,10 @@
 import pandas as pd
 
-from .topk_indexer import TopkIndexer
+from .indexer import StandardizedIndexer
 from .regex_tokenizer import RegexTokenizer
 
 
-class SegmentIndexer(TopkIndexer):
+class SegmentIndexer(StandardizedIndexer):
     
     def __init__(self, data, group_splitter=r'([^\.\n]+)', tokenizer=r'(\w+)', 
                  token_threshold=0.7, topk=5):
@@ -30,12 +30,7 @@ class SegmentIndexer(TopkIndexer):
                 results.append(search_results)
         
         if len(results) > 0:
-            results = pd.concat(results, axis=0).rename(columns={
-                'text': 'original',
-                'text_start': 'original_start',
-                'text_end': 'original_end',
-                'matching_score': 'substring_matching_score'
-            })
+            results = pd.concat(results, axis=0)
         else:
             columns = [
                 'query_start_idx', 'query_end_idx', 
