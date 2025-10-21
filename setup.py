@@ -10,7 +10,7 @@ with open('requirements.txt', 'r') as handler:
 
 setup(
     name='plasma',
-    version='3.1.9dev0',
+    version='3.1.9dev1',
     packages=['plasma', *packages],
     url='https://github.com/jokingbear/research-idea',
     license='MIT',
