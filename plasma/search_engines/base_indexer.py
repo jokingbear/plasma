@@ -17,15 +17,27 @@ class BaseIndexer(TokenGraph, F.AutoPipe):
         TokenGraph.__init__(self, data, tokenizer)
         
         self.token_matcher = TokenMatcher(self._graph, token_threshold)
+        
+        singletons = self._data[self._data['path'].map(len) < 3].copy()
+        singletons['db_token'] = singletons['path']
+        singletons = singletons.explode('db_token')
+        singletons = singletons[['db_token']]
+        self._singletons = singletons
 
     def run(self, query:str):
         query = query.lower()
         token_data = self.tokenizer.run(query)
         q2db_token_maps = self.token_matcher.run(token_data['token'])
         
+        matched_singletons = match_singletons(q2db_token_maps, self._singletons)
+        
         subgraph = self._graph.subgraph(q2db_token_maps['db_token'])
         position_graph = build_position_graph(subgraph, q2db_token_maps)
         path_candidate_data  = generate_candidates(position_graph)
+        
+        if len(matched_singletons) > 0:
+            path_candidate_data = pd.concat([path_candidate_data, matched_singletons], axis=0, ignore_index=True)
+        
         path_candidate_data['db_candidate'] = self._data.iloc[path_candidate_data['db_index'].values]['path'].values
         path_candidate_data['query_start_idx'] = token_data.iloc[path_candidate_data['start'].values]['start_idx'].values
         path_candidate_data['query_end_idx'] = token_data.iloc[path_candidate_data['end'].values - 1]['end_idx'].values
@@ -55,3 +67,14 @@ def build_position_graph(db_graph:nx.DiGraph, q2db_token_maps:pd.DataFrame):
                 position_graph.add_edge((o, ctk), (next_o, ntk), path_args=path_args)
 
     return position_graph
+
+
+def match_singletons(q2db_token_maps:pd.DataFrame, singletons:pd.DataFrame):
+    singletons = singletons.reset_index().rename(columns={'index': 'db_index'})
+    matched_singletons = q2db_token_maps.reset_index()\
+                            .rename(columns={'offset':'start', 'score': 'matching_score'})\
+                                .merge(singletons, on='db_token')\
+
+    matched_singletons['end'] = matched_singletons['start'] + 1
+    matched_singletons['db_path'] = matched_singletons['db_token'].apply(lambda tk: (tk,))
+    return matched_singletons[['db_index', 'start', 'end', 'db_path', 'matching_score']]

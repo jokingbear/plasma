@@ -32,6 +32,9 @@ def tokenize_data(data:list[str], tokenizer:RegexTokenizer):
     
 
 def insert_path(graph:nx.DiGraph, path_id, path:list):
+    for n in path:
+        graph.add_node(n)
+
     for start, end in zip(path[:-1], path[1:]):
         graph.add_edge(start, end)
         paths:set = graph.edges[start, end].get('path_args', set())

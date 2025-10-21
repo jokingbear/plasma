@@ -41,9 +41,9 @@ class TopkIndexer(OverlapFilterIndexer):
         return results
 
 
-def find_match(path_token_maps:dict[int, pd.DataFrame], db_candidates:pd.Series, db_path, db_index):
-    db_candidate = db_candidates.iloc[db_index]
-    _, offset, size = difflib.SequenceMatcher(None, db_path, db_candidate).find_longest_match()
+def find_match(path_token_maps:dict[int, pd.DataFrame], db_path_candidates:pd.Series, db_path, db_index):
+    db_path_candidate = db_path_candidates.iloc[db_index]
+    _, offset, size = difflib.SequenceMatcher(None, db_path, db_path_candidate).find_longest_match()
     start = path_token_maps[db_index].iloc[offset]['start_idx']
     end = path_token_maps[db_index].iloc[offset + size - 1]['end_idx'] 
     
