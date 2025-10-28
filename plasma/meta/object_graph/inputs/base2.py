@@ -15,7 +15,7 @@ class Inputs:
                 setattr(self, k, data[k])
         
         for func, regs in func2reg_maps.items():
-            Registrator.init(self, func, regs)
+            init(self, func, regs)
     
     def __init_subclass__(cls):
         for k, v in cls.__annotations__.items():
