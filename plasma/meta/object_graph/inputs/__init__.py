@@ -1,2 +1,2 @@
 from .renderable import RenderableInputs as Inputs
-from .base2 import Registrator
+from .base2 import Initiable

@@ -1,9 +1,9 @@
 class Inputs:
     
     def __init__(self, data:dict={}):
-        func2reg_maps = dict[object, list[Registrator]]()
+        func2reg_maps = dict[object, list[Initiable]]()
         for k, t in self.__annotations__.items():
-            if t is Registrator:
+            if t is Initiable:
                 registrator = getattr(self, k)
                 if registrator.init_func not in func2reg_maps:
                     func2reg_maps[registrator.init_func] = []
@@ -19,7 +19,7 @@ class Inputs:
     
     def __init_subclass__(cls):
         for k, v in cls.__annotations__.items():
-            if v is Registrator:
+            if v is Initiable:
                 setattr(cls, k, v(cls, k))
     
     def to_dict(self):
@@ -35,7 +35,7 @@ class Inputs:
         return results
 
 
-class Registrator:
+class Initiable:
 
     def __init__(self, input_cls, key):
         self.cls = input_cls
@@ -67,7 +67,7 @@ class Registrator:
         return init_func
 
 
-def init(obj, func, registrators:list[Registrator]):
+def init(obj, func, registrators:list[Initiable]):
     props = func(obj)
     if len(registrators) == 1:
         registrators[0]._value = props
