@@ -8,5 +8,5 @@ class AutoPipe(ReadableClass):
     def run(self, *inputs, **kwargs):
         pass
     
-    def __init_subclass__(cls):
-        cls.__call__ = cls.run
+    def __call__(self, *args, **kwds):
+        return self.run(*args, **kwds)
