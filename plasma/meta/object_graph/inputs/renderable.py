@@ -7,7 +7,7 @@ class RenderableInputs(Inputs):
     
     def to_dict(self):
         results = {}
-        for k in self.__annotations__:
+        for k in type(self).__annotations__:
             if hasattr(self, k):
                 value = getattr(self, k)
                 if isinstance(value, Inputs):

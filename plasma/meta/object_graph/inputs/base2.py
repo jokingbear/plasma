@@ -2,7 +2,7 @@ class Inputs:
     
     def __init__(self, data:dict={}):
         func2reg_maps = dict[object, list[Initiable]]()
-        for k, t in self.__annotations__.items():
+        for k, t in type(self).__annotations__.items():
             if t is Initiable:
                 registrator = getattr(self, k)
                 if registrator.init_func not in func2reg_maps:
