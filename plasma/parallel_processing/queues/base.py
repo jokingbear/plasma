@@ -26,12 +26,10 @@ class Queue[T](State):
         return self
         
     @abstractmethod
-    def _init_state(self) -> T:
-        pass
+    def _init_state(self) -> T:...
 
     @abstractmethod
-    def put(self, x):
-        pass
+    def put(self, x):...
 
     def register_callback(self, callback):
         assert not self._running,\

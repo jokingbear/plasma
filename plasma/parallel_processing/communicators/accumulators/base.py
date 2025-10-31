@@ -7,7 +7,7 @@ from multiprocessing.managers import ValueProxy
 from ...queues import Signal
 
 
-class Accumulator(State):
+class Accumulator[D, A](State):
 
     def __init__(self, total:int, sleep=1e-2, process_base=False, ignore_none=True, count_none=True):
         super().__init__()
@@ -76,8 +76,8 @@ class Accumulator(State):
         else:
             self._finished.value += 1
 
-    def aggregate(self, data):
+    def aggregate(self, data:D):
         self._results.append(data)
     
-    def finalize(self):
+    def finalize(self) -> A:
         return self._results

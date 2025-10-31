@@ -4,6 +4,7 @@ from ...functional import State, partials, proxy_func, Identity
 from ..queues import Queue
 from .distributors import Distributor, UniformDistributor
 from ._proxy import ProxyIO
+from warnings import warn
 
 
 class TreeFlow(State):
@@ -11,6 +12,7 @@ class TreeFlow(State):
     def __init__(self):
         super().__init__()
 
+        warn('this class will be removed in the future, please use AsyncFlow')    
         self._module_graph = nx.DiGraph()
         self._running = False
 

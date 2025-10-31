@@ -1,7 +1,7 @@
 import yaml
 import json
 
-from .base import Inputs
+from .base2 import Inputs
 from pathlib import Path
 
 
