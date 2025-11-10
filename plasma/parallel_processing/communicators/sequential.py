@@ -1,10 +1,11 @@
 from ..queues import Queue
 from .tree2 import TreeFlow
-from warnings import warn
+from warnings import warn, deprecated
 from .distributors import Distributor
 from ._proxy import ProxyIO
 
 
+@deprecated('this class is deprecated, use Async Flow instead')
 class Sequential(TreeFlow):
 
     def registerIOs(self, **blocks:Queue|tuple[Queue, Distributor]):
