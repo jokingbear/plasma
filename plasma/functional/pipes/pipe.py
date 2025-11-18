@@ -27,7 +27,16 @@ def render_params(signature:inspect.Signature):
     params = []
     for p in signature.parameters.values():
         if p.name != 'self':
-            params.append(f'{p.name}:{render_annotation(p.annotation)}')
+            annotation = p.annotation.__name__ if p.annotation is not inspect._empty else 'Any'
+            name = p.name
+            match p.kind:
+                case inspect._ParameterKind.VAR_POSITIONAL: name = '*' + name
+                case inspect._ParameterKind.VAR_KEYWORD: name = '**' + name
+
+            default_val = ''
+            if p.default is not inspect._empty:
+                default_val = f'={type(p.default).__name__}'
+            params.append(f'{name}:{annotation}{default_val}')
     
     return params
 
