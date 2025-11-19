@@ -14,13 +14,18 @@ class AutoPipe(ReadableClass):
 
     def __repr__(self):
         class_repr = super().__repr__()
+        func_signature = self.signature()
         
-        signature = inspect.signature(self.run)
+        return f'{class_repr}: {func_signature}'
+
+    @classmethod
+    def signature(cls):
+        signature = inspect.signature(cls.run)
         params = render_params(signature)
         params = ', '.join(params)
         return_signature = render_annotation(signature.return_annotation)
         
-        return f'{class_repr}:F[[{params}], {return_signature}]'
+        return f'({params}) -> {return_signature}'
 
 
 def render_params(signature:inspect.Signature):
