@@ -15,8 +15,7 @@ class proxy_func(ABC):
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         pass
 
-
-class auto_map_func(proxy_func):
+class auto_map(proxy_func):
 
     def __call__(self, inputs):
         if isinstance(inputs, (tuple, list)):

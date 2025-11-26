@@ -1,6 +1,6 @@
 from ..communicators import AsyncFlow
 from ..queues import Queue
-from ...functional import AutoPipe, auto_map_func
+from ...functional import AutoPipe, auto_map
 from ..communicators.accumulators import DynamicAccumulator
 from typing import Callable
 
@@ -12,7 +12,7 @@ class Pool:
                 **global_vars
         ):        
         runner = FuncRunner(global_vars)
-        runner = auto_map_func(runner)
+        runner = auto_map(runner)
         accumalator = Accumulator()
         
         flow = AsyncFlow().chain(
