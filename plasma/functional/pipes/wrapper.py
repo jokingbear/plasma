@@ -1,6 +1,5 @@
-from .pipe import AutoPipe
+from .pipe import AutoPipe, Signature
 from typing import Callable, Any
-from ..signature import Signature
 
 
 class Wrapper[T](AutoPipe):
