@@ -3,7 +3,7 @@ import networkx as nx
 from .adaptable_graph import AdaptableGraph
 from ...queues import Queue
 from ..distributors import UniformDistributor
-from ....functional import proxy_func, AutoPipe
+from ....functional import proxy_func, AutoPipe, Signature
 
 
 class ReadableGraph(AdaptableGraph):
@@ -34,9 +34,9 @@ class ReadableGraph(AdaptableGraph):
             obj = node_attributes['object']
             
             if isinstance(obj, AutoPipe):
-                name = f'{type(obj).__name__}[{obj.signature()}]'
+                name = f'{type(obj).__name__}[{Signature(obj)}]'
             else:
-                name = f'{obj}'
+                name = f'{obj.__qualname__}{Signature(obj)}'
 
             line = f'{name}(id={key})'
             distributor = node_attributes['distributor']
