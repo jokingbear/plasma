@@ -3,7 +3,7 @@ import networkx as nx
 from .adaptable_graph import AdaptableGraph
 from ...queues import Queue
 from ..distributors import UniformDistributor
-from ....functional import _proxy_func, AutoPipe, Signature
+from ....functional import AutoPipe, Signature
 
 
 class ReadableGraph(AdaptableGraph):
