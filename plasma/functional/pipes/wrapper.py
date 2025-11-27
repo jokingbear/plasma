@@ -25,3 +25,6 @@ class Wrapper[T](AutoPipe):
         
         input_rep = ', '.join(str(i) for i in signature.inputs)
         return f'{type_name}(*meta, {method_name}({input_rep}))->tuple[*meta, {signature.outputs.__name__}]'
+
+    def type_repr(self):
+        return repr(self)
