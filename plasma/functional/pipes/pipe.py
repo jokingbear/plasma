@@ -15,11 +15,14 @@ class AutoPipe(ReadableClass):
 
     def __repr__(self):
         class_repr = super().__repr__()
-        func_signature = Signature(self)
         type_name = type(self).__name__
-        final_repr = f'{type_name}[{func_signature}]' + class_repr[len(type_name):]
+        final_repr = self.type_repr() + class_repr[len(type_name):]
         return final_repr
 
+    def type_repr(self):
+        func_signature = Signature(self)
+        return f'{type(self).__name__}[{func_signature}]'
+    
 
 class Signature:
     
