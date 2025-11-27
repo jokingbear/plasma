@@ -2,7 +2,7 @@ import warnings
 import networkx as nx
 import inspect
 
-from ..functional import auto_map_func
+from ..functional import auto_map
 
 
 class ObjectFactory[K,V](dict[K, type[V]]):
@@ -39,9 +39,9 @@ class ObjectFactory[K,V](dict[K, type[V]]):
         for k, initiator in self.items():
             if k in mapped_args:
                 if isinstance(initiator, list):
-                    results[k] = [auto_map_func(init)(arg) for init, arg in zip(initiator, mapped_args[k])]
+                    results[k] = [auto_map(init)(arg) for init, arg in zip(initiator, mapped_args[k])]
                 else:
-                    results[k] = auto_map_func(initiator)(mapped_args[k])
+                    results[k] = auto_map(initiator)(mapped_args[k])
 
         return results
 
