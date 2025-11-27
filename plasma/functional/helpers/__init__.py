@@ -1,4 +1,4 @@
-from .utils import partials, auto_map, proxy_func, chain
+from .utils import partials, auto_map, chain
 from warnings import deprecated
 
 

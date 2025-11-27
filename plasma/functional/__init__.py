@@ -1,4 +1,5 @@
-from .helpers import partials, auto_map, proxy_func, chain
+from .helpers import partials, auto_map, chain
 from .pipes import *
 from . import decorators
-from .signature import Signature
+from .pipes.pipe import Signature
+
