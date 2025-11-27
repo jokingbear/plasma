@@ -15,16 +15,9 @@ class Wrapper[T](AutoPipe):
 
     def __repr__(self):
         type_name = type(self).__name__
-        
-        if isinstance(self.func, AutoPipe):
-            method_name = type(self.func).__name__
-            signature = Signature(self.func.run)
-        else:
-            method_name = self.func.__qualname__
-            signature = Signature(self.func)
-        
+        signature = Signature(self.func)
         input_rep = ', '.join(str(i) for i in signature.inputs)
-        return f'{type_name}(*meta, {method_name}({input_rep}))->tuple[*meta, {signature.outputs.__name__}]'
+        return f'{type_name}(*meta, {signature.name}({input_rep}))->tuple[*meta, {signature.outputs.__name__}]'
 
     def type_repr(self):
         return repr(self)
