@@ -1,4 +1,4 @@
-from .pipe import AutoPipe
+from .pipe import AutoPipe, Signature
 from .identity import Identity
 from .lambda_pipe import LambdaPipe
 from .sequential_pipe import SequentialPipe

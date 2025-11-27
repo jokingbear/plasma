@@ -1,6 +1,5 @@
 from typing import Callable
-from ..signature import Signature
-from ..pipes import AutoPipe
+from ..pipes import Signature
 
 
 class proxy_func:
