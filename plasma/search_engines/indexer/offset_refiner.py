@@ -1,7 +1,7 @@
 import difflib
 import pandas as pd
 
-from ...functional import auto_map_func
+from ...functional import auto_map
 from .overlap_filter import OverlapFilterIndexer
 
 
@@ -10,7 +10,7 @@ class OffsetRefiner(OverlapFilterIndexer):
     def run(self, query):
         results = super().run(query)
         
-        block_finder = auto_map_func(find_match_block)
+        block_finder = auto_map(find_match_block)
         matches = [*map(block_finder, results[['start', 'db_path', 'db_candidate']].itertuples(index=False))]
         matches = pd.DataFrame(matches, columns=[
             'start', 'end',

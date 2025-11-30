@@ -1,2 +1,1 @@
-from .utils import automap, propagate
-from .tuples import as_tuple
+from .utils import propagate

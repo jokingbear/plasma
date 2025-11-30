@@ -1,6 +1,6 @@
 import networkx as nx
 
-from ...functional import State, partials, proxy_func, Identity
+from ...functional import State, partials, Identity
 from ..queues import Queue
 from .distributors import Distributor, UniformDistributor
 from ._proxy import ProxyIO
@@ -137,7 +137,7 @@ class TreeFlow(State):
             distributor = self._module_graph.nodes[key]['dist']
             queue:Queue = self._module_graph.nodes[key]['queue']
 
-            if type(block).__name__ == 'function' or isinstance(block, proxy_func):
+            if type(block).__name__ == 'function':
                 name = repr(block)
             else:
                 name = type(block).__name__
