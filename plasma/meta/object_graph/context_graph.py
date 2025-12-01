@@ -1,6 +1,6 @@
 import networkx as nx
 
-from typing import Hashable, overload
+from typing import Hashable
 from .types import Node
 from .links import Link
 
