@@ -4,3 +4,4 @@ from .managed import (
     ContextManager
 )
 from .inputs import Inputs, Initiable
+from .factory import Factory
