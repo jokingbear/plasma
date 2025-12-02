@@ -36,15 +36,24 @@ class ContextGraph:
     def add_edge(self, head:tuple[Hashable, Hashable], tail:tuple[Hashable, Hashable], link=Link.DEPEND_ON):
         self.backend.add_edge(head, tail, type=link)
 
+    def update_node(self, old:tuple[Hashable, Hashable], new:tuple[Hashable, Hashable]):
+        self.backend.update(nodes={old: new})
+    
     # get
     def __getitem__(self, node_id) -> dict:
         return self.backend.nodes[*node_id]
     
-    def merge(self, other):
+    def merge(self, other, overwrite=False):
         assert isinstance(other, ContextGraph)
         current_backend = self.backend
         other_backend = other.backend
-        return ContextGraph(nx.compose(current_backend, other_backend))
+        new_backend = nx.compose(current_backend, other_backend)
+        if overwrite:
+            self.backend = new_backend
+            graph = self
+        else:
+            graph = ContextGraph(new_backend)
+        return graph
     
     @property
     def contexts(self):

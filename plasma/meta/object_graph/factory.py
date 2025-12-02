@@ -1,6 +1,8 @@
 from .context_graph import ContextGraph
 from .types import Node
 from .links import Link
+from pathlib import Path
+from ..utils import get_caller_frame
 
 
 class Factory:
