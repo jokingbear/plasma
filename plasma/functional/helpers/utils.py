@@ -1,5 +1,5 @@
 from typing import Callable
-from ..pipes import Signature
+from ..pipes import Signature, AutoPipe
 
 
 class proxy_func:
@@ -24,13 +24,14 @@ class proxy_func:
         return Signature(self.func)
 
 
-class auto_map(proxy_func):
+class auto_map(AutoPipe):
     
     def __init__(self, func):
+        super().__init__()
         assert not isinstance(func, auto_map)
-        super().__init__(func)
+        self.func = func
 
-    def __call__(self, inputs):
+    def run(self, inputs):
         if isinstance(inputs, (tuple, list)):
             return self.func(*inputs)
         elif isinstance(inputs, dict):
@@ -40,9 +41,12 @@ class auto_map(proxy_func):
         else:
             return self.func(inputs)
     
+    def type_repr(self):
+        signature = Signature(self.func)
+        return f'{signature.name}[automap{signature.inputs}] -> {signature.outputs.__name__}'
+    
     def __repr__(self):
-        signature = self.signature
-        return f'{self.name}[automap{signature.inputs}] -> {signature.outputs.__name__}'
+        return self.type_repr()
 
 
 class partials(proxy_func):
