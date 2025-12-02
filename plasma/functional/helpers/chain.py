@@ -7,7 +7,7 @@ class chain(AutoPipe):
 
     def __init__(self, *funcs:Callable):
         assert len(funcs) > 1, 'need at least 1 func'
-        super().__init__(**{f'pipe_{i}': f for i, f in enumerate(funcs)})
+        super().__init__()
         self.funcs = funcs
     
     def run(self, *args, **kwargs):
