@@ -35,13 +35,16 @@ def render_inputs(signature:inspect.Signature):
 
 
 def render_single_input(name:str, annotation:type, default):
-    annotation_str = render_type(annotation)
+    annotation_str = render_type(annotation, render_any=False)
+    if len(annotation_str) > 0:
+        annotation_str = ':' + annotation_str
+    
     
     default_str = ''
     if default is not inspect._empty:
         default_str = f'={type(default).__name__}'
 
-    return f'{name}:{annotation_str}{default_str}'
+    return f'{name}{annotation_str}{default_str}'
 
 
 def standardize(t:type):
@@ -51,7 +54,7 @@ def standardize(t:type):
         return t
 
 
-def render_type(t:type):
+def render_type(t:type, render_any=True):
     if hasattr(t, '__args__'):
         args = [render_type(a) for a in t.__args__]
         if isinstance(t, UnionType):
@@ -60,5 +63,7 @@ def render_type(t:type):
         else:
             args = ','.join(args)
             return f'{t.__name__}[{args}]'
+    elif t is Any and not render_any:
+        return ''
     else:
         return t.__name__

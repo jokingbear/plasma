@@ -1,27 +1,6 @@
 from typing import Callable
-from ..pipes import Signature, AutoPipe
-
-
-class proxy_func:
-
-    def __init__(self, func):
-        self.func = func
-
-        if hasattr(func, '__qualname__'):
-            self.__qualname__ = func.__qualname__
-
-    @property
-    def name(self):
-        if hasattr(self.func, '__qualname__'):
-            name = self.func.__qualname__
-        else:
-            name = type(self.func)
-        
-        return name
-    
-    @property
-    def signature(self):
-        return Signature(self.func)
+from ..pipes import AutoPipe, SequentialPipe
+from ..signature import Signature
 
 
 class auto_map(AutoPipe):
@@ -41,36 +20,29 @@ class auto_map(AutoPipe):
         else:
             return self.func(inputs)
     
-    def type_repr(self):
-        signature = Signature(self.func)
-        return f'{signature.name}[automap{signature.inputs}] -> {signature.outputs.__name__}'
-    
     def __repr__(self):
-        return self.type_repr()
+        return repr(self.signature())
 
-
-class partials(proxy_func):
-
-    def __init__(self, func, *args, pre_apply_before=True, **kwargs):
-        super().__init__(func)
-        self.args = args
-        self.kwargs = kwargs
-        self.pre_apply_before = pre_apply_before
-
-    def __call__(self, *new_args, **new_kwargs):
-        if self.pre_apply_before:
-            return self.func(*self.args, *new_args, **self.kwargs, **new_kwargs)
+    def signature(self):
+        if isinstance(self.func, AutoPipe):
+            signature = self.func.signature()
         else:
-            return self.func(*new_args, *self.args, **new_kwargs, **self.kwargs)
+            signature = Signature.from_func(self.func)
+
+        return Signature(
+            signature.name,
+            f'automap({signature.inputs})',
+            signature.outputs
+        )
 
 
-class chain:
+class chain(SequentialPipe):
 
     def __init__(self, *funcs:Callable):
         assert len(funcs) > 1, 'need at least 1 func'
-        self.funcs = funcs
+        super().__init__(**{f'pipe_{i}': f for i, f in enumerate(funcs)})
     
-    def __call__(self, *args, **kwargs):
+    def run(self, *args, **kwargs):
         results = self.funcs[0](*args, **kwargs)
         for f in self.funcs[1:]:
             results = f(results)
@@ -78,14 +50,3 @@ class chain:
     
     def chain(self, *funcs:Callable):
         return chain(*self.funcs, *funcs)
-
-    def __repr__(self):
-        lines = []
-        offset = ''
-        for f in self.funcs:
-            signature = Signature(f)
-            inputs_rep = ', '.join(str(i) for i in signature.inputs)
-            lines.append(f'{offset}|->{signature.name}({inputs_rep}) -> {signature.outputs.__name__}')
-            offset += ' ' * 3
-
-        return '\n'.join(lines)[3:]
