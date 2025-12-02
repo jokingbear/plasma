@@ -34,12 +34,11 @@ class ReadableGraph(AdaptableGraph):
             obj = node_attributes['object']
             
             if isinstance(obj, AutoPipe):
-                name = obj.type_repr()
+                signature = obj.signature()
             else:
-                signature = Signature(obj)
-                name = f'{signature.name}{signature}'
+                signature = Signature.from_func(obj)
 
-            line = f'{name}(id={key})'
+            line = f'{signature.name}([({signature.inputs}) -> {signature.outputs}], id={key})'
             distributor = node_attributes['distributor']
             if not isinstance(distributor, UniformDistributor):
                 line = f'{line}-{type(distributor).__name__}'
