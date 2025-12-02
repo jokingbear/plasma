@@ -1,6 +1,7 @@
-from .utils import auto_map, chain
+from .automap import auto_map
 from warnings import deprecated
 from .partials import partials
+from .chain import chain
 
 
 @deprecated('this class is deprecated, use auto_map instead')

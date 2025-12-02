@@ -34,19 +34,3 @@ class auto_map(AutoPipe):
             f'automap({signature.inputs})',
             signature.outputs
         )
-
-
-class chain(SequentialPipe):
-
-    def __init__(self, *funcs:Callable):
-        assert len(funcs) > 1, 'need at least 1 func'
-        super().__init__(**{f'pipe_{i}': f for i, f in enumerate(funcs)})
-    
-    def run(self, *args, **kwargs):
-        results = self.funcs[0](*args, **kwargs)
-        for f in self.funcs[1:]:
-            results = f(results)
-        return results
-    
-    def chain(self, *funcs:Callable):
-        return chain(*self.funcs, *funcs)
