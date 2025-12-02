@@ -1,10 +1,11 @@
-from .pipe import AutoPipe, Signature
+from .pipe import AutoPipe
 from typing import Callable, Any
+from ..signature import Signature
 
 
-class Wrapper[T](AutoPipe):
+class Wrapper(AutoPipe):
     
-    def __init__(self, func:Callable[[T], Any]):
+    def __init__(self, func:Callable):
         super().__init__()
         
         self.func = func
@@ -13,11 +14,18 @@ class Wrapper[T](AutoPipe):
         *meta, data = inputs
         return *meta, self.func(data, **kwargs)
 
-    def __repr__(self):
-        type_name = type(self).__name__
-        signature = Signature(self.func)
-        input_rep = ', '.join(str(i) for i in signature.inputs)
-        return f'{type_name}(*meta, {signature.name}({input_rep}))->tuple[*meta, {signature.outputs.__name__}]'
+    def __repr__(self):        
+        signature = self.signature()
+        return f'{signature.name}({signature.inputs})->{signature.outputs}'
+    
+    def signature(self):
+        if isinstance(self.func, AutoPipe):
+            original_signature = self.func.signature()
+        else:
+            original_signature = Signature.from_func(self.func)
 
-    def type_repr(self):
-        return repr(self)
+        return Signature(
+            type(self).__name__,
+            f'*meta, {original_signature.name}({original_signature.inputs})',
+            f'tuple[*meta, {original_signature.outputs}]'
+        )
