@@ -3,6 +3,7 @@ import inspect
 from typing import Callable, Any, NamedTuple
 from abc import abstractmethod
 from .readable import ReadableClass
+from types import UnionType
 
 
 class AutoPipe(ReadableClass):
@@ -78,9 +79,14 @@ class Inputs(NamedTuple):
     
     def __repr__(self):
         annotation = ''
-        if self.annotation is not Any:
+        if isinstance(self.annotation, UnionType):
+            args = self.annotation.__args__
+            args = [f'{a.__name__}' for a in args]
+            args = '|'.join(args)
+            annotation = f':{args}'
+        elif self.annotation is not Any:
             annotation = f':{self.annotation.__name__}'
-        
+
         default_val = ''
         if self.default is not inspect._empty:
             default_val = f'={type(self.default).__name__}'
