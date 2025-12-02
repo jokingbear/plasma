@@ -1,11 +1,9 @@
-from abc import abstractmethod
 from .readable import ReadableClass
 from ..signature import Signature
 
 
 class AutoPipe(ReadableClass):
 
-    @abstractmethod
     def run(self, *inputs, **kwargs):...
     
     def __call__(self, *args, **kwds):
