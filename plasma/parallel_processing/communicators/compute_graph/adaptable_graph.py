@@ -1,10 +1,10 @@
-from .graph import Graph
+from .chainable_graph import ChainableGraph
 from dataclasses import dataclass
 from ...queues import Queue
 from ..distributors import UniformDistributor, Distributor
 
 
-class AdaptableGraph(Graph):
+class AdaptableGraph(ChainableGraph):
     
     def chain(self, *chains:tuple[Queue, object]|tuple[object, Queue]|tuple[object, object]\
                             |tuple[object, Queue, object]|tuple[object, object, Queue]|tuple[Queue, object, Distributor]\
