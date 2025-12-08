@@ -4,11 +4,12 @@ from queue import Full
 
 class RoundRobin(Distributor):
     
-    def __init__(self, num_workers:int):
+    def __init__(self, num_workers:int, verbose=True):
         super().__init__()
         
         self.num_workers = num_workers
         self._counters = 0
+        self.verbose = verbose
     
     def run(self, data, *queues, **named_queues):
         is_pushing = True
@@ -17,7 +18,7 @@ class RoundRobin(Distributor):
                 queues[self._counters].put(data)
                 is_pushing = False
             except Full:
-                print('load balancing')
+                print('load balancing') if self.verbose else None
             finally:
                 self._counters = (self._counters + 1) % self.num_workers
         
