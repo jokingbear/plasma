@@ -8,11 +8,9 @@ class ChainDataset[T](BaseDataset[T]):
 
         self._arg2dataset = []
         self._arg2arg = []
-        offset = 0
         for d in datasets:
-            self._arg2arg.extend(range(offset, offset + len(d)))
+            self._arg2arg.extend(range(len(d)))
             self._arg2dataset.extend([d] * len(d))
-            offset += len(d)
 
         self.datasets = datasets
     
