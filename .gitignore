@@ -44,3 +44,7 @@ dependencies
 .check*
 
 .*.*
+
+*.lock
+*.python*
+*.egg-info

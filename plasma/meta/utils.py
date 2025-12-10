@@ -49,10 +49,10 @@ def load_entry(cfg: dict):
 
 
 def mass_import(pattern):
-    caller = inspect.stack()[1][0]
-    caller = inspect.getmodule(caller)
+    caller_frame = get_caller_frame()
+    caller = inspect.getmodule(caller_frame.frame)
 
-    path = Path(caller.__file__)
+    path = Path(caller_frame.filename)
     parent_path = path.parent
     if not os.path.exists(f'{parent_path}/__init__.py'):
         raise RuntimeError('mass_import can only be used in packaged folder with __init__ file')
@@ -60,3 +60,8 @@ def mass_import(pattern):
     for p in parent_path.glob(pattern):
         module_name = p.name.replace('.py', '')
         importlib.import_module(f'.{module_name}', caller.__package__)
+
+
+def get_caller_frame():
+    stack = inspect.stack()
+    return stack[2]

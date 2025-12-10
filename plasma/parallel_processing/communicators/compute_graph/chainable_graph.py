@@ -3,9 +3,10 @@ import networkx as nx
 from ....functional import decorators
 from ...queues import Queue
 from ..distributors import Distributor
+from .graph2 import Graph
 
 
-class Graph:
+class ChainableGraph(Graph):
 
     def __init__(self):
         self._structures = nx.DiGraph()
@@ -15,9 +16,9 @@ class Graph:
             assert not isinstance(head, Queue) \
                     and not isinstance(tail, Queue), f'Queue cannot be used as a block'
             
-            self._add_block(head)
-            self._add_block(tail, distributor)
-            self._add_queue(connector)
+            self.add_block(head)
+            self.add_block(tail, distributor)
+            self.add_queue(connector)
             
             if head is None:
                 self._structures.add_edge(id(connector), id(tail))
@@ -39,17 +40,6 @@ class Graph:
             raise SyntaxError() from e
 
         return self
-
-    @decorators.propagate(None)
-    def _add_queue(self, queue):
-        self._structures.add_node(id(queue), object=queue)
-    
-    @decorators.propagate(None)
-    def _add_block(self, block, distributor=None):
-        self._structures.add_node(id(block), object=block)
-
-        if distributor is not None:
-            self._structures.add_node(id(block), distributor=distributor)
 
     def _merge_queue(self):
         mappings = {}

@@ -6,6 +6,7 @@ from ..queues import Queue
 from typing import Callable
 from ...functional import partials, Identity
 from .distributors import Distributor
+from ...functional import Signature, AutoPipe
 
 
 class AsyncFlow(Graph, State):
@@ -48,9 +49,17 @@ class AsyncFlow(Graph, State):
         
         self._running = False
 
-    def on_exception(self, handler:Callable[[int, object, Exception], None]):
+    def on_exception(self, handler:Callable[[str, object, Exception], None]):
         for q in self.internal_queues:
-            q.on_exception(partials(handler, id(q)))
+            block, = self.successors(q)
+            
+            if isinstance(block, AutoPipe):
+                signature = block.signature()
+            else:
+                signature = Signature.from_func(block)
+
+            signature_repr = f'{signature.name}[({signature.inputs}) -> {signature.outputs}]'
+            q.on_exception(partials(handler, signature_repr))
     
     @property
     def running(self):
