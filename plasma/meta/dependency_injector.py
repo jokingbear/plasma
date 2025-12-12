@@ -5,6 +5,7 @@ import pandas as pd
 
 from ..functional import State
 from warnings import deprecated
+from .utils import get_caller_frame
 
 
 @deprecated('this class is deprecated, please use plasma.meta.object_graph.Manager')
@@ -15,6 +16,11 @@ class DependencyInjector(State):
 
         self._dep_graph = nx.DiGraph()
         self.stateful = stateful
+        caller = get_caller_frame()
+        print(
+            f'this class will be removed in the next version, '
+            f'please consider using the improved version in {caller.filename}'
+        )
 
     def run(self, *names, **init_args) -> dict:
         if len(names) == 0:
