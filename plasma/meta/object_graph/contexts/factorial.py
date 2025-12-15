@@ -10,7 +10,7 @@ class FactorialContext(Base):
         if (self.name, name) in self.graph and overwrite:
             self.remove_dependency(name)
         
-        factory = Factory(name, self.name, self.graph)
+        factory = Factory(name, self)
         return factory
 
     def add_dependency(self, name, value, as_singleton=False):
