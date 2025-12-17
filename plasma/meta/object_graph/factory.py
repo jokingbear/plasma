@@ -22,8 +22,9 @@ class Factory:
         assert len(names) > 0, 'must at least have one name'
               
         def decorate(cls):
+            singleton = not isinstance(cls, type)
             for n in names:
-                self._context.add_dependency(n, cls)
+                self._context.add_dependency(n, cls, singleton)
                 self.graph.add_edge((self.context, self.name), (self.context, n))
             return cls
         
