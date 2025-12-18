@@ -4,7 +4,7 @@ class Inputs:
         func2reg_maps = dict[object, list[Initiable]]()
         for k, t in type(self).__annotations__.items():
             if t is Initiable:
-                registrator = getattr(self, k)
+                registrator:Initiable = getattr(type(self), k)
                 if registrator.init_func not in func2reg_maps:
                     func2reg_maps[registrator.init_func] = []
                 
@@ -44,8 +44,8 @@ class Initiable:
         self._value = None
         self.rank = 0
     
-    def __get__(self, *_):
-        if self._value is None:
+    def __get__(self, obj, _):
+        if obj is None:
             return self
         else:
             return self._value

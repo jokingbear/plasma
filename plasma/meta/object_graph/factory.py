@@ -5,6 +5,7 @@ from pathlib import Path
 from ..utils import get_caller_frame
 from .contexts.base import Base
 
+
 class Factory:
     
     def __init__(self, name:str=None, context:Base=None):
@@ -22,9 +23,9 @@ class Factory:
         assert len(names) > 0, 'must at least have one name'
               
         def decorate(cls):
-            singleton = not isinstance(cls, type)
+            is_class = isinstance(cls, type)
             for n in names:
-                self._context.add_dependency(n, cls, singleton)
+                self._context.add_dependency(n, cls, as_singleton=not is_class)
                 self.graph.add_edge((self.context, self.name), (self.context, n))
             return cls
         
