@@ -1,6 +1,4 @@
 import warnings
-import networkx as nx
-import inspect
 
 from ..functional import auto_map
 
