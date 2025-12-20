@@ -92,11 +92,7 @@ class ContextGraph:
         return len(nodes)
 
     def type(self, context:Hashable, name: Hashable):
-        try:
-            return self.backend.nodes[(context, name)]['type']
-        except:
-            print(context, name)
-            raise
+        return self.backend.nodes[(context, name)]['type']
     
     def value(self, context:Hashable, name: Hashable, default=None):
         return self.backend.nodes[context, name].get('value', default)
