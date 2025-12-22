@@ -41,7 +41,10 @@ def _render_node(graph:ContextGraph, current_context, node_id, prefix:str, lines
         lines.append(f'{prefix}|-> {name} = {render_annotation(type(node_attr['value']))}')
     else:
         if node_type is Node.FACTORY:
-            lines.append(f'{prefix}|-> {name}: {type(node_attr['value']).__name__}')
+            if node_attr['value'] is None:
+                lines.append(f'{prefix}|-> {name}')
+            else:
+                lines.append(f'{prefix}|-> {name}: {type(node_attr['value']).__name__}')
         elif 'annotation' in node_attr:
             lines.append(f'{prefix}|-> {name}: {render_annotation(node_attr['annotation'])}')
         else:
