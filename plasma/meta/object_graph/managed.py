@@ -1,21 +1,16 @@
-import inspect
-
 from .contexts import Context
 from .managers import Manager
 from typing import Hashable
 from pathlib import Path
+from ..utils import get_caller_frame
 
 
 class AutoContext(Context):
     
     def __init__(self, graph=None, name=None):
         if name is None:
-            for s in inspect.stack():
-                if 'plasma' not in s.filename:
-                    path = Path(s.filename)
-                    parent_path = path.parent
-                    name = parent_path.name
-                    break
+            caller_frame = get_caller_frame()
+            name = Path(caller_frame.filename).parent.name
         
         graph = graph or ContextManager().graph
         super().__init__(graph, name)
@@ -55,7 +50,10 @@ class AutoContext(Context):
 
 class ContextManager(Manager):
     
-    def context(self, context:Hashable=None):        
+    def context(self, context:Hashable=None):
+        if context is None:
+            caller_frame = get_caller_frame()
+            context = Path(caller_frame.filename).parent.name
         return AutoContext(self.graph, context)
 
     def __eq__(self, value):
