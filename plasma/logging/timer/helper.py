@@ -1,6 +1,5 @@
-from .timeio import TimeIO
 from .decorator import Timer
 
 
-def time(func):
+def timer(func):
     return Timer()(func)
