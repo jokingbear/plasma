@@ -1,7 +1,8 @@
 from .base import BaseDataset
+from .sample import SampleBase
 
 
-class ChainDataset[T](BaseDataset[T]):
+class ChainDataset[T](SampleBase[T]):
 
     def __init__(self, *datasets:BaseDataset[T]):
         super().__init__()
