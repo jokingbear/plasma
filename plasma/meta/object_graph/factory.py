@@ -3,17 +3,17 @@ from .types import Node
 from .links import Link
 from pathlib import Path
 from ..utils import get_caller_frame
-from .contexts import Context
+from .contexts.base import Base
 
 
 class Factory:
     
-    def __init__(self, name:str=None, context:Context=None):
+    def __init__(self, name:str=None, context:Base=None):
         name = name or 'factory'
         
         if context is None:
             context_name = Path(get_caller_frame().filename).parent.name
-            context = Context(ContextGraph(), context_name)
+            context = Base(ContextGraph(), context_name)
         
         self.name = name
         self._context = context
