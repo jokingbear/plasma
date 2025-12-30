@@ -17,7 +17,7 @@ class FactorialContext(Base):
         if isinstance(value, Factory):
             if self.graph is not value.graph:
                 self.graph.merge(value.graph, overwrite=True)
-                value.graph = self.graph
+                value.update_graph(self.graph)
 
             if self.name != value.context:
                 self.graph.add_node(self.name, name, type=Node.FACTORY, value=None)
