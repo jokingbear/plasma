@@ -3,17 +3,17 @@ from .types import Node
 from .links import Link
 from pathlib import Path
 from ..utils import get_caller_frame
-from .contexts.base import Base
+from .contexts import Context
 
 
 class Factory:
     
-    def __init__(self, name:str=None, context:Base=None):
+    def __init__(self, name:str=None, context:Context=None):
         name = name or 'factory'
         
         if context is None:
             context_name = Path(get_caller_frame().filename).parent.name
-            context = Base(ContextGraph(), context_name)
+            context = Context(ContextGraph(), context_name)
         
         self.name = name
         self._context = context
@@ -26,7 +26,7 @@ class Factory:
             is_class = isinstance(cls, type)
             for n in names:
                 self._context.add_dependency(n, cls, as_singleton=not is_class)
-                self.graph.add_edge((self.context, self.name), (self.context, n), Link.CONTAINS)
+                self.graph.add_edge((self.context, self.name), (self.context, n), Link.SUBITEM)
             return cls
         
         return decorate
