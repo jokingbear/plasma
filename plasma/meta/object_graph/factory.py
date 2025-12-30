@@ -26,7 +26,7 @@ class Factory:
             is_class = isinstance(cls, type)
             for n in names:
                 self._context.add_dependency(n, cls, as_singleton=not is_class)
-                self.graph.add_edge((self.context, self.name), (self.context, n))
+                self.graph.add_edge((self.context, self.name), (self.context, n), Link.CONTAINS)
             return cls
         
         return decorate
