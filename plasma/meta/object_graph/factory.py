@@ -46,3 +46,6 @@ class Factory:
     @property
     def graph(self):
         return self._context.graph
+
+    def update_graph(self, new_graph:ContextGraph):
+        self._context = Base(new_graph, self._context.name)

@@ -15,7 +15,10 @@ class FactorialContext(Base):
 
     def add_dependency(self, name, value, as_singleton=False):
         if isinstance(value, Factory):
-            self.graph.merge(value.graph, overwrite=True)
+            if self.graph is not value.graph:
+                self.graph.merge(value.graph, overwrite=True)
+                value.update_graph(self.graph)
+
             if self.name != value.context:
                 self.graph.add_node(self.name, name, type=Node.FACTORY, value=None)
                 self.graph.add_edge((self.name, name), (value.context, value.name), Link.DELEGATE_TO)
