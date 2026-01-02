@@ -8,7 +8,7 @@ class SampleBase[T](BaseDataset[T]):
     
     def sample(self, num_sample, replace=False, seed=None):
         np.random.seed(seed)
-        indices = np.random.choice(num_sample, replace=replace)
+        indices = np.random.choice(len(self), replace=replace, size=num_sample)
         return SampledDataset(self, indices)
 
 

@@ -1,6 +1,6 @@
 [project]
 name = "plasma"
-version = "3.6.6post4"
+version = "3.7.8"
 description = "plasma package for functional, meta and parallel programming"
 authors = [
   {name = "jokingbear", email = "nerokid1072@gmail.com"},
