@@ -11,6 +11,10 @@ class Inquirer:
         self.graph = context_graph
         self.meta = meta
     
+    def list_context(self):
+        for m in self.meta:
+            yield m
+    
     def find_context(self, file:Path):
         for p in self.meta:
             if file.is_relative_to(p):

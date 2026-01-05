@@ -11,7 +11,6 @@ class ContextGraph(nx.DiGraph):
     def __init__(self):
         super().__init__()
         
-        self._contexts:dict[Hashable, set] = {}
         self._meta = Meta()
     
     def add_node(self, node_for_adding, **attr):
