@@ -4,6 +4,7 @@ from .registrator import Registrator
 from ...utils import get_caller_frame
 from .factory import Factory
 from .delegator import Delegator
+from pathlib import Path
 
 
 class FunctionalContext(Context):
@@ -37,6 +38,7 @@ class FunctionalContext(Context):
 
         return self
 
-    def factory(self, name:str):
+    def factory(self, name:str=None):
         caller = get_caller_frame()
+        name = name or Path(caller.filename).parent.name
         return Factory(name, self.graph, self.name, caller.filename)
