@@ -29,12 +29,12 @@ class FunctionalContext(Context):
             if isinstance(block, Factory) and block.context_name != self.name:
                 delegator = Delegator(self.graph, self.name, source)
                 delegator.run(node_name, block.context_name, block.name)
-
-            registrator = Registrator(self.graph, self.name, node_name, source)
-            if isinstance(block, type):
-                registrator.register_type(block)
             else:
-                registrator.register_singleton(block)
+                registrator = Registrator(self.graph, self.name, node_name, source)
+                if isinstance(block, type):
+                    registrator.register_type(block)
+                else:
+                    registrator.register_singleton(block)
 
         return self
 
