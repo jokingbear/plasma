@@ -2,6 +2,8 @@ from .context_graph import ContextGraph
 from ...utils import get_caller_frame
 from pathlib import Path
 from .registrator import Registrator
+from .context import Context
+from types import ModuleType
 
 CONTEXT_GRAPH = ContextGraph()
 
@@ -21,3 +23,7 @@ def register(**blocks:type|object):
             registrator.register_type(block)
         else:
             registrator.register_singleton(block)
+
+
+def get_context(module:ModuleType):
+    return Context(CONTEXT_GRAPH, module)

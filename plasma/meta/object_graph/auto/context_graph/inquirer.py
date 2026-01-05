@@ -18,9 +18,13 @@ class Inquirer:
 
         return None
     
-    def select(self, node_id, *attrs):
+    def select(self, node_id, *attrs, default=None):
         for a in attrs:
-            yield self.graph.nodes[node_id][a]
+            yield self.graph.nodes[node_id].get(a, default)
     
     def type(self, node_id) -> Node:
         return self.graph.nodes[node_id]['type']
+
+    def nodes(self, context):
+        for n in self.meta[context]:
+            yield n
