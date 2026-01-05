@@ -4,6 +4,7 @@ from .....functional import AutoPipe
 from ..context_graph import ContextGraph, Node
 from pathlib import Path
 from .render import render_context
+from .inputs import InputDict
 
 
 class Context(AutoPipe):
@@ -23,6 +24,9 @@ class Context(AutoPipe):
 
         return pd.Series({i: results[self.name, i] for i in inputs}).loc[inputs]
 
+    def inputs(self, *names):
+        return InputDict(self.graph, self.name, names)
+    
     def __repr__(self):
         return render_context(self.graph, self.name)
 
