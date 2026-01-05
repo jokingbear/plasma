@@ -28,3 +28,7 @@ def register(**blocks:type|object):
                 )
     
     return FunctionalContext(CONTEXT_GRAPH, context).register(source=file, **blocks)
+
+
+def inspect_graph():
+    print(repr(CONTEXT_GRAPH))

@@ -1,2 +1,2 @@
-from .state import init_context, register
+from .state import init_context, register, inspect_graph
 from .factory import Factory
