@@ -3,18 +3,20 @@ import inspect
 from inspect import FrameInfo
 from ...utils import get_caller_frame
 from .state import CONTEXT_GRAPH
-from .context_graph import Node
+from .context_graph import Node, ContextGraph
 from .registrator import Registrator
 
 
 class Factory:
     
-    def __init__(self, name:str):
-        caller = get_caller_frame()
-        self.graph = CONTEXT_GRAPH
-        context, source = self._trace_context(caller)
-        self.graph.add_node((context, name), type=Node.FACTORY, source=source)
+    def __init__(self, name:str, graph:ContextGraph=None, context:str=None, source:str=None):
+        self.graph = graph or CONTEXT_GRAPH
         
+        if context is None:
+            caller = get_caller_frame()
+            context, source = self._trace_context(caller)
+
+        self.graph.add_node((context, name), type=Node.FACTORY, source=source)
         self.context = context
         self.name = name
     
