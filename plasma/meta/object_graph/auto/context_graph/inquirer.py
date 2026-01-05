@@ -15,9 +15,9 @@ class Inquirer:
             yield m
     
     def find_context(self, path:str):
-        for p in self.meta:
-            if p in path:
-                return p
+        candidates = [p for p in self.meta if p in path]
+        if len(candidates) > 0:
+            return max(candidates, key=len)
 
         return None
     
