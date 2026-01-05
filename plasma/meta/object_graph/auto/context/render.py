@@ -18,7 +18,7 @@ def render_context(graph:ContextGraph, context):
 
 
 def render_node(graph:ContextGraph, node, indent:str, lines:list, rendered:set):
-    node_name = node[1]
+    node_name = str(node[1])
     node_type = graph.inquirer.type(node)
     value, = graph.inquirer.select(node, 'value')
     expansion = True

@@ -32,6 +32,7 @@ def render_context(graph:nx.DiGraph, inquirer:Inquirer, context):
 
 def render_node(graph:nx.DiGraph, inquirer:Inquirer, node, indent:str, lines:list, rendered:set):
     _, node_name = node
+    node_name = str(node_name)
     node_type = inquirer.type(node)
     value, = inquirer.select(node, 'value')
     expand = True
