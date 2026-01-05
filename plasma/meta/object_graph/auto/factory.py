@@ -9,16 +9,14 @@ from .registrator import Registrator
 
 class Factory:
     
-    def __init__(self, name:str, context:str=None, source:str=None):
+    def __init__(self, name:str):
+        caller = get_caller_frame()
         self.graph = CONTEXT_GRAPH
+        context, source = self._trace_context(caller)
+        self.graph.add_node((context, name), type=Node.FACTORY, source=source)
         
-        if context is None:
-            caller = get_caller_frame()    
-            context, source = self._trace_context(caller)
-            
         self.context = context
         self.name = name
-        self.graph.add_node((context, name), type=Node.FACTORY, source=source)
     
     def register(self, *names):
         assert len(names) > 0

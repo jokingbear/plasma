@@ -2,7 +2,6 @@ from .context import Context
 from .linker import Linker
 from .registrator import Registrator
 from ...utils import get_caller_frame
-from .factory import Factory
 
 
 class FunctionalContext(Context):
@@ -29,7 +28,3 @@ class FunctionalContext(Context):
                 registrator.register_singleton(block)
 
         return self
-
-    def factory(self, name:str):
-        caller = get_caller_frame()
-        return Factory(name, self.name, caller.filename)
