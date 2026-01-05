@@ -13,6 +13,7 @@ def init_context():
     caller_file = Path(caller.filename)
 
     CONTEXT_GRAPH.init_context(caller_file.parent)
+    return Context(CONTEXT_GRAPH, caller_file.parent)
 
 
 def register(**blocks:type|object):
@@ -25,5 +26,14 @@ def register(**blocks:type|object):
             registrator.register_singleton(block)
 
 
-def get_context(module:ModuleType):
-    return Context(CONTEXT_GRAPH, module)
+def get_context(module:ModuleType):     
+    file = Path(module.__file__)
+    context = CONTEXT_GRAPH.inquirer.find_context(file)
+    
+    if context is None:
+        raise ImportError(
+                    f'{file} does not belong to any context, '
+                    'use init_context first'
+                )
+    
+    return Context(CONTEXT_GRAPH, context)

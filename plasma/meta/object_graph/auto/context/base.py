@@ -9,19 +9,10 @@ from .render import render_context
 
 class Context(AutoPipe):
     
-    def __init__(self, graph:ContextGraph, module:ModuleType):
+    def __init__(self, graph:ContextGraph, context:str):
         super().__init__()
         
-        file = Path(module.__file__)
-        context = graph.inquirer.find_context(file)
-        
-        if context is None:
-            raise ImportError(
-                        f'{file} does not belong to any context, '
-                        'use init_context first'
-                    )
-        
-        self.context = context
+        self.name = context
         self.graph = graph
     
     def run(self, *inputs:str, **kwargs):
@@ -29,12 +20,12 @@ class Context(AutoPipe):
         
         results = {**kwargs}
         for i in inputs:
-            init_object(self.graph, (self.context, i), results)
+            init_object(self.graph, (self.name, i), results)
 
-        return pd.Series({i: results[self.context, i] for i in inputs}).loc[inputs]
+        return pd.Series({i: results[self.name, i] for i in inputs}).loc[inputs]
 
     def __repr__(self):
-        return render_context(self.graph, self.context)
+        return render_context(self.graph, self.name)
 
 
 def init_object(graph:ContextGraph, node, initiated_objects:dict):
