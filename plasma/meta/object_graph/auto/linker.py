@@ -13,9 +13,9 @@ def link_name(context:Context, *excludes:str):
     linking_context = context.name
     
     current_names = {node_name for node_name 
-                     in CONTEXT_GRAPH.inquirer.nodes(current_context)}
+                     in CONTEXT_GRAPH.inquirer.node_names(current_context)}
     candidate_names = {node_name for node_name 
-                       in CONTEXT_GRAPH.inquirer.nodes(linking_context)}
+                       in CONTEXT_GRAPH.inquirer.node_names(linking_context)}
     
     shared_names = current_names.intersection(candidate_names).difference(excludes)
     if len(shared_names) == 0:

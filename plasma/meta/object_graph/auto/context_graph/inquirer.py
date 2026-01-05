@@ -25,6 +25,14 @@ class Inquirer:
     def type(self, node_id) -> Node:
         return self.graph.nodes[node_id]['type']
 
-    def nodes(self, context):
+    def node_names(self, context):
         for n in self.meta[context]:
             yield n
+
+    def context_in_degree(self, n):
+        in_context_predecessors = [m for m in self.graph.predecessors(n) if m[0] == n[0]]
+        return len(in_context_predecessors)
+    
+    def context_out_degree(self, n):
+        in_context_successors = [m for m in self.graph.successors(n) if m[0] == n[0]]
+        return len(in_context_successors)

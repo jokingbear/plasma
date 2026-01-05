@@ -26,4 +26,4 @@ class ContextGraph(nx.DiGraph):
         return Inquirer(self._meta, self)
 
     def __repr__(self):
-        return render(self._meta, self)
+        return render(self._meta, self, self.inquirer)
