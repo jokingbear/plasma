@@ -30,7 +30,7 @@ class Registrator:
                                     else (Node.SINGLETON, param_info.default)
 
                 self.graph.add_node(child_id, type=node_type, value=value, source=self.source)
-                self.graph.add_edge(self.node_id, child_id)
+            self.graph.add_edge(self.node_id, child_id)
     
     def register_singleton(self, obj):
         self.graph.add_node(self.node_id, type=Node.SINGLETON, value=obj, source=self.source)
