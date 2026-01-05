@@ -41,4 +41,11 @@ class FunctionalContext(Context):
     def factory(self, name:str=None):
         caller = get_caller_frame()
         name = name or Path(caller.filename).parent.name
-        return Factory(name, self.graph, self.name, caller.filename)
+        return FunctionalFactory(name, self.graph, self.name, caller.filename)
+
+
+class FunctionalFactory(Factory):
+    
+    @property
+    def context(self):
+        return FunctionalContext(self.graph, self.context_name)
