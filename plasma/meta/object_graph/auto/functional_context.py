@@ -3,6 +3,7 @@ from .linker import Linker
 from .registrator import Registrator
 from ...utils import get_caller_frame
 from .factory import Factory
+from .delegator import Delegator
 
 
 class FunctionalContext(Context):
@@ -13,7 +14,9 @@ class FunctionalContext(Context):
         self.linker = Linker(self.graph)
     
     def link_name(self, context:Context, *excludes:str):
-        self.linker.run(self, context, *excludes)
+        caller = get_caller_frame()
+        source = caller.filename
+        self.linker.run(self, context, source, *excludes)
         return self
     
     def register(self, source:str=None, **blocks):
@@ -22,6 +25,10 @@ class FunctionalContext(Context):
             source = caller.filename
 
         for node_name, block in blocks.items():
+            if isinstance(block, Factory) and block.context_name != self.name:
+                delegator = Delegator(self.graph, self.name, source)
+                delegator.run(node_name, block.context_name, block.name)
+
             registrator = Registrator(self.graph, self.name, node_name, source)
             if isinstance(block, type):
                 registrator.register_type(block)

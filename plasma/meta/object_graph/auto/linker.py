@@ -2,6 +2,7 @@ from warnings import warn
 from .context_graph import Node, ContextGraph
 from .context import Context
 from ....functional import AutoPipe
+from .delegator import Delegator
 
 
 class Linker(AutoPipe):
@@ -10,7 +11,7 @@ class Linker(AutoPipe):
         super().__init__()
         self.graph = graph
     
-    def run(self, context1:Context, context2:Context, *excludes:str):
+    def run(self, context1:Context, context2:Context, source:str, *excludes:str):
         current_context = context1.name
         linking_context = context2.name
         
@@ -23,15 +24,5 @@ class Linker(AutoPipe):
             warn(f'{current_context} does not share any name with {linking_context}')
         else:
             for n in shared_names:
-                ntype = inquirer.type((current_context, n))
-                
-                if ntype is not Node.LEAF:
-                    warn(
-                        f'overriding non leaf object {n} in {current_context} '
-                        f'with {n} in {linking_context}'
-                    )
-                
-                    self.graph.remove_node((current_context, n))
-                
-                self.graph.add_node((current_context, n), type=Node.DELEGATE)
-                self.graph.add_edge((current_context, n), (linking_context, n))
+                delegator = Delegator(self.graph, current_context, source)
+                delegator.run(n, linking_context, n)

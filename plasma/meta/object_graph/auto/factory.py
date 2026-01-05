@@ -17,18 +17,18 @@ class Factory:
             context, source = self._trace_context(caller)
 
         self.graph.add_node((context, name), type=Node.FACTORY, source=source)
-        self.context = context
+        self.context_name = context
         self.name = name
-    
+
     def register(self, *names):
         assert len(names) > 0
         
         caller = get_caller_frame()
-        registrators = [Registrator(self.graph, self.context, n,  caller.filename) for n in names]
+        registrators = [Registrator(self.graph, self.context_name, n,  caller.filename) for n in names]
         def decorator(cls):
             for r in registrators:
                 r.register_type(cls)
-                self.graph.add_edge((self.context, self.name), r.node_id)
+                self.graph.add_edge((self.context_name, self.name), r.node_id)
             
             return cls
         
@@ -40,7 +40,7 @@ class Factory:
         
         registrator = Registrator(self.graph, context, key, file)
         registrator.register_singleton(value)
-        self.graph.add_edge((self.context, self.name), registrator.node_id)
+        self.graph.add_edge((self.context_name, self.name), registrator.node_id)
     
     def _trace_context(self, caller_info:FrameInfo):
         file = caller_info.filename
