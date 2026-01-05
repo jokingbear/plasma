@@ -25,6 +25,7 @@ def render_node(graph:ContextGraph, node, indent:str, lines:list, rendered:set):
     
     if node in rendered and node_type is not Node.LEAF:
         node_name += '...'
+        expansion = False
     elif node_type is Node.FACTORY:
         node_name += ':Factory'
     elif node_type is Node.LEAF and value is not _empty:
@@ -69,5 +70,9 @@ def render_type(t:type):
                 generic_arg_texts.append('[' + ', '.join(rendered_args) + ']')
             else:
                 generic_arg_texts.append(render_type(a))
-        generic_arg_texts = ','.join(generic_arg_texts)
-        return f'{name}[{generic_arg_texts}]' 
+        
+        if name == 'Union':
+            return '|'.join(generic_arg_texts)
+        else:
+            generic_arg_texts = ','.join(generic_arg_texts)
+            return f'{name}[{generic_arg_texts}]' 

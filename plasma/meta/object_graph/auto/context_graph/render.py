@@ -38,6 +38,7 @@ def render_node(graph:nx.DiGraph, inquirer:Inquirer, node, indent:str, lines:lis
     
     if node in rendered and node_type is not Node.LEAF:
         node_name += '...'
+        expand = False
     elif node_type is Node.FACTORY:
         node_name += ':Factory'
     elif node_type is Node.LEAF and value is not _empty:
@@ -79,5 +80,9 @@ def render_type(t:type):
                 generic_arg_texts.append('[' + ', '.join(rendered_args) + ']')
             else:
                 generic_arg_texts.append(render_type(a))
-        generic_arg_texts = ','.join(generic_arg_texts)
-        return f'{name}[{generic_arg_texts}]' 
+        
+        if name == 'Union':
+            return '|'.join(generic_arg_texts)
+        else:
+            generic_arg_texts = ','.join(generic_arg_texts)
+            return f'{name}[{generic_arg_texts}]' 

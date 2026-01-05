@@ -21,7 +21,7 @@ class Factory:
         assert len(names) > 0
         
         caller = get_caller_frame()
-        registrators = [Registrator(self.graph, caller, n) for n in names]
+        registrators = [Registrator(self.graph, self.context, n,  caller.filename) for n in names]
         def decorator(cls):
             for r in registrators:
                 r.register_type(cls)

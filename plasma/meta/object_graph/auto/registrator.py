@@ -1,13 +1,13 @@
 from .context_graph import ContextGraph, Node
 from typing import Callable
-from inspect import FrameInfo, signature
+from inspect import signature
 from pathlib import Path
 from warnings import warn
 
 
 class Registrator:
     
-    def __init__(self, graph:ContextGraph, context:str, name:str, source:str):
+    def __init__(self, graph:ContextGraph, context:Path, name:str, source:str):
         self.graph = graph
         
         inquirer = self.graph.inquirer
@@ -33,12 +33,3 @@ class Registrator:
     
     def register_singleton(self, obj):
         self.graph.add_node(self.node_id, type=Node.SINGLETON, value=obj, source=self.source)
-
-    def _trace_context(self, caller_frame:FrameInfo):
-        file = Path(caller_frame.filename)
-        context = self.graph.inquirer.find_context(file)
-        
-        if context is None:
-            raise ReferenceError(f'{file} has no context initiated, use init_context')
-        
-        return context, file

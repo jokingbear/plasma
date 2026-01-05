@@ -1,19 +1,27 @@
 from .context import Context
-from .linker import link_name
+from .linker import Linker
 from .registrator import Registrator
 from ...utils import get_caller_frame
 
 
 class FunctionalContext(Context):
     
+    def __init__(self, graph, context):
+        super().__init__(graph, context)
+        
+        self.linker = Linker(self.graph)
+    
     def link_name(self, context:Context, *excludes:str):
-        link_name(self, context, *excludes)
+        self.linker.run(self, context, *excludes)
         return self
     
-    def register(self, **blocks):
-        caller = get_caller_frame()
+    def register(self, source:str=None, **blocks):
+        if source is None:
+            caller = get_caller_frame()
+            source = caller.filename
+
         for node_name, block in blocks.items():
-            registrator = Registrator(self.graph, self.name, node_name, caller.filename)
+            registrator = Registrator(self.graph, self.name, node_name, source)
             if isinstance(block, type):
                 registrator.register_type(block)
             else:
