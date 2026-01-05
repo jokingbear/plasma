@@ -37,11 +37,15 @@ def render_node(graph:nx.DiGraph, node, indent:str, lines:list, rendered:set):
         lines.append(line)
         return
     
-    node_type, value = graph.inquirer.select(node, 'type', 'value')
-    if node_type is Node.LEAF and value is not _empty:
-        line += f':{render_type(value)}'
-    elif node_type is Node.SINGLETON:
-        line += f'={render_type(type(value))}'
+    node_type = graph.inquirer.type(node)
+    if node_type is Node.FACTORY:
+        line += ':Factory'
+    else:
+        value, = graph.inquirer.select(node, 'value')
+        if node_type is Node.LEAF and value is not _empty:
+            line += f':{render_type(value)}'
+        elif node_type is Node.SINGLETON:
+            line += f'={render_type(type(value))}'
     
     lines.append(line)
     

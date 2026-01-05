@@ -1,4 +1,4 @@
-from . import context, package_11
+from . import context, package_11, sub_modules
 from .class1 import Class1
 from .class2 import Class2
 from .class4 import Class4
