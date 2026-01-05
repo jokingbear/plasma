@@ -9,7 +9,7 @@ from .....functional.helpers.color_printer import Color
 def render_context(graph:ContextGraph, context):
     lines = []
     rendered = set()
-    for node_name in graph.inquirer.nodes(context):
+    for node_name in graph.inquirer.node_names(context):
         node_id = context, node_name
         if graph.in_degree(node_id) == 0:
             indent = ''
@@ -21,6 +21,7 @@ def render_node(graph:ContextGraph, node, indent:str, lines:list, rendered:set):
     node_name = node[1]
     node_type = graph.inquirer.type(node)
     value, = graph.inquirer.select(node, 'value')
+    expansion = True
     
     if node in rendered and node_type is not Node.LEAF:
         node_name += '...'
@@ -33,20 +34,21 @@ def render_node(graph:ContextGraph, node, indent:str, lines:list, rendered:set):
         node_name += f'={render_type(type(value))}'
         node_name = Color.YELLOW.render(node_name)
     elif node_type is Node.DELEGATE:
-        node_name = Color.BLUE.render(node_name)
+        linked_node, = graph.successors(node)
+        linked_context, linked_name = linked_node
+        linked_name = f'{linked_name}:{linked_context}'
+        node_name = f'{Color.BLUE.render(node_name)} --> {Color.BLUE.render(linked_name)}'
+        expansion = False
     
     line = f'{indent}|->{node_name}'
     lines.append(line)
     
-    if node_type is Node.DELEGATE:
-        pass
-    else:
+    if expansion:
         for m in graph.successors(node):
             new_indent = indent + ' ' * 2
             render_node(graph, m, new_indent, lines, rendered)
 
-        rendered.add(node)
-    
+    rendered.add(node)
 
 
 def render_type(t:type):

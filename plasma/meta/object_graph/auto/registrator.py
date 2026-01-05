@@ -7,10 +7,9 @@ from warnings import warn
 
 class Registrator:
     
-    def __init__(self, graph:ContextGraph, caller:FrameInfo, name:str):
+    def __init__(self, graph:ContextGraph, context:str, name:str, source:str):
         self.graph = graph
         
-        context, source = self._trace_context(caller)
         inquirer = self.graph.inquirer
         node_id = context, name
         if node_id in self.graph and inquirer.type(node_id) is not Node.LEAF:

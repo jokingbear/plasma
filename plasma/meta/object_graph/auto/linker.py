@@ -1,16 +1,12 @@
-from types import ModuleType
-from ...utils import get_caller_frame
-from pathlib import Path
 from .state import CONTEXT_GRAPH
 from warnings import warn
 from .context_graph import Node
 from .context import Context
 
 
-def link_name(context:Context, *excludes:str):
-    caller = get_caller_frame()
-    current_context = CONTEXT_GRAPH.inquirer.find_context(Path(caller.filename))
-    linking_context = context.name
+def link_name(context1:Context, context2:Context, *excludes:str):
+    current_context = context1.name
+    linking_context = context2.name
     
     current_names = {node_name for node_name 
                      in CONTEXT_GRAPH.inquirer.node_names(current_context)}
