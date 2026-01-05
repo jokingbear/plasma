@@ -14,6 +14,7 @@ def link_name(context:Context, *excludes:str):
     
     current_names = {node_name for node_name 
                      in CONTEXT_GRAPH.inquirer.node_names(current_context)}
+    
     candidate_names = {node_name for node_name 
                        in CONTEXT_GRAPH.inquirer.node_names(linking_context)}
     
@@ -29,6 +30,8 @@ def link_name(context:Context, *excludes:str):
                     f'overriding non leaf object {n} in {current_context} '
                     f'with {n} in {linking_context}'
                 )
+            
+                CONTEXT_GRAPH.remove_node((current_context, n))
             
             CONTEXT_GRAPH.add_node((current_context, n), type=Node.DELEGATE)
             CONTEXT_GRAPH.add_edge((current_context, n), (linking_context, n))
