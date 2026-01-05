@@ -40,7 +40,7 @@ class FunctionalContext(Context):
 
     def factory(self, name:str=None):
         caller = get_caller_frame()
-        name = name or Path(caller.filename).parent.name
+        name = name or 'factory'
         return FunctionalFactory(name, self.graph, self.name, caller.filename)
 
 
