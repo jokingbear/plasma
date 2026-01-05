@@ -4,5 +4,6 @@ from .class6 import Class6
 
 
 CONTEXT.register(
-    class6=Class6
+    class6=Class6,
+    z=8
 )

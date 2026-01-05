@@ -5,23 +5,23 @@ from pathlib import Path
 class Meta:
     
     def __init__(self):
-        self._contexts:dict[Path, set] = {}
+        self._contexts:dict[str, set] = {}
     
     def init(self, context):
         if context not in self:
             self._contexts[context] = set()
     
-    def add_name(self, context:Path, name:str):
+    def add_name(self, context:str, name:str):
         self._contexts[context].add(name)
     
     def __iter__(self):
         for c in self._contexts:
             yield c
     
-    def __getitem__(self, context:Path):
+    def __getitem__(self, context:str):
         return self._contexts[context]
     
-    def __contains__(self, other:Path):
+    def __contains__(self, other:str):
         return other in self._contexts
     
     def __repr__(self):

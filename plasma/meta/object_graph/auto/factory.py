@@ -1,6 +1,5 @@
 import inspect
 
-from pathlib import Path
 from inspect import FrameInfo
 from ...utils import get_caller_frame
 from .state import CONTEXT_GRAPH
@@ -35,12 +34,14 @@ class Factory:
     
     def __setitem__(self, key, value):
         caller = get_caller_frame()
-        registrator = Registrator(self.graph, caller, key)
+        context, file = self._trace_context(caller)
+        
+        registrator = Registrator(self.graph, context, key, file)
         registrator.register_singleton(value)
         self.graph.add_edge((self.context, self.name), registrator.node_id)
     
     def _trace_context(self, caller_info:FrameInfo):
-        file = Path(caller_info.filename)
+        file = caller_info.filename
         package = inspect.getmodule(caller_info.frame).__package__
         context = self.graph.inquirer.find_context(package)
         
