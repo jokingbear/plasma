@@ -1,0 +1,41 @@
+import networkx as nx
+
+from .meta import Meta
+from .types import Node
+
+
+class Inquirer:
+    
+    def __init__(self, meta:Meta, context_graph:nx.DiGraph):
+        self.graph = context_graph
+        self.meta = meta
+    
+    def list_context(self):
+        for m in self.meta:
+            yield m
+    
+    def find_context(self, path:str):
+        candidates = [p for p in self.meta if p in path]
+        if len(candidates) > 0:
+            return max(candidates, key=len)
+
+        return None
+    
+    def select(self, node_id, *attrs, default=None):
+        for a in attrs:
+            yield self.graph.nodes[node_id].get(a, default)
+    
+    def type(self, node_id) -> Node:
+        return self.graph.nodes[node_id]['type']
+
+    def node_names(self, context):
+        for n in self.meta[context]:
+            yield n
+
+    def context_in_degree(self, n):
+        in_context_predecessors = [m for m in self.graph.predecessors(n) if m[0] == n[0]]
+        return len(in_context_predecessors)
+    
+    def context_out_degree(self, n):
+        in_context_successors = [m for m in self.graph.successors(n) if m[0] == n[0]]
+        return len(in_context_successors)
