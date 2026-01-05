@@ -1,7 +1,6 @@
 import networkx as nx
 
 from .meta import Meta
-from pathlib import Path
 from .types import Node
 
 
@@ -15,9 +14,9 @@ class Inquirer:
         for m in self.meta:
             yield m
     
-    def find_context(self, file:Path):
+    def find_context(self, path:str):
         for p in self.meta:
-            if file.is_relative_to(p):
+            if p in path:
                 return p
 
         return None

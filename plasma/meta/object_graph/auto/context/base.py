@@ -2,16 +2,16 @@ import pandas as pd
 
 from .....functional import AutoPipe
 from ..context_graph import ContextGraph, Node
-from pathlib import Path
 from .render import render_context
 from .inputs import InputDict
 
 
 class Context(AutoPipe):
     
-    def __init__(self, graph:ContextGraph, context:Path):
+    def __init__(self, graph:ContextGraph, context:str):
         super().__init__()
         
+        graph.init_context(context)
         self.name = context
         self.graph = graph
     

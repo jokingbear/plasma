@@ -1,3 +1,5 @@
+import inspect
+
 from pathlib import Path
 from inspect import FrameInfo
 from ...utils import get_caller_frame
@@ -37,9 +39,10 @@ class Factory:
         registrator.register_singleton(value)
         self.graph.add_edge((self.context, self.name), registrator.node_id)
     
-    def _trace_context(self, caller_frame:FrameInfo):
-        file = Path(caller_frame.filename)
-        context = self.graph.inquirer.find_context(file)
+    def _trace_context(self, caller_info:FrameInfo):
+        file = Path(caller_info.filename)
+        package = inspect.getmodule(caller_info.frame).__package__
+        context = self.graph.inquirer.find_context(package)
         
         if context is None:
             raise ReferenceError(f'{file} has no context initiated, use init_context')

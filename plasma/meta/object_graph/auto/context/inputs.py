@@ -43,7 +43,7 @@ def drill_down(graph:ContextGraph, node, objects:dict):
 
 def render(data:dict, indent:str, lines:list):
     for k, v in data.items():
-        if isinstance(k, Path):
+        if '.' in k:
             lines.append(f'{indent}{k}:{{')
             render(data[k], indent + '\t', lines)
             lines.append(f'{indent}}}')
