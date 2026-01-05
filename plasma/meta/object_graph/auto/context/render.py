@@ -28,8 +28,9 @@ def render_node(graph:ContextGraph, node, indent:str, lines:list, rendered:set):
         expansion = False
     elif node_type is Node.FACTORY:
         node_name += ':Factory'
-    elif node_type is Node.LEAF and value is not _empty:
-        node_name += f':{render_type(value)}'
+    elif node_type is Node.LEAF:
+        if value is not _empty:
+            node_name += f':{render_type(value)}'
         node_name = Color.RED.render(node_name)
     elif node_type is Node.SINGLETON:
         node_name += f'={render_type(type(value))}'
