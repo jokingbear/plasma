@@ -1,6 +1,6 @@
 from ..context_graph import Node, ContextGraph
 from .require import Require
-from pathlib import Path
+from .....functional.helpers.color_printer import Color
 
 
 class InputDict(dict):
@@ -48,4 +48,10 @@ def render(data:dict, indent:str, lines:list):
             render(data[k], indent + '\t', lines)
             lines.append(f'{indent}}}')
         else:
-            lines.append(f'{indent}{k}: {type(v).__name__}')
+            value = v
+            if isinstance(v, Require):
+                value = Color.RED.render(Require.__name__)
+            else:
+                value = Color.BLUE.render(type(v).__name__)
+
+            lines.append(f'{indent}{k}: {value}')

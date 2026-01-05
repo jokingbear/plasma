@@ -18,11 +18,17 @@ class Context(AutoPipe):
     def run(self, *inputs:str, **kwargs):
         assert len(inputs) > 0
         
-        results = {**kwargs}
-        for i in inputs:
-            init_object(self.graph, (self.name, i), results)
+        global_vars = {k: v for k, v in kwargs.items() if '.' not in k}
+        context_vars = {k: v for k,v in kwargs.items() if '.' in k}
+        for c in self.graph.inquirer.list_context():
+            if c not in context_vars:
+                context_vars[c] = {}
 
-        return pd.Series({i: results[self.name, i] for i in inputs}).loc[inputs]
+        context_vars[self.name] = global_vars
+        for i in inputs:
+            init_object(self.graph, (self.name, i), context_vars, global_vars)
+
+        return pd.Series({i: context_vars[self.name][i] for i in inputs}).loc[list(inputs)]
 
     def inputs(self, *names):
         return InputDict(self.graph, self.name, names)
@@ -31,32 +37,37 @@ class Context(AutoPipe):
         return render_context(self.graph, self.name)
 
 
-def init_object(graph:ContextGraph, node, initiated_objects:dict):
-    if node not in initiated_objects:
+def init_object(graph:ContextGraph, node, context_vars:dict, global_vars:dict):
+    context, node_name = node
+    if node_name not in context_vars[context]:
         node_type = graph.inquirer.type(node)
         context, node_name = node
 
         if node_type is Node.SINGLETON:
-            initiated_objects[node], = graph.inquirer.select(node, 'value')
+            obj, = graph.inquirer.select(node, 'value')
         elif node_type is Node.LEAF:
-            context, node_name = node
-            raise ReferenceError(f'there is no input value for {node_name} in {context}')
+            if node_name in global_vars:
+                obj = global_vars[node_name]
+            else:
+                raise ReferenceError(f'there is no input value for {node_name} in {context}')
         elif node_type is Node.FACTORY:
-            factory = {}
+            obj = {}
             for m in graph.successors(node):
-                init_object(graph, m, initiated_objects)
-                _, child_name = m
-                factory[child_name] = initiated_objects[m]
-            initiated_objects[node] = factory
+                init_object(graph, m, context_vars, global_vars)
+                child_context, child_name = m
+                obj[child_name] = context_vars[child_context][child_name]
         elif node_type is Node.DELEGATE:
             delegated_node, = graph.successors(node)
-            init_object(graph, delegated_node, initiated_objects)
-            initiated_objects[node] = delegated_node
+            init_object(graph, delegated_node, context_vars, global_vars)
+            delegated_context, delegated_name = delegated_node
+            obj = context_vars[delegated_context][delegated_name]
         else:
             args = {}
             for m in graph.successors(node):
-                init_object(graph, m, initiated_objects)
-                _, child_name = m
-                args[child_name] = initiated_objects[m]
+                init_object(graph, m, context_vars, global_vars)
+                child_context, child_name = m
+                args[child_name] = context_vars[child_context][child_name]
             initiator, = graph.inquirer.select(node, 'value')
-            initiated_objects[node] = initiator(**args)
+            obj = initiator(**args)
+        
+        context_vars[context][node_name] = obj
