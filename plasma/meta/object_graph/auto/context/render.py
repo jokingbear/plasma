@@ -20,7 +20,7 @@ def render_context(graph:ContextGraph, context):
 def render_node(graph:ContextGraph, node, indent:str, lines:list, rendered:set):
     _, node_name = node
     if isinstance(node_name, tuple):
-        node_name = ', '.join(str(n) for n in node_name)
+        node_name = str(node_name[-1])
     else:
         node_name = str(node_name)
 
