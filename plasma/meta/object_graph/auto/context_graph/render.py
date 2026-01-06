@@ -33,7 +33,7 @@ def render_context(graph:nx.DiGraph, inquirer:Inquirer, context):
 def render_node(graph:nx.DiGraph, inquirer:Inquirer, node, indent:str, lines:list, rendered:set):
     _, node_name = node
     if isinstance(node_name, tuple):
-        node_name = ', '.join(node_name)
+        node_name = ', '.join(str(n) for n in node_name)
     else:
         node_name = str(node_name)
 
