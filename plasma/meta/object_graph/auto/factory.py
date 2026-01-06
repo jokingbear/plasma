@@ -24,7 +24,7 @@ class Factory:
         assert len(names) > 0
         
         caller = get_caller_frame()
-        registrators = [Registrator(self.graph, self.context_name, n,  caller.filename) for n in names]
+        registrators = [Registrator(self.graph, self.context_name, (self.name, n),  caller.filename) for n in names]
         def decorator(cls):
             for r in registrators:
                 r.register_type(cls)
@@ -38,7 +38,7 @@ class Factory:
         caller = get_caller_frame()
         context, file = self._trace_context(caller)
         
-        registrator = Registrator(self.graph, context, key, file)
+        registrator = Registrator(self.graph, context, (self.name, key), file)
         registrator.register_singleton(value)
         self.graph.add_edge((self.context_name, self.name), registrator.node_id)
     

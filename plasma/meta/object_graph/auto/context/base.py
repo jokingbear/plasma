@@ -55,7 +55,7 @@ def init_object(graph:ContextGraph, node, context_vars:dict, global_vars:dict):
             for m in graph.successors(node):
                 init_object(graph, m, context_vars, global_vars)
                 child_context, child_name = m
-                obj[child_name] = context_vars[child_context][child_name]
+                obj[child_name[1]] = context_vars[child_context][child_name]
         elif node_type is Node.DELEGATE:
             delegated_node, = graph.successors(node)
             init_object(graph, delegated_node, context_vars, global_vars)
