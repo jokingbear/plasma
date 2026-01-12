@@ -10,7 +10,7 @@ class TimeIO:
         self.name = name
         self._start = time.time()
         self._end:float = None
-        self._args = None
+        self._args = []
         self._kwargs = {}
 
     @property
