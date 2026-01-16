@@ -1,7 +1,8 @@
 from .field import Field, Composite
+from .readable_meta import Readable
 
 
-class BaseModel:
+class BaseModel(metaclass=Readable):
     
     def __init_subclass__(cls):
         sub_fields = construct_field(cls)
@@ -9,9 +10,29 @@ class BaseModel:
         for name, field in sub_fields.items():
             setattr(cls, name, field)
 
+    @classmethod
+    def from_fields(cls, fields:dict[Field|Composite, object]):
+        data = {}
+        for field in fields:
+            resolve(fields, field, data)
+        
+        return cls.from_dict(data)
+
+    @classmethod
+    def from_dict(cls, data:dict[str, object]):
+        obj = cls()
+        for field_name, field_value in data.items():
+            annotation = cls.__annotations__[field_name]
+            if type(annotation) is Readable and issubclass(annotation, BaseModel):
+                setattr(obj, field_name, annotation.from_dict(field_value))
+            else:
+                setattr(obj, field_name, field_value)
+            
+        return obj
+
 
 def construct_field(cls:type, context=None):
-    if type(cls) is not type or not issubclass(cls, BaseModel): # generic type
+    if type(cls) is not Readable or not issubclass(cls, BaseModel): # generic type
         return Field(context)
     else:
         context = context or (cls.__name__,)
@@ -20,3 +41,19 @@ def construct_field(cls:type, context=None):
             return sub_fields
         else:
             return Composite(context, sub_fields)
+
+
+def resolve(fields_values:dict[Field|Composite, object], field:Field|Composite, results:dict):
+    if isinstance(field, Composite):
+        for sub_field in field.sub_fields:
+            resolve(fields_values, sub_field, results)
+    else:
+        _, *accessors, name = field.context
+        
+        temp_dict = results
+        for a in accessors:
+            if a not in temp_dict:
+                temp_dict[a] = {}
+            temp_dict = temp_dict[a]
+
+        temp_dict[name] = fields_values[field]
