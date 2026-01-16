@@ -1,14 +1,22 @@
 import re
+import os
 
 from setuptools import setup
 from pathlib import Path
 
 packages = [re.sub(r'\\|\/', '.', str(p.parent)) for p in Path('plasma').rglob('__init__.py')]
 
+lib_folder = os.path.dirname(os.path.realpath(__file__))
+requirement_path = f"{lib_folder}/requirements.txt"
+
+with open(requirement_path) as f:
+        install_requires = f.readlines()
+
 setup(
     name='plasma',
-    packages=['plasma', *packages],
-    url='https://github.com/jokingbear/research-idea',
+    version='4.1.0',
+    packages=[*packages],
     license='MIT',
     author='jokingbear',
+    install_requires=install_requires
 )
