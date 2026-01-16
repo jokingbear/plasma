@@ -43,13 +43,12 @@ def init_object(graph:ContextGraph, node, context_vars:dict, global_vars:dict):
         node_type = graph.inquirer.type(node)
         context, node_name = node
 
-        if node_type is Node.SINGLETON:
+        if node_name in global_vars:
+            obj = global_vars[node_name]
+        elif node_type is Node.SINGLETON:
             obj, = graph.inquirer.select(node, 'value')
         elif node_type is Node.LEAF:
-            if node_name in global_vars:
-                obj = global_vars[node_name]
-            else:
-                raise ReferenceError(f'there is no input value for {node_name} in {context}')
+            raise ReferenceError(f'there is no input value for {node_name} in {context}')
         elif node_type is Node.FACTORY:
             obj = {}
             for m in graph.successors(node):
