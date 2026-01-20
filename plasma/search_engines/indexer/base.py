@@ -18,7 +18,7 @@ class BaseIndexer(TokenGraph, F.AutoPipe):
         
         self.token_matcher = TokenMatcher(self._graph, token_threshold)
         
-        singletons = self._data[self._data['path'].map(len) <= 4].copy()
+        singletons = self._data
         singletons['db_token'] = singletons['path']
         singletons = singletons.explode('db_token')
         singletons = singletons[['db_token']]
