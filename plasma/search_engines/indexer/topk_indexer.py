@@ -19,7 +19,11 @@ class TopkIndexer(OffsetRefiner):
         # calculcate scores
         coverage_scores = results['matched_len'] / results['db_candidate'].map(len)
         results['coverage_score'] = coverage_scores.values
-        results['harmonic_score'] = hmean(results[['matching_score', 'coverage_score']].values, axis=1)
+        
+        if len(results) > 0:
+            results['harmonic_score'] = hmean(results[['matching_score', 'coverage_score']].values, axis=1)
+        else:
+            results['harmonic_score'] = []
         
         # group and get topk
         results = results\
