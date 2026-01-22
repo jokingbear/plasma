@@ -2,11 +2,11 @@ from .readable import ReadableClass
 from ..signature import Signature
 
 
-class AutoPipe(ReadableClass):
+class AutoPipe[**I, O](ReadableClass):
 
-    def run(self, *inputs, **kwargs):...
+    def run(self, *inputs, **kwargs) -> O:...
     
-    def __call__(self, *args, **kwds):
+    def __call__(self, *args:I.args, **kwds:I.kwargs) -> O:
         return self.run(*args, **kwds)
     
     def signature(self):
