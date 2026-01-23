@@ -14,7 +14,7 @@ class Meta:
         self._successors:dict[tuple, dict[object, set]] = {}
         self._predecessors:dict[tuple, dict[object, set]] = {}
     
-    def index(self, node_id, type):
+    def add(self, node_id, type):
         self._indices[type].add(node_id)
         
         data = self.graph.nodes[node_id]['data']
