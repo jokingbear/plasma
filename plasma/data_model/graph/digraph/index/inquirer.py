@@ -30,7 +30,7 @@ class Inquirer:
         ntype = self._type_getter(node_id)
         if succ_type is None:
             return self._graph.successors(node_id)
-        elif (ntype, succ_type) in self:
+        elif (ntype, succ_type) in self._successor_indices:
             return self._successor_indices[ntype, succ_type].get(node_id, set())
         
         return set()
@@ -39,7 +39,7 @@ class Inquirer:
         ntype = self._type_getter(node_id)
         if pred_type is None:
             return self._graph.predecessors(node_id)
-        elif (ntype, pred_type) in self:
+        elif (ntype, pred_type) in self._predcessor_indices:
             return self._predcessor_indices[ntype, pred_type].get(node_id, set())
         
         return set()

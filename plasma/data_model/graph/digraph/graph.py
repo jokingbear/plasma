@@ -2,6 +2,7 @@ import networkx as nx
 import itertools
 
 from .index import Index
+from .inquirer import Inquirer
 
 
 class DiGraph(nx.DiGraph):
@@ -11,6 +12,10 @@ class DiGraph(nx.DiGraph):
         
         self._index = Index(self, index_names)
 
+    @property
+    def inquirer(self):
+        return Inquirer(self, self._index)
+    
     def add_node(self, node_for_adding, type, data=None):
         super().add_node(node_for_adding, type=type, data=data)
         

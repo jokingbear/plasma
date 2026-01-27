@@ -21,7 +21,10 @@ class Index:
     
     @property
     def node_editor(self):
-        return NodeEditor(self.graph, self._indices, self._get_index_values)
+        return NodeEditor(self.graph, self._indices, 
+                          self._get_index_values, 
+                          self.edge_editor
+                        )
     
     @property
     def edge_editor(self):

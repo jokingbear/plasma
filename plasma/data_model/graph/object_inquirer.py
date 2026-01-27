@@ -18,7 +18,7 @@ class ObjectInquirer:
     def get(self, obj, chain_attr:str, default=None):
         attr_names = chain_attr.split('.')
         for n in attr_names:
-            obj_type = type(self.obj)
+            obj_type = type(obj)
             if re.search(r'^\d+$', n):
                 n = int(n)
             
