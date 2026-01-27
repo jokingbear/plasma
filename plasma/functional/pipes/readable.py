@@ -20,7 +20,7 @@ class ReadableClass:
             if isinstance(val, (str,int,float,bool)):
                 val_rep = self._format_primitive(val)
             else:
-                val_rep = self._format_complex(val_rep)
+                val_rep = self._format_complex(val)
 
             lines_rep = val_rep.split('\n')
 
