@@ -26,6 +26,7 @@ class DiGraph(nx.DiGraph):
         valid_nodes = []
         for n, *attrs in iter1:
             assert len(attrs) == 1
+            attrs, = attrs
             assert 'type' in attrs
             assert 'data' in attrs
             if n in self:
