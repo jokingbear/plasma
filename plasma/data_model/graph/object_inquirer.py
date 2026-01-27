@@ -15,7 +15,7 @@ class ObjectInquirer:
             pd.Series: lambda s, k: s.loc[k]
         }
     
-    def query(self, obj, chain_attr:str, default=EmptyResult):
+    def get(self, obj, chain_attr:str, default=None):
         attr_names = chain_attr.split('.')
         for n in attr_names:
             obj_type = type(self.obj)
@@ -34,6 +34,7 @@ class ObjectInquirer:
             
             obj = qresult
             if obj is EmptyResult:
+                obj = default
                 break
                 
         return obj
