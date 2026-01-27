@@ -14,8 +14,14 @@ class Inquirer:
         self.graph = graph
         self._index = index
     
-    def nodes(self, index_value, *attrs:str, index_name:str=None):
-        nodes = self._index.inquirer.nodes(index_value, index_name)
+    def nodes(self, node_type, *attrs:str, **other_index_values):
+        index_inquirer = self._index.inquirer
+        nodes = index_inquirer.nodes(node_type)
+        for index_name, index_value in other_index_values.items():
+            related_nodes = index_inquirer.nodes(index_value, index_name)
+            anchor, reference = sorted([nodes, related_nodes], key=len)
+            nodes = anchor.intersection(reference)
+
         for n in nodes:
             data = self._index.data(n)
             yield select(n, data, ObjectInquirer(), attrs)
