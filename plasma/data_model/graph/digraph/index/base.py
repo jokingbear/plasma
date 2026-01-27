@@ -55,3 +55,7 @@ class Index:
 
     def data(self, node_id):
         return self.graph.nodes[node_id]['data']
+
+    @property
+    def names(self):
+        return [k for k in self._indices if k != 'type']
