@@ -44,6 +44,12 @@ class Inquirer:
         results = select(node_id, data, ObjectInquirer(), attrs)
         return results[1:]
 
+    def type(self, node_id):
+        return self._index.type(node_id)
+    
+    def data(self, node_id):
+        return self._index.data(node_id)
+    
 
 def select(node_id, data, attr_inquirer:ObjectInquirer, attrs:tuple[str]):
     if len(attrs) == 0:
