@@ -1,1 +1,1 @@
-from .segment_indexer import SegmentIndexer as GraphIndexer
+from .engine import GraphIndexer
