@@ -2,6 +2,7 @@ import networkx as nx
 
 from .index import Index
 from ..object_inquirer import ObjectInquirer
+from ....functional import auto_map
 
 
 class Inquirer:
@@ -14,35 +15,37 @@ class Inquirer:
         self.graph = graph
         self._index = index
     
-    def nodes(self, node_type, *attrs:str, **other_index_values):
+    def nodes(self, node_type:object|list, *attrs:str, **index_map:object|list):
         index_inquirer = self._index.inquirer
-        nodes = index_inquirer.nodes(node_type)
-        for index_name, index_value in other_index_values.items():
-            related_nodes = index_inquirer.nodes(index_value, index_name)
-            anchor, reference = sorted([nodes, related_nodes], key=len)
-            nodes = anchor.intersection(reference)
+        index_map[None] = node_type
+        values_keys = sorted(
+                            ((idv, idk) for idk, idv in index_map.items()), 
+                            key=auto_map(index_inquirer.rank), reverse=True
+                        )
+        nodes = index_inquirer.nodes(*values_keys[0])
+        for vk in values_keys[1:]:
+            nodes.update(index_inquirer.nodes(*vk))
 
         for n in nodes:
             data = self._index.data(n)
             yield select(n, data, ObjectInquirer(), attrs)
     
-    def successors(self, node_id, *attrs:str, succ_type=None):
+    def successors(self, node_id, succ_type:object|list=None, *attrs:str):
         successors = self._index.inquirer.successors(node_id, succ_type)
         for s in successors:
             data = self._index.data(s)
             yield select(s, data, ObjectInquirer(), attrs)
     
-    def predecessors(self, node_id, *attrs:str, pred_type=None):
+    def predecessors(self, node_id, pred_type:object|list=None, *attrs:str):
         predecessors = self._index.inquirer.predecessors(node_id, pred_type)
         for p in predecessors:
             data = self._index.data(p)
             yield select(p, data, ObjectInquirer(), attrs)
 
     def select(self, node_id, *attrs:str):
-        data = self._index.data(node_id)
         assert len(attrs) > 0
-        results = select(node_id, data, ObjectInquirer(), attrs)
-        return results[1:]
+        data = self.data(node_id)
+        return ObjectInquirer().select(data, attrs)
 
     def type(self, node_id):
         return self._index.type(node_id)
@@ -55,5 +58,4 @@ def select(node_id, data, attr_inquirer:ObjectInquirer, attrs:tuple[str]):
     if len(attrs) == 0:
         return node_id
     else:
-        selected_data = (attr_inquirer.get(data, a) for a in attrs)
-        return node_id, *selected_data
+        return node_id, *attr_inquirer.select(data, attrs)

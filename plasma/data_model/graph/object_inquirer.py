@@ -39,5 +39,9 @@ class ObjectInquirer:
                 
         return obj
 
+    def select(self, obj, attrs, default=None):
+        for a in attrs:
+            yield self.get(obj, a, default)
+    
     def register_type(self, t:type, func:Callable[[object, int|str], object]):
         self._type_accessor[t] = func
