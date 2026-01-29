@@ -14,7 +14,7 @@ class Inquirer:
         self.graph = graph
         self._index = index
     
-    def nodes(self, node_type, *attrs:str, **other_index_values):
+    def nodes(self, node_type:object|list, *attrs:str, **other_index_values:object|list):
         index_inquirer = self._index.inquirer
         nodes = index_inquirer.nodes(node_type)
         for index_name, index_value in other_index_values.items():
@@ -26,13 +26,13 @@ class Inquirer:
             data = self._index.data(n)
             yield select(n, data, ObjectInquirer(), attrs)
     
-    def successors(self, node_id, *attrs:str, succ_type=None):
+    def successors(self, node_id, succ_type=None, *attrs:str,):
         successors = self._index.inquirer.successors(node_id, succ_type)
         for s in successors:
             data = self._index.data(s)
             yield select(s, data, ObjectInquirer(), attrs)
     
-    def predecessors(self, node_id, *attrs:str, pred_type=None):
+    def predecessors(self, node_id, pred_type=None, *attrs:str):
         predecessors = self._index.inquirer.predecessors(node_id, pred_type)
         for p in predecessors:
             data = self._index.data(p)
