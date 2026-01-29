@@ -39,18 +39,21 @@ class PathInquirer(AutoPipe[[str], list[Match]]):
         solver = Solver(position_graph, self.index.get_path_args)
         for position_path in paths:
             segments.extend(solver(position_path))
-    
-        refined_segments = self.segment_refiner(segments)
 
-        grouped_segments = itertools.groupby(refined_segments, key=lambda s: (s.token_start, s.token_end))
         matches = []
-        for _, gsegments in grouped_segments:
-            gsegments = sorted(gsegments, key=lambda s:s.score, reverse=True)
-            
-            matched_paths:list[Match] = []
-            for s in gsegments:
-                matched_paths.extend(s.get_matches(qtoken_frame, self.index))
-            matched_paths = sorted(matched_paths, key=lambda p:(p.matching_score, p.matched_len, p.coverage_score), reverse=True)
-            matches.extend(matched_paths[:self.topk])
+        if len(segments) > 0:
+            refined_segments = self.segment_refiner(segments)
+            grouped_segments = itertools.groupby(refined_segments, key=lambda s: (s.token_start, s.token_end))
+            for _, gsegments in grouped_segments:
+                gsegments = sorted(gsegments, key=lambda s:s.score, reverse=True)
+                
+                matched_paths:list[Match] = []
+                for s in gsegments:
+                    matched_paths.extend(s.get_matches(qtoken_frame, self.index))
+                matched_paths = sorted(matched_paths, key=lambda p:(p.matching_score, p.matched_len, p.coverage_score), reverse=True)
+                matches.extend(matched_paths[:self.topk])
 
-        return self.match_refiner(matches)
+            if len(matches) > 0:
+                matches = self.match_refiner(matches)
+        
+        return matches
