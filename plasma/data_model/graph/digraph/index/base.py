@@ -39,12 +39,10 @@ class Index:
 
     def _get_index_values(self, node_id):
         results = {'type': self.type(node_id)}
-        data = self.data(node_id)
-        
-        inquirer = ObjectInquirer()   
+        inquirer = ObjectInquirer(self.data(node_id))   
         for k in self._indices:
             if k != 'type':
-                index_value = inquirer.get(data, k, None)
+                index_value = inquirer.get(k)
                 if index_value is not None:
                     results[k] = index_value
 

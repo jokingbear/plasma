@@ -9,14 +9,17 @@ class EmptyResult:...
 
 class ObjectInquirer:
     
-    def __init__(self):        
+    def __init__(self, obj):
+        self.obj = obj
+                
         self._type_accessor = {
             pd.DataFrame: lambda frame, i: frame.iloc[i],
             pd.Series: lambda s, k: s.loc[k]
         }
     
-    def get(self, obj, chain_attr:str, default=None):
+    def get(self, chain_attr:str, default=None):
         attr_names = chain_attr.split('.')
+        obj = self.obj
         for n in attr_names:
             obj_type = type(obj)
             if re.search(r'^\d+$', n):
@@ -39,9 +42,9 @@ class ObjectInquirer:
                 
         return obj
 
-    def select(self, obj, attrs, default=None):
+    def select(self, attrs, default=None):
         for a in attrs:
-            yield self.get(obj, a, default)
+            yield self.get(a, default)
     
     def register_type(self, t:type, func:Callable[[object, int|str], object]):
         self._type_accessor[t] = func
