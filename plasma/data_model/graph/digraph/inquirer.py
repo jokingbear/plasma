@@ -63,3 +63,11 @@ def select(node_id, data_inquirer:ObjectInquirer, attrs:tuple[str]):
         return node_id
     else:
         return node_id, *data_inquirer.select(attrs)
+
+
+class NodeInquirer:
+    
+    def __init__(self):
+        pass
+
+class EdgeInquirer:pass

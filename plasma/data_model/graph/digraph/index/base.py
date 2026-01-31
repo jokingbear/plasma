@@ -13,11 +13,8 @@ class Index:
         assert 'type' not in index_names
         
         self.graph = graph
-        indices = {n: defaultdict(lambda: set()) for n in index_names}
-        indices['type'] = defaultdict(lambda: set())    
-        self._indices = indices
-        self._successors = defaultdict(lambda: defaultdict(lambda: set()))
-        self._predecessors = defaultdict(lambda: defaultdict(lambda: set()))
+        self._indices = nx.DiGraph()
+        self._edges = defaultdict[tuple, set](lambda: set())
     
     @property
     def node_editor(self):
