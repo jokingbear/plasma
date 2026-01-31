@@ -1,5 +1,6 @@
 from .field import Field, Composite
-from .readable_meta import Readable
+from .meta import Readable
+from .repr import render_lines
 
 
 class BaseModel(metaclass=Readable):
@@ -30,6 +31,12 @@ class BaseModel(metaclass=Readable):
             
         return obj
 
+    def __repr__(self):
+        lines = []
+        render_lines(None, self, lines, '')
+        
+        return '\n'.join(lines)
+
 
 def construct_field(cls:type, context=None):
     if type(cls) is not Readable or not issubclass(cls, BaseModel): # generic type
@@ -56,4 +63,4 @@ def resolve(fields_values:dict[Field|Composite, object], field:Field|Composite, 
                 temp_dict[a] = {}
             temp_dict = temp_dict[a]
 
-        temp_dict[name] = fields_values[field]
+        temp_dict[name] = fields_values.get(field, None)
