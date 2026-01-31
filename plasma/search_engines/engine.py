@@ -16,10 +16,9 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
                 token_threshold=0.7, topk=5,
             ):
         super().__init__()
-        assert len(data) == len(set(data)), 'data must be unique'
         
         tokenizer = RegexTokenizer(tokenizer)
-        index = Index([d.lower() for d in data], tokenizer)
+        index = Index(data, tokenizer)
         token_matcher = TokenMatcher(index, token_threshold)
         
         self._index = index

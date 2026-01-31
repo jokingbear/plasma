@@ -8,12 +8,14 @@ from collections import defaultdict
 class Index:
     
     def __init__(self, data:tuple[str], tokenizer:Callable[[str], pd.DataFrame]):
+        assert len(data) == len(set(data)), 'data must be unique'
+        
         token2positions = defaultdict[str, dict[TokenPosition, tuple[int, int]]](lambda: {})
         graph = nx.DiGraph()
         path_args = {}
         paths:list[tuple[str]] = []
         for i, d in enumerate(data):
-            token_frame = tokenizer(d)
+            token_frame = tokenizer(d.lower())
             path = tuple(token_frame['token'])
             for token_arg, start, end, token in token_frame.itertuples(index=True):
                 position = TokenPosition(i, token_arg)
