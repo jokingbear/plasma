@@ -2,15 +2,15 @@ import itertools
 
 from ..index import Index
 from .....functional import auto_map
-from typing import Callable, Hashable, Iterable, Self
+from typing import Callable, Hashable, Iterator
 from ...object_inquirer import ObjectInquirer
 
 
-class Nodes(Iterable[Hashable|tuple]):
+class Nodes(Iterator[Hashable|tuple]):
     
     def __init__(self, 
                 index:Index, 
-                ids:Iterable[Hashable],
+                ids:Iterator[Hashable],
                 attributes:set[Hashable],
                 default
             ):
@@ -21,28 +21,29 @@ class Nodes(Iterable[Hashable|tuple]):
         self.default = default
     
     def select(self, *attributes:Hashable, default=None, override=True):
-        iterable1, iterable2 = itertools.tee(self.ids)
-        self._ids = iterable1
+        new_iterable = self._clone()
         new_attributes = set(attributes) if override else self.attributes.union(attributes)
-        return Nodes(self._index, iterable2, new_attributes, default)
+        return Nodes(self._index, new_iterable, new_attributes, default)
 
     def filter(self, *predicates:Callable[[Hashable, dict], bool]):
-        iterable1, iterable2 = itertools.tee(self.ids)
-        iterable2 = (
+        new_iterator = self._clone()
+        new_iterator = (
             (i, ObjectInquirer(self._index.data(i)).select(self.attributes)) for i in self._ids
             if all(p(i, {}) if len(self.attributes) == 0 
                    else None for p in predicates)
         )
-        iterable2 = (i for i, data in iterable2 if all(p(i, data) for p in predicates))
-        self._ids = iterable1
-        return Nodes(self._index, iterable2, self.attributes, self.default)
+        new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
+        return Nodes(self._index, new_iterator, self.attributes, self.default)
     
-    def unwind[V](self, list_func:Callable[[Hashable, dict], Iterable[V]]) -> Iterable[V]:
-        pass
+    def unwind[V](self, list_func:Callable[[Hashable, dict], Iterator[V]]):
+        for i in self._clone():
+            data = ObjectInquirer(self._index.data(i)).select(self.attributes)
+            for new_value in list_func(i, data):
+                yield new_value
     
     def accumulate[V](self, initial:V, func:Callable[[V, Hashable, dict], V]) -> V:
         running_value = initial
-        for i in self._ids:
+        for i in self._clone():
             data_inquirer = ObjectInquirer(self._index.data(i))
             selected_data = data_inquirer.select(self.attributes, self.default)
             running_value = func(running_value, i, selected_data)
@@ -50,9 +51,14 @@ class Nodes(Iterable[Hashable|tuple]):
         return running_value
     
     def __iter__(self):
-        for i in self._ids:
+        for i in self._clone():
             if len(self.attributes) > 0:
                 data_inquirer = ObjectInquirer(self._index.data(i))
                 yield i, *data_inquirer.select(self.attributes, self.default)
             else:
                 yield i
+
+    def _clone(self):
+        iterable1, iterable2 = itertools.tee(self._ids)
+        self._ids = iterable1
+        return iterable2
