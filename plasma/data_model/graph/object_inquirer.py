@@ -43,8 +43,25 @@ class ObjectInquirer:
         return obj
 
     def select(self, attrs, default=None):
-        for a in attrs:
-            yield self.get(a, default)
+        return TupleDict(attrs, [self.get(a, default) for a in attrs])
     
     def register_type(self, t:type, func:Callable[[object, int|str], object]):
         self._type_accessor[t] = func
+
+
+class TupleDict:
+    
+    def __init__(self, 
+                names:tuple, 
+                values:tuple
+            ):
+        
+        self._dict = {n: v for n, v in zip(names, values)}
+        self._tuple = values
+    
+    def __getitem__(self, name):
+        return self._dict[name]
+    
+    def __iter__(self):
+        for v in self._tuple:
+            yield v

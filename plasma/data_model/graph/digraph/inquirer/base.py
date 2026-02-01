@@ -1,8 +1,9 @@
 import networkx as nx
 
-from .index import Index
-from ..object_inquirer import ObjectInquirer
-from ....functional import auto_map
+from ..index import Index
+from ...object_inquirer import ObjectInquirer
+from .....functional import auto_map
+from .nodes import Nodes
 
 
 class Inquirer:
@@ -15,7 +16,7 @@ class Inquirer:
         self.graph = graph
         self._index = index
     
-    def nodes(self, node_type:object|list=None, *attrs:str, **index_map:object|list):
+    def nodes(self, node_type:object|list=None, **index_map:object|list):
         assert node_type is not None or len(index_map) > 0, 'must at least use one index'
         
         index_inquirer = self._index.inquirer
@@ -30,9 +31,7 @@ class Inquirer:
         for vk in values_keys[1:]:
             nodes.intersection_update(index_inquirer.nodes(*vk))
 
-        for n in nodes:
-            data = self._index.data(n)
-            yield select(n, ObjectInquirer(data), attrs)
+        return Nodes(self._index, nodes)
     
     def successors(self, node_id, succ_type:object|list=None, *attrs:str):
         successors = self._index.inquirer.successors(node_id, succ_type)
