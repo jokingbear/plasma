@@ -56,12 +56,18 @@ class TupleDict:
         self._dict = {n: v for n, v in zip(names, values)}
         self._tuple = values
     
+    @property
     def selectors(self):
         for n in self._dict:
             yield n
     
+    @property
     def items(self):
         return self._dict.items()
+    
+    @property
+    def values(self):
+        return self._tuple
     
     def __getitem__(self, name):
         return self._dict[name]
