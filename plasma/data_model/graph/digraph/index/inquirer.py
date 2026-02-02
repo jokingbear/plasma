@@ -56,6 +56,18 @@ class Inquirer:
         index = self._indices[index_name]
         return sum(len(index.get(v, [])) for v in index_values)
 
+    def in_degree(self, node_id, predecessor_types:object|list):
+        pred_types = standardize_value(predecessor_types)
+        node_type = self._type_getter(node_id)
+        return sum(len(self._predcessor_indices.get((node_type, pt), [])) 
+                   for pt in pred_types)
+
+    def out_degree(self, node_id, successor_types:object|list):
+        succ_types = standardize_value(successor_types)
+        node_type = self._type_getter(node_id)
+        return sum(len(self._predcessor_indices.get((node_type, st))) 
+                   for st in succ_types)
+
 
 def standardize_value(values:object|list|None):
     if values is None:
