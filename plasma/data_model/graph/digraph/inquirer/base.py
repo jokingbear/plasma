@@ -33,17 +33,13 @@ class Inquirer:
 
         return Nodes(self._index, nodes)
     
-    def successors(self, node_id, succ_type:object|list=None, *attrs:str):
+    def successors(self, node_id, succ_type:object|list=None):
         successors = self._index.inquirer.successors(node_id, succ_type)
-        for s in successors:
-            data = self._index.data(s)
-            yield select(s, ObjectInquirer(data), attrs)
+        return Nodes(self._index, successors)
     
-    def predecessors(self, node_id, pred_type:object|list=None, *attrs:str):
+    def predecessors(self, node_id, pred_type:object|list=None):
         predecessors = self._index.inquirer.predecessors(node_id, pred_type)
-        for p in predecessors:
-            data = self._index.data(p)
-            yield select(p, ObjectInquirer(data), attrs)
+        return Nodes(self._index, predecessors)
 
     def select(self, node_id, *attrs:str):
         assert len(attrs) > 0
