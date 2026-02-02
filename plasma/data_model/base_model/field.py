@@ -7,11 +7,11 @@ class Field:
         return '.'.join(str(c) for c in self.context)
 
 
-class Composite:
+class Composite(Field):
     
     def __init__(self, context, sub_fields:dict[str, Field]):
-        self.context = context
-        
+        super().__init__(context)
+
         for name, field in sub_fields.items():
             setattr(self, name, field)
             

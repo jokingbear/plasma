@@ -1,6 +1,7 @@
 import pandas as pd
 
 from typing import Callable
+from ..base_model import Field
 
 
 class EmptyResult:...
@@ -16,8 +17,12 @@ class ObjectInquirer:
             pd.Series: lambda s, k: s.loc[k]
         }
     
-    def get(self, chain_attr:str, default=None):
-        attr_names = chain_attr.split('.')
+    def get(self, chain_attr:str|Field, default=None):
+        if isinstance(chain_attr, str):
+            attr_names = chain_attr.split('.')
+        else:
+            attr_names = chain_attr.context[1:]
+
         obj = self.obj
         for n in attr_names:
             obj_type = type(obj)

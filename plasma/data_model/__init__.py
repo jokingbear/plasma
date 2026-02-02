@@ -1,4 +1,5 @@
 from .base_model import BaseModel
+from .graph import ObjectInquirer
 from warnings import warn
 
 
