@@ -16,6 +16,3 @@ class Composite(Field):
             setattr(self, name, field)
             
         self.sub_fields = sub_fields.values()
-
-    def __repr__(self):
-        return '.'.join(str(c) for c in self.context)
