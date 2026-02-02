@@ -23,12 +23,12 @@ class Timer:
         log_func(self._io)
         self._io = None
 
-    def __call__(self, func):
+    def __call__[**I, O](self, func:Callable[I, O]):
         name = func.__qualname__
         self.name = name
         
         @wraps(func)
-        def timed_func(*args, **kwargs):
+        def timed_func(*args:I.args, **kwargs:I.kwargs) -> O:
             with self as timeio:
                 results = func(*args, **kwargs)
                 timeio.update_params(args, kwargs)

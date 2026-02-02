@@ -4,7 +4,7 @@ import pandas as pd
 from ..functional import AutoPipe
 
 
-class RegexTokenizer(AutoPipe):
+class RegexTokenizer(AutoPipe[[str], pd.DataFrame]):
 
     def __init__(self, pattern):
         super().__init__()

@@ -6,7 +6,7 @@ from functools import wraps
 
 class ForwardWrapper:
     
-    def prepend(self,  trainer:Trainer, i:int, inputs):
+    def prepend(self, trainer:Trainer, i:int, inputs):
         pass
     
     def append(self, trainer:Trainer, i:int, inputs, outputs:torch.Tensor):

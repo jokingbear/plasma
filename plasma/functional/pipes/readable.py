@@ -17,7 +17,11 @@ class ReadableClass:
         indent = ' ' * 2
         for attr in self._marked_attributes:
             val = getattr(self, attr)
-            val_rep = repr(val)
+            if isinstance(val, (str,int,float,bool)):
+                val_rep = self._format_primitive(val)
+            else:
+                val_rep = self._format_complex(val)
+
             lines_rep = val_rep.split('\n')
 
             if len(lines_rep) == 1:
@@ -34,3 +38,9 @@ class ReadableClass:
             rep = '\n' + rep
             rep = re.sub(r'\([\t\n\s]{1,}\)', '()', rep)
         return f'{type(self).__name__}({rep})'
+
+    def _format_primitive(self, val:str|int|float|bool):
+        return repr(val)
+    
+    def _format_complex(self, val:object):
+        return repr(val)

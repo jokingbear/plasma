@@ -1,25 +1,24 @@
-import networkx as nx
-import pandas as pd
 import difflib
 
 from ..functional import AutoPipe
+from collections import defaultdict
+from .index import Index
 
 
-class TokenMatcher(AutoPipe):
+class TokenMatcher(AutoPipe[[list[str]], dict[str, dict[str, float]]]):
 
-    def __init__(self, graph: nx.DiGraph, threshold):
+    def __init__(self, index:Index, threshold:float):
         super().__init__()
 
-        self._graph = graph
+        self._index = index
         self.threshold = threshold
     
     def run(self, tokens:list[str]):
-        matches = []
-        for i, tk in enumerate(tokens):
-            for db_tk in self._graph.nodes:
-                score = difflib.SequenceMatcher(None, tk, db_tk).ratio()
+        matches = defaultdict(lambda: {})
+        for qtk in tokens:
+            for db_tk in self._index.tokens:
+                score = difflib.SequenceMatcher(None, qtk, db_tk).ratio()
                 if score >= self.threshold:
-                    matches.append([i, tk, db_tk, score])
+                    matches[qtk][db_tk] = score
 
-        return pd.DataFrame(matches, columns=['offset', 'token', 'db_token', 'score'])\
-                    .set_index(['offset', 'token']).sort_index()
+        return matches
