@@ -11,23 +11,23 @@ class ExceptionIO:
     exception:Exception
 
 
-class ExceptionLogger:
+class ExceptionLogger[V]:
 
     IO = ExceptionIO
     
     def __init__(self, name=None, 
                  log_func:Callable[[ExceptionIO], None]=print, raise_on_exception=True, 
-                 on_exception_return:Callable[[ExceptionIO], Any]|Any=None) -> None:
+                 on_exception_return:Callable[[ExceptionIO], V]|V=None) -> None:
         self.name = name
         self.log_func = log_func
         self.raise_on_exception = raise_on_exception
         self.on_exception_value = on_exception_return
     
-    def __call__(self, function):
+    def __call__[**I, O](self, function:Callable[I, O]):
         name = self.name or function.__qualname__
         
         @wraps(function)
-        def run(*args, **kwargs):
+        def run(*args:I.args, **kwargs:I.kwargs) -> O|V:
             try:
                 results = function(*args, **kwargs)
                 return results
