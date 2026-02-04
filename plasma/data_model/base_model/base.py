@@ -5,6 +5,10 @@ from .repr import render_lines
 
 class BaseModel(metaclass=Readable):
     
+    def __init__(self):
+        for a in self.__annotations__:
+            setattr(self, a, None)
+    
     def __init_subclass__(cls):
         sub_fields = construct_field(cls)
         
@@ -42,9 +46,9 @@ def construct_field(cls:type, context=None):
     if type(cls) is not Readable or not issubclass(cls, BaseModel): # generic type
         return Field(context)
     else:
-        context = context or (cls.__name__,)
+        context = context or (cls,)
         sub_fields = {name: construct_field(annotation, (*context, name)) for name, annotation in cls.__annotations__.items()}
-        if context == (cls.__name__,):
+        if context == (cls,):
             return sub_fields
         else:
             return Composite(context, sub_fields)

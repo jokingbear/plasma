@@ -4,7 +4,8 @@ class Field:
         self.context = context
     
     def __repr__(self):
-        return '.'.join(str(c) for c in self.context)
+        type_str = self.context[0].__name__
+        return type_str + '.' + '.'.join(str(c) for c in self.context[1:])
 
 
 class Composite(Field):
