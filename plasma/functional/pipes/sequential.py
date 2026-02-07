@@ -1,7 +1,7 @@
 from .state import State
 
 
-class SequentialPipe[I, O](State):
+class SequentialPipe[I, O](State[[I], O]):
 
     def __init__(self, **pipes):
         super().__init__()

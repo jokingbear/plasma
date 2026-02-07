@@ -3,9 +3,9 @@ from ..pipes import AutoPipe, SequentialPipe
 from ..signature import Signature
 
 
-class auto_map(AutoPipe):
+class auto_map[O](AutoPipe[[tuple], O]):
     
-    def __init__(self, func):
+    def __init__(self, func:Callable[..., O]):
         super().__init__()
         assert not isinstance(func, auto_map)
         self.func = func

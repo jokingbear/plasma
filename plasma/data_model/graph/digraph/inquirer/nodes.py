@@ -1,8 +1,9 @@
 import itertools
+import networkx as nx
 
 from ..index import Index
-from typing import Callable, Hashable, Iterator
 from ...object_inquirer import ObjectInquirer, TupleDict
+from typing import Callable, Hashable, Iterator
 
 
 class Nodes:
@@ -11,43 +12,48 @@ class Nodes:
                 index:Index, 
                 ids:Iterator[Hashable],
                 attributes:set[Hashable]=(),
+                selector_funcs:dict[str, Callable[[Hashable, nx.Digraph], object]]={},
                 default=None,
             ):
 
         self._ids = ids
         self._index = index
-        self.attributes = set(attributes)
-        self.default = default
+        self._attributes = set(attributes)
+        self._select_funcs = selector_funcs
+        self._default = default
     
-    def select(self, *attributes:Hashable, default=None, override=True):
+    def select(self, *attributes:Hashable, default=None, override=True,
+                **select_funcs:Callable[[Hashable, nx.DiGraph], object],
+            ):
         new_iterable = self._clone()
-        new_attributes = set(attributes) if override else self.attributes.union(attributes)
-        return Nodes(self._index, new_iterable, new_attributes, default)
+        new_attributes = set(attributes) if override else self._attributes.union(attributes)
+        new_selectors = select_funcs if override else {**select_funcs, **self._select_funcs}
+        return Nodes(self._index, new_iterable, new_attributes, new_selectors, default)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
         new_iterator = self._clone()
         new_iterator = (
-            (i, ObjectInquirer(self._index.data(i)).select(self.attributes)) 
+            (i, ObjectInquirer(self._index.data(i)).select(self._attributes)) 
             for i in self._ids
         )
         
         new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
-        return Nodes(self._index, new_iterator, self.attributes, self.default)
+        return Nodes(self._index, new_iterator, self._attributes, self._default)
     
     def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterator[V]]):
         for i in self._clone():
-            data = ObjectInquirer(self._index.data(i)).select(self.attributes)
+            data = ObjectInquirer(self._index.data(i)).select(self._attributes)
             for new_value in list_func(i, data):
                 yield new_value
     
     def accumulate[V](self, 
-                      initial:V, func:Callable[[V, Hashable, TupleDict], V], 
-                      stateful=True
+                      initial:V, func:Callable[[V, Hashable, TupleDict], V|None], 
+                      stateful=True # check if func update intial V
                 ) -> V:
         running_value = initial
         for i in self._clone():
             data_inquirer = ObjectInquirer(self._index.data(i))
-            selected_data = data_inquirer.select(self.attributes, self.default)
+            selected_data = data_inquirer.select(self._attributes, self._default)
             new_running_value = func(running_value, i, selected_data)
             if not stateful:
                 running_value = new_running_value
@@ -56,9 +62,9 @@ class Nodes:
     
     def __iter__(self):
         for i in self._clone():
-            if len(self.attributes) > 0:
+            if len(self._attributes) > 0:
                 data_inquirer = ObjectInquirer(self._index.data(i))
-                yield i, *data_inquirer.select(self.attributes, self.default)
+                yield i, *data_inquirer.select(self._attributes, self._default)
             else:
                 yield i
 
