@@ -2,8 +2,8 @@ import itertools
 import networkx as nx
 
 from ..index import Index
-from typing import Callable, Hashable, Iterator
 from ...object_inquirer import ObjectInquirer, TupleDict
+from typing import Callable, Hashable, Iterator
 
 
 class Nodes:
@@ -47,8 +47,8 @@ class Nodes:
                 yield new_value
     
     def accumulate[V](self, 
-                      initial:V, func:Callable[[V, Hashable, TupleDict], V], 
-                      stateful=True
+                      initial:V, func:Callable[[V, Hashable, TupleDict], V|None], 
+                      stateful=True # check if func update intial V
                 ) -> V:
         running_value = initial
         for i in self._clone():
