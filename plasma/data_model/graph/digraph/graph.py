@@ -16,8 +16,8 @@ class DiGraph(nx.DiGraph):
     def inquirer(self):
         return Inquirer(self, self._index)
     
-    def add_node(self, node_for_adding, type, data=None):
-        super().add_node(node_for_adding, type=type, data=data)
+    def add_node(self, node_for_adding, type, data=None, **additional_meta):
+        super().add_node(node_for_adding, type=type, data=data, **additional_meta)
         
         self._index.node_editor.add(node_for_adding)
     
