@@ -64,7 +64,10 @@ class Nodes:
         for i in self._clone():
             if len(self._attributes) > 0:
                 data_inquirer = ObjectInquirer(self._index.data(i))
-                yield i, *data_inquirer.select(self._attributes, self._default)
+                data = data_inquirer.select(self._attributes, self._default)
+                additional_data = {n: f(i, self._index.graph) for n, f in self._select_funcs.items()}
+                final_data = data.update(additional_data)
+                yield i, *final_data
             else:
                 yield i
 

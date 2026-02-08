@@ -1,4 +1,5 @@
 import pandas as pd
+import itertools
 
 from typing import Callable
 from ..base_model import Field
@@ -58,25 +59,32 @@ class TupleDict:
                 values:tuple
             ):
         
-        self._dict = {n: v for n, v in zip(names, values)}
-        self._tuple = values
+        
+        self._name2args = {n: i for i, n in names}
+        self._values = values
     
     @property
     def selectors(self):
-        for n in self._dict:
+        for n in self._name2args:
             yield n
     
     @property
     def items(self):
-        return self._dict.items()
+        return zip(self._name2args, self._values)
     
     @property
     def values(self):
-        return self._tuple
+        return self._values
+    
+    def update(self, new_values:dict):
+        return TupleDict(
+            itertools.chain(self._name2args.keys(), new_values.keys()),
+            itertools.chain(self._values, new_values.values())
+        )
     
     def __getitem__(self, name):
-        return self._dict[name]
+        return self._values[self._name2args[name]]
     
     def __iter__(self):
-        for v in self._tuple:
+        for v in self._values:
             yield v
