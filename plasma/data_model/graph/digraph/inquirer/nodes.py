@@ -12,7 +12,7 @@ class Nodes:
                 index:Index, 
                 ids:Iterator[Hashable],
                 attributes:set[Hashable]=(),
-                selector_funcs:dict[str, Callable[[Hashable, nx.Digraph], object]]={},
+                selector_funcs:dict[str, Callable[[Hashable, nx.DiGraph], object]]={},
                 default=None,
             ):
 
