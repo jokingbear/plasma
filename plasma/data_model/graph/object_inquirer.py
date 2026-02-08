@@ -1,4 +1,5 @@
 import pandas as pd
+import itertools
 
 from typing import Callable
 from ..base_model import Field
@@ -45,7 +46,7 @@ class ObjectInquirer:
         return obj
 
     def select(self, attrs, default=None):
-        return TupleDict(attrs, [self.get(a, default) for a in attrs])
+        return TupleDict({a: self.get(a, default) for a in attrs})
     
     def register_type[T](self, t:type[T], func:Callable[[T, str], object]):
         self._type_accessor[t] = func
@@ -53,13 +54,8 @@ class ObjectInquirer:
 
 class TupleDict:
     
-    def __init__(self, 
-                names:tuple, 
-                values:tuple
-            ):
-        
-        self._dict = {n: v for n, v in zip(names, values)}
-        self._tuple = values
+    def __init__(self, data:dict):
+        self._dict = data
     
     @property
     def selectors(self):
@@ -72,11 +68,14 @@ class TupleDict:
     
     @property
     def values(self):
-        return self._tuple
+        return tuple(self._dict.values())
+    
+    def update(self, new_values:dict):
+        return TupleDict({**self._dict, **new_values})
     
     def __getitem__(self, name):
         return self._dict[name]
     
     def __iter__(self):
-        for v in self._tuple:
+        for v in self._dict.values():
             yield v

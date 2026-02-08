@@ -12,7 +12,7 @@ class Nodes:
                 index:Index, 
                 ids:Iterator[Hashable],
                 attributes:set[Hashable]=(),
-                selector_funcs:dict[str, Callable[[Hashable, nx.Digraph], object]]={},
+                selector_funcs:dict[str, Callable[[Hashable, nx.DiGraph], object]]={},
                 default=None,
             ):
 
@@ -62,9 +62,12 @@ class Nodes:
     
     def __iter__(self):
         for i in self._clone():
-            if len(self._attributes) > 0:
+            if len(self._attributes) > 0 or len(self._select_funcs) > 0:
                 data_inquirer = ObjectInquirer(self._index.data(i))
-                yield i, *data_inquirer.select(self._attributes, self._default)
+                data = data_inquirer.select(self._attributes, self._default)
+                additional_data = {n: f(i, self._index.graph) for n, f in self._select_funcs.items()}
+                final_data = data.update(additional_data)
+                yield i, *final_data
             else:
                 yield i
 
