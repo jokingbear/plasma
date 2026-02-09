@@ -5,6 +5,7 @@ from ..index import Index
 from ...object_inquirer import ObjectInquirer, TupleDict
 from typing import Callable, Hashable, Iterator
 
+SelectFunc = Callable[[Hashable, nx.DiGraph], object]
 
 class Nodes:
     
@@ -12,7 +13,7 @@ class Nodes:
                 index:Index, 
                 ids:Iterator[Hashable],
                 attributes:set[Hashable]=(),
-                selector_funcs:tuple[tuple[str, Callable[[Hashable, nx.DiGraph]]]]=(),
+                selector_funcs:tuple[tuple[str, SelectFunc]]=(),
                 default=None,
             ):
 
