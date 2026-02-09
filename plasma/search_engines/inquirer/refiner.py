@@ -44,5 +44,9 @@ class MatchRefiner(AutoPipe[[list[Match]], list[Match]]):
 
 
 def _unique_matches(matches:list[Match]):
-    for _, grouped_matches in itertools.groupby(matches, key=lambda m: (m.db_char_start, m.db_char_end)):
+    for _, grouped_matches in itertools.groupby(matches, key=_unique_key):
         yield max(grouped_matches, key=lambda m: m.harmonic_score)
+
+
+def _unique_key(m:Match):
+    return m.qchar_start, m.qchar_end, m.db_arg, m.db_char_start, m.db_char_end
