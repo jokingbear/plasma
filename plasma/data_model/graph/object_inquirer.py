@@ -5,9 +5,6 @@ from typing import Callable
 from ..base_model import Field
 
 
-class EmptyResult:...
-
-
 class ObjectInquirer:
     
     def __init__(self, obj):
@@ -45,11 +42,14 @@ class ObjectInquirer:
                 
         return obj
 
-    def select(self, attrs, default=None):
-        return TupleDict({a: self.get(a, default) for a in attrs})
+    def select(self, attrs:tuple, default=None):
+        return TupleDict(attrs, [self.get(a, default) for a in attrs])
     
     def register_type[T](self, t:type[T], func:Callable[[T, str], object]):
         self._type_accessor[t] = func
+
+
+class EmptyResult:...
 
 
 class TupleDict:

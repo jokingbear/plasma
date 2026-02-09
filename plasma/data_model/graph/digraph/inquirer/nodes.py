@@ -68,8 +68,11 @@ class Nodes:
             if len(self._attributes) > 0 or len(self._select_funcs) > 0:
                 data_inquirer = ObjectInquirer(self._index.data(i))
                 data = data_inquirer.select(self._attributes, self._default)
-                additional_data = [(n, f(i, self._index.graph)) for n, f in self._select_funcs.items()]
-                final_data = data.update(zip(*additional_data))
+                additional_data = [(n, f(i, self._index.graph)) for n, f in self._select_funcs]
+                final_data = data.update(
+                    [n for n, _ in additional_data],
+                    [d for _, d in additional_data]
+                )
                 yield i, *final_data
             else:
                 yield i
