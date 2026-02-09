@@ -54,28 +54,24 @@ class ObjectInquirer:
 
 class TupleDict:
     
-    def __init__(self, data:dict):
-        self._dict = data
-    
-    @property
-    def selectors(self):
-        for n in self._dict:
-            yield n
+    def __init__(self, names:tuple, values:tuple):
+        self.names = names
+        self.values = values
+        self._name_args = {n: i for i,n  in enumerate(names)}
     
     @property
     def items(self):
         return self._dict.items()
-    
-    @property
-    def values(self):
-        return tuple(self._dict.values())
-    
-    def update(self, new_values:dict):
-        return TupleDict({**self._dict, **new_values})
+
+    def update(self, new_names, new_values):
+        return TupleDict(
+            itertools.chain(self.names, new_names),
+            itertools.chain(self.values, new_values)
+        )
     
     def __getitem__(self, name):
-        return self._dict[name]
+        return self.values[self._name_args[name]]
     
     def __iter__(self):
-        for v in self._dict.values():
+        for v in self.values:
             yield v

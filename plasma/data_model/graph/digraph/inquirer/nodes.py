@@ -12,7 +12,7 @@ class Nodes:
                 index:Index, 
                 ids:Iterator[Hashable],
                 attributes:set[Hashable]=(),
-                selector_funcs:dict[str, Callable[[Hashable, nx.DiGraph], object]]={},
+                selector_funcs:tuple[tuple[str, Callable[[Hashable, nx.DiGraph]]]]=(),
                 default=None,
             ):
 
@@ -27,7 +27,9 @@ class Nodes:
             ):
         new_iterable = self._clone()
         new_attributes = set(attributes) if override else self._attributes.union(attributes)
-        new_selectors = select_funcs if override else {**select_funcs, **self._select_funcs}
+
+        new_selectors = tuple(select_funcs.items()) if override \
+                        else [*self._select_funcs, *select_funcs.items()]
         return Nodes(self._index, new_iterable, new_attributes, new_selectors, default)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
@@ -65,8 +67,8 @@ class Nodes:
             if len(self._attributes) > 0 or len(self._select_funcs) > 0:
                 data_inquirer = ObjectInquirer(self._index.data(i))
                 data = data_inquirer.select(self._attributes, self._default)
-                additional_data = {n: f(i, self._index.graph) for n, f in self._select_funcs.items()}
-                final_data = data.update(additional_data)
+                additional_data = [(n, f(i, self._index.graph)) for n, f in self._select_funcs.items()]
+                final_data = data.update(zip(*additional_data))
                 yield i, *final_data
             else:
                 yield i
