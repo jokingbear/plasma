@@ -12,22 +12,24 @@ class Nodes:
     def __init__(self, 
                 index:Index, 
                 ids:Iterator[Hashable],
-                attributes:set[Hashable]=(),
+                attributes:tuple[Hashable]=(),
                 selector_funcs:tuple[tuple[str, SelectFunc]]=(),
                 default=None,
             ):
 
         self._ids = ids
         self._index = index
-        self._attributes = set(attributes)
+        self._attributes = attributes
         self._select_funcs = selector_funcs
         self._default = default
     
     def select(self, *attributes:Hashable, default=None, override=True,
                 **select_funcs:Callable[[Hashable, nx.DiGraph], object],
             ):
+        assert len(set(attributes)) == len(attributes), 'attributes name must be unique'
+        
         new_iterable = self._clone()
-        new_attributes = set(attributes) if override else self._attributes.union(attributes)
+        new_attributes = attributes if override else self._attributes.union(attributes)
 
         new_selectors = tuple(select_funcs.items()) if override \
                         else [*self._select_funcs, *select_funcs.items()]
