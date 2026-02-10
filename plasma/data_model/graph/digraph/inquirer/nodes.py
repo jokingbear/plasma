@@ -63,7 +63,7 @@ class Nodes:
         return groupby[T, Hashable](self._tuple_iter(), auto_map(key), lambda key_data:key_data[0])
     
     def __iter__(self):
-        for nid, data in self._tuple_iter:
+        for nid, data in self._tuple_iter():
             if len(data) > 0:
                 yield nid, *data
             else:
