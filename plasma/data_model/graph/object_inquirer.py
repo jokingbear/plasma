@@ -65,8 +65,8 @@ class TupleDict:
 
     def update(self, new_names, new_values):
         return TupleDict(
-            itertools.chain(self.names, new_names),
-            itertools.chain(self.values, new_values)
+            [*self.names, *new_names],
+            [*self.values, *new_values]
         )
     
     def __getitem__(self, name):

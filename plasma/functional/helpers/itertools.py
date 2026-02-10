@@ -9,7 +9,8 @@ class groupby[T, V](dict[V, tuple[T]]):
         
         temp = defaultdict(lambda: [])
         for d in data:
-            temp[d].append(key(d))
+            dkey = key(d)
+            temp[dkey].append(d)
         
         for k, v in temp.items():
             self[k] = tuple(v)
