@@ -4,6 +4,7 @@ import networkx as nx
 from ..index import Index
 from ...object_inquirer import ObjectInquirer, TupleDict
 from typing import Callable, Hashable, Iterator
+from .....functional.helpers import groupby
 
 SelectFunc = Callable[[Hashable, nx.DiGraph], object]
 
@@ -64,6 +65,9 @@ class Nodes:
                 running_value = new_running_value
         
         return running_value
+
+    def groupby[T](self, key:Callable[[Hashable, TupleDict], T]):
+        return groupby(self, key)
     
     def __iter__(self):
         for i in self._clone():
