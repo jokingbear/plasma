@@ -41,6 +41,9 @@ class Inquirer:
         predecessors = self._index.inquirer.predecessors(node_id, pred_type)
         return Nodes(self._index, predecessors)
 
+    def node_ids(self, node_ids):
+        return Nodes(self._index, node_ids)
+    
     def select(self, node_id, *attrs:str):
         assert len(attrs) > 0
         data = self.data(node_id)
