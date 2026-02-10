@@ -2,9 +2,9 @@ from typing import Iterable, Callable
 from collections import defaultdict
 
 
-class groupby[D, K, O](dict[K, tuple[O]]):
+class groupby[K, O](dict[K, tuple[O]]):
     
-    def __init__(self, data:Iterable[D], 
+    def __init__[D](self, data:Iterable[D], 
                  key:Callable[[D], K],
                  selector:Callable[[D], O]=None):
         
