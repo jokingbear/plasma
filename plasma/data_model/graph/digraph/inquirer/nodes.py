@@ -4,9 +4,10 @@ import networkx as nx
 from ..index import Index
 from ...object_inquirer import ObjectInquirer, TupleDict
 from typing import Callable, Hashable, Iterator
-from .....functional.helpers import groupby
+from .....functional.helpers import groupby, auto_map
 
 SelectFunc = Callable[[Hashable, nx.DiGraph], object]
+
 
 class Nodes:
     
@@ -37,18 +38,12 @@ class Nodes:
         return Nodes(self._index, new_iterable, new_attributes, new_selectors, default)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
-        new_iterator = self._clone()
-        new_iterator = (
-            (i, ObjectInquirer(self._index.data(i)).select(self._attributes)) 
-            for i in self._ids
-        )
-        
+        new_iterator = self._tuple_iter()        
         new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
         return Nodes(self._index, new_iterator, self._attributes, self._default)
     
     def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterator[V]]):
-        for i in self._clone():
-            data = ObjectInquirer(self._index.data(i)).select(self._attributes)
+        for i, data in self._tuple_iter():
             for new_value in list_func(i, data):
                 yield new_value
     
@@ -57,32 +52,34 @@ class Nodes:
                       stateful=True # check if func update intial V
                 ) -> V:
         running_value = initial
-        for i in self._clone():
-            data_inquirer = ObjectInquirer(self._index.data(i))
-            selected_data = data_inquirer.select(self._attributes, self._default)
-            new_running_value = func(running_value, i, selected_data)
+        for i, data in self._tuple_iter():
+            new_running_value = func(running_value, i, data)
             if not stateful:
                 running_value = new_running_value
         
         return running_value
 
     def groupby[T](self, key:Callable[[Hashable, TupleDict], T]):
-        return groupby(self, key)
+        return groupby(self._tuple_iter(), auto_map(key))
     
     def __iter__(self):
-        for i in self._clone():
-            if len(self._attributes) > 0 or len(self._select_funcs) > 0:
-                data_inquirer = ObjectInquirer(self._index.data(i))
-                data = data_inquirer.select(self._attributes, self._default)
-                additional_data = [(n, f(i, self._index.graph)) for n, f in self._select_funcs]
-                final_data = data.update(
-                    [n for n, _ in additional_data],
-                    [d for _, d in additional_data]
-                )
-                yield i, *final_data
+        for nid, data in self._tuple_iter:
+            if len(data) > 0:
+                yield nid, *data
             else:
-                yield i
+                yield nid
 
+    def _tuple_iter(self):
+        for i in self._clone():
+            data_inquirer = ObjectInquirer(self._index.data(i))
+            data = data_inquirer.select(self._attributes, self._default)
+            additional_data = [(n, f(i, self._index.graph)) for n, f in self._select_funcs]
+            final_data = data.update(
+                [n for n, _ in additional_data],
+                [d for _, d in additional_data]
+            )
+            yield i, final_data
+    
     def _clone(self):
         iterator1, iterator2 = itertools.tee(self._ids)
         self._ids = iterator1

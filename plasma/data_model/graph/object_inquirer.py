@@ -75,3 +75,6 @@ class TupleDict:
     def __iter__(self):
         for v in self.values:
             yield v
+
+    def __len__(self):
+        return len(self.names)
