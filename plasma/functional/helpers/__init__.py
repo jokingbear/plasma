@@ -2,6 +2,7 @@ from .automap import auto_map
 from warnings import deprecated
 from .partials import partials
 from .chain import chain
+from .itertools import groupby
 
 
 @deprecated('this class is deprecated, use auto_map instead')
