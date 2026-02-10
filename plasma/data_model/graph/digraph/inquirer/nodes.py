@@ -60,7 +60,7 @@ class Nodes:
         return running_value
 
     def groupby[T](self, key:Callable[[Hashable, TupleDict], T]):
-        return groupby(self._tuple_iter(), auto_map(key))
+        return groupby(self._tuple_iter(), auto_map(key), lambda key_data:key_data[0])
     
     def __iter__(self):
         for nid, data in self._tuple_iter:
