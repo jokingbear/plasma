@@ -9,10 +9,11 @@ from .....functional.helpers import groupby, auto_map
 SelectFunc = Callable[[Hashable, nx.DiGraph], object]
 
 
-class Nodes:
+class Nodes[T]:
     
     def __init__(self, 
                 index:Index, 
+                inquirer:T,
                 ids:Iterator[Hashable],
                 attributes:tuple[Hashable]=(),
                 selector_funcs:tuple[tuple[str, SelectFunc]]=(),
@@ -21,12 +22,13 @@ class Nodes:
 
         self._ids = ids
         self._index = index
+        self._inquirer = inquirer
         self._attributes = attributes
         self._select_funcs = selector_funcs
         self._default = default
     
     def select(self, *attributes:Hashable, default=None, override=True,
-                **select_funcs:Callable[[Hashable, nx.DiGraph], object],
+                **select_funcs:Callable[[Hashable, T], object],
             ):
         assert len(set(attributes)) == len(attributes), 'attributes name must be unique'
         
@@ -35,12 +37,12 @@ class Nodes:
 
         new_selectors = tuple(select_funcs.items()) if override \
                         else [*self._select_funcs, *select_funcs.items()]
-        return Nodes(self._index, new_iterable, new_attributes, new_selectors, default)
+        return Nodes(self._index, self._inquirer, new_iterable, new_attributes, new_selectors, default)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
         new_iterator = self._tuple_iter()        
         new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
-        return Nodes(self._index, new_iterator, self._attributes, self._default)
+        return Nodes(self._index, self._inquirer, new_iterator, self._attributes, self._default)
     
     def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterator[V]]):
         for i, data in self._tuple_iter():
@@ -73,7 +75,7 @@ class Nodes:
         for i in self._clone():
             data_inquirer = ObjectInquirer(self._index.data(i))
             data = data_inquirer.select(self._attributes, self._default)
-            additional_data = [(n, f(i, self._index.graph)) for n, f in self._select_funcs]
+            additional_data = [(n, f(i, self._inquirer)) for n, f in self._select_funcs]
             final_data = data.update(
                 [n for n, _ in additional_data],
                 [d for _, d in additional_data]

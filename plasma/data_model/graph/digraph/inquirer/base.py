@@ -31,18 +31,18 @@ class Inquirer:
         for vk in values_keys[1:]:
             nodes.intersection_update(index_inquirer.nodes(*vk))
 
-        return Nodes(self._index, nodes)
+        return Nodes(self._index, self, nodes)
     
     def successors(self, node_id, succ_type:object|list=None):
         successors = self._index.inquirer.successors(node_id, succ_type)
-        return Nodes(self._index, successors)
+        return Nodes(self._index, self, successors)
     
     def predecessors(self, node_id, pred_type:object|list=None):
         predecessors = self._index.inquirer.predecessors(node_id, pred_type)
-        return Nodes(self._index, predecessors)
+        return Nodes(self._index, self, predecessors)
 
     def node_ids(self, node_ids):
-        return Nodes(self._index, node_ids)
+        return Nodes(self._index, self, node_ids)
     
     def select(self, node_id, *attrs:str):
         assert len(attrs) > 0
