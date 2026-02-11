@@ -49,13 +49,16 @@ class Nodes[T]:
             for new_value in list_func(i, data):
                 yield new_value
     
-    def accumulate[V](self, 
-                      initial:V, func:Callable[[V, Hashable, TupleDict], V|None], 
+    def accumulate[T, V](self, 
+                      initial:V, 
+                      selector:Callable[[Hashable, TupleDict], T],
+                      accumulator:Callable[[V, T], V|None], 
                       stateful=True # check if func update intial V
                 ) -> V:
         running_value = initial
         for i, data in self._tuple_iter():
-            new_running_value = func(running_value, i, data)
+            accumulating_value = selector(i, data)
+            new_running_value = accumulator(running_value, accumulating_value)
             if not stateful:
                 running_value = new_running_value
         

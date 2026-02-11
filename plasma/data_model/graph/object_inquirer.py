@@ -69,6 +69,10 @@ class TupleDict:
             [*self.values, *new_values]
         )
     
+    def keys(self):
+        for n in self.names:
+            yield n
+    
     def __getitem__(self, name):
         return self.values[self._name_args[name]]
     
