@@ -42,7 +42,8 @@ class Nodes[T]:
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
         new_iterator = self._tuple_iter()        
         new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
-        return Nodes(self._index, self._inquirer, new_iterator, self._attributes, self._default)
+        return Nodes(self._index, self._inquirer, new_iterator, self._attributes, 
+                     self._select_funcs, self._default)
     
     def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterator[V]]):
         for i, data in self._tuple_iter():
