@@ -1,7 +1,7 @@
 import pandas as pd
 import itertools
 
-from typing import Callable
+from typing import Callable, NamedTuple
 from ...base_model import Field
 from .tuple_dict import TupleDict
 
@@ -29,7 +29,7 @@ class ObjectInquirer:
             qresult = EmptyResult
             if obj_type in self._type_accessor:
                 qresult = self._type_accessor[obj_type](obj, n)
-            elif isinstance(obj, (list, tuple)):
+            elif isinstance(obj, (list, tuple)) and not isinstance(obj, NamedTuple):
                 qresult = obj[int(n)]
             elif isinstance(obj, dict):
                 qresult = obj.get(n, qresult)
