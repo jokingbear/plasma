@@ -29,7 +29,7 @@ class ObjectInquirer:
             qresult = EmptyResult
             if obj_type in self._type_accessor:
                 qresult = self._type_accessor[obj_type](obj, n)
-            elif isinstance(obj, (list, tuple)) and not hasattr('__orig_bases__'):
+            elif isinstance(obj, (list, tuple)) and not hasattr(obj, '__orig_bases__'):
                 qresult = obj[int(n)]
             elif isinstance(obj, dict):
                 qresult = obj.get(n, qresult)
