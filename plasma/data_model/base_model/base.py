@@ -25,15 +25,15 @@ class BaseModel(metaclass=Readable):
 
     @classmethod
     def from_dict(cls, data:dict[str, object]):
-        obj = cls()
+        args = {}
         for field_name, field_value in data.items():
             annotation = cls.__annotations__[field_name]
             if type(annotation) is Readable and issubclass(annotation, BaseModel):
-                setattr(obj, field_name, annotation.from_dict(field_value))
-            else:
-                setattr(obj, field_name, field_value)
+                field_value = annotation.from_dict(field_value)
             
-        return obj
+            args[field_name] = field_value
+            
+        return cls(**args)
 
     def __repr__(self):
         lines = []
