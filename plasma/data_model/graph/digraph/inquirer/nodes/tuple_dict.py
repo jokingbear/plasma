@@ -1,6 +1,7 @@
 class TupleDict:
     
-    def __init__(self, names:list, values:list):
+    def __init__(self, node_id, names:list, values:list):
+        self.node_id = node_id
         self._names = names
         self._values = values
         
@@ -15,7 +16,7 @@ class TupleDict:
     def update(self, name, value):
         self._names.append(name)
         self._values.append(value)
-        self._name_arg_map[name] = len(self._names)
+        self._name_arg_map[name] = len(self._names) - 1
     
     def __contains__(self, key):
         return key in self._name_arg_map
@@ -40,3 +41,9 @@ class TupleDict:
     
     def __len__(self):
         return len(self._values)
+
+    def __repr__(self):
+        components = [f'node_id={self.node_id}']
+        for name, value in zip(self._names, self._values):
+            components.append(f'{name}={value}')
+        return '(' + ', '.join(components) + ')'

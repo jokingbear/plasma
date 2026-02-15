@@ -1,1 +1,1 @@
-from .base import Nodes
+from .proxy import Proxy as Nodes

@@ -29,13 +29,13 @@ class Nodes[T]:
         ):
         assert len(set(attributes)) == len(attributes), 'attributes name must be unique'
         
-        projector = self._projector.update(attributes, select_funcs, default, override)
-        return Nodes(self._index, self._inquirer, self._clone(), projector)
+        projector = self._projector.update(attributes, select_funcs.items(), default, override)
+        return Nodes(self._index, self._clone(), projector)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
         new_iterator = self._tuple_iter()        
         new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
-        return Nodes(self._index, self._inquirer, new_iterator, self._projector)
+        return Nodes(self._index, new_iterator, self._projector)
     
     def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterable[V]]):
         for i, data in self._tuple_iter():
@@ -68,7 +68,7 @@ class Nodes[T]:
     def __iter__(self):
         for nid, data in self._tuple_iter():
             if len(data) > 0:
-                yield nid, *data
+                yield data
             else:
                 yield nid
 

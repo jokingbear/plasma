@@ -1,10 +1,9 @@
 import networkx as nx
 
+from .nodes import Nodes
 from ..index import Index
 from ...object_inquirer import ObjectInquirer
 from .....functional import auto_map
-from .nodes import Nodes
-
 
 class Inquirer:
     
