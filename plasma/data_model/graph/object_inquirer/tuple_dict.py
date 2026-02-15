@@ -1,16 +1,12 @@
 class TupleDict:
     
     def __init__(self, names:tuple, values:tuple):
-        self.__names = names
+        self.names = names
         self.values = values
         
         name_arg_map = {n: i for i,n  in enumerate(names)}
         self._name_arg_map = name_arg_map
     
-    @property
-    def items(self):
-        return self._dict.items()
-
     def update(self, new_names, new_values):
         return TupleDict(
             [*self.__names, *new_names],
@@ -18,7 +14,7 @@ class TupleDict:
         )
     
     def keys(self):
-        for n in self.__names:
+        for n in self.names:
             yield n
     
     def __getitem__(self, name):
@@ -29,7 +25,7 @@ class TupleDict:
             yield v
 
     def __len__(self):
-        return len(self.__names)
+        return len(self.names)
 
     def __getattr__(self, name):
         if name in self._name_arg_map:
