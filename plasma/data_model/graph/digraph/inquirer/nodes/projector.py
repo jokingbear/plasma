@@ -1,6 +1,7 @@
 import inspect
+import itertools
 
-from typing import Hashable
+from typing import Hashable, Iterable
 
 from .tuple_dict import TupleDict
 from ....object_inquirer import ObjectInquirer
@@ -18,7 +19,7 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
                 inquirer:T,
                 attributes:tuple[str|Field],
                 funcs:tuple[tuple[str, SelectFunc[T]|SelectFuncAggregate[T]]],
-                default
+                default:object,
             ):
         self.inquirer = inquirer
         self.attributes = attributes
@@ -46,3 +47,16 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
 
     def __len__(self):
         return len(self.attributes) + len(self.funcs)
+
+    def update(self, 
+               attributes:tuple[str|Field], 
+               funcs:Iterable[tuple[str, SelectFunc[T]|SelectFuncAggregate[T]]],
+               default:object,
+               override:bool,
+            ):
+        return Projector(
+            self.inquirer,
+            attributes if override else {*self._projector.attributes, *attributes},
+            tuple(funcs) if override else tuple(itertools.chain(self.funcs, funcs)),
+            default=default
+        )

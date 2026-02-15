@@ -1,6 +1,6 @@
 import itertools
 
-from typing import Callable, Hashable, Iterator, Iterable
+from typing import Callable, Hashable, Generator, Iterable
 
 from .projector import Projector
 from ...index import Index
@@ -13,15 +13,13 @@ class Nodes[T]:
     
     def __init__(self, 
                 index:Index, 
-                inquirer:T,
                 ids:tuple[Hashable],
-                projector:Projector[T]=None,
+                projector:Projector[T],
             ):
 
         self._ids = ids
         self._index = index
-        self._inquirer = inquirer
-        self._projector = projector or Projector(inquirer, [], [], None)
+        self._projector = projector
     
     def select(self, 
                 *attributes:Hashable, default=None, override=True,
@@ -31,30 +29,24 @@ class Nodes[T]:
         ):
         assert len(set(attributes)) == len(attributes), 'attributes name must be unique'
         
-        selector = Projector(
-            self._inquirer,
-            attributes if override else {*self._projector.attributes, *attributes},
-            tuple(select_funcs.items()) if override
-                else [*self._select_funcs, *select_funcs.items()],
-            default
-        )
-        return Nodes(self._index, self._inquirer, self._clone(), selector)
+        projector = self._projector.update(attributes, select_funcs, default, override)
+        return Nodes(self._index, self._inquirer, self._clone(), projector)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
         new_iterator = self._tuple_iter()        
         new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
         return Nodes(self._index, self._inquirer, new_iterator, self._projector)
     
-    def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterator[V]]):
+    def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterable[V]]):
         for i, data in self._tuple_iter():
             for new_value in list_func(i, data):
                 yield new_value
     
     def accumulate[T, V](self, 
-                      initial:V, 
-                      selector:Callable[[Hashable, TupleDict], T],
-                      accumulator:Callable[[V, T], V|None], 
-                      stateful=True # check if func update intial V
+                        initial:V, 
+                        selector:Callable[[Hashable, TupleDict], T],
+                        accumulator:Callable[[V, T], V|None], 
+                        stateful=True # check if func update intial V
                 ) -> V:
         running_value = initial
         for i, data in self._tuple_iter():
@@ -65,8 +57,13 @@ class Nodes[T]:
         
         return running_value
 
-    def groupby[T](self, key:Callable[[Hashable, TupleDict], T]):
-        return groupby[T, Hashable](self._tuple_iter(), auto_map(key), lambda key_data:key_data[0])
+    def groupby[K, V](self, 
+                   key:Callable[[Hashable, TupleDict], K],
+                   value:Callable[[Hashable, TupleDict], V]=None
+                ):
+        
+        value_func = value or (lambda n,_: n)
+        return groupby[K, V](self._tuple_iter(), auto_map(key), value_func)
     
     def __iter__(self):
         for nid, data in self._tuple_iter():
