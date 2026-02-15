@@ -1,12 +1,12 @@
 import itertools
-import networkx as nx
 
-from ..index import Index
-from ...object_inquirer import ObjectInquirer, TupleDict
-from typing import Callable, Hashable, Iterator
-from .....functional.helpers import groupby, auto_map
+from typing import Callable, Hashable, Iterator, Iterable
 
-SelectFunc = Callable[[Hashable, nx.DiGraph], object]
+from .projector import Projector
+from ...index import Index
+from ....object_inquirer import ObjectInquirer, TupleDict
+from .....base_model import Field
+from ......functional.helpers import groupby, auto_map
 
 
 class Nodes[T]:
@@ -14,36 +14,36 @@ class Nodes[T]:
     def __init__(self, 
                 index:Index, 
                 inquirer:T,
-                ids:Iterator[Hashable],
-                attributes:tuple[Hashable]=(),
-                selector_funcs:tuple[tuple[str, SelectFunc]]=(),
-                default=None,
+                ids:tuple[Hashable],
+                projector:Projector[T]=None,
             ):
 
         self._ids = ids
         self._index = index
         self._inquirer = inquirer
-        self._attributes = attributes
-        self._select_funcs = selector_funcs
-        self._default = default
+        self._projector = projector or Projector(inquirer, [], [], None)
     
-    def select(self, *attributes:Hashable, default=None, override=True,
-                **select_funcs:Callable[[Hashable, T], object],
-            ):
+    def select(self, 
+                *attributes:Hashable, default=None, override=True,
+                **select_funcs:str|Field\
+                                |Callable[[Hashable, T], object]\
+                                |Callable[[Hashable, T, TupleDict], object],
+        ):
         assert len(set(attributes)) == len(attributes), 'attributes name must be unique'
         
-        new_iterable = self._clone()
-        new_attributes = attributes if override else self._attributes.union(attributes)
-
-        new_selectors = tuple(select_funcs.items()) if override \
-                        else [*self._select_funcs, *select_funcs.items()]
-        return Nodes(self._index, self._inquirer, new_iterable, new_attributes, new_selectors, default)
+        selector = Projector(
+            self._inquirer,
+            attributes if override else {*self._projector.attributes, *attributes},
+            tuple(select_funcs.items()) if override
+                else [*self._select_funcs, *select_funcs.items()],
+            default
+        )
+        return Nodes(self._index, self._inquirer, self._clone(), selector)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
         new_iterator = self._tuple_iter()        
         new_iterator = (i for i, data in new_iterator if all(p(i, data) for p in predicates))
-        return Nodes(self._index, self._inquirer, new_iterator, self._attributes, 
-                     self._select_funcs, self._default)
+        return Nodes(self._index, self._inquirer, new_iterator, self._projector)
     
     def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterator[V]]):
         for i, data in self._tuple_iter():
@@ -76,15 +76,10 @@ class Nodes[T]:
                 yield nid
 
     def _tuple_iter(self):
-        for i in self._clone():
-            data_inquirer = ObjectInquirer(self._index.data(i))
-            data = data_inquirer.select(self._attributes, self._default)
-            additional_data = [(n, f(i, self._inquirer)) for n, f in self._select_funcs]
-            final_data = data.update(
-                [n for n, _ in additional_data],
-                [d for _, d in additional_data]
-            )
-            yield i, final_data
+        for nid in self._clone():
+            data_inquirer = ObjectInquirer(self._index.data(nid))
+            qresults = self._projector(nid, data_inquirer)
+            yield nid, qresults
     
     def _clone(self):
         iterator1, iterator2 = itertools.tee(self._ids)
