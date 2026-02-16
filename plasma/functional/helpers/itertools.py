@@ -4,9 +4,11 @@ from collections import defaultdict
 
 class groupby[K, V](dict[K, tuple[V]]):
     
-    def __init__[D](self, data:Iterable[D], 
-                 key:Callable[[D], K],
-                 selector:Callable[[D], V]=None):
+    def __init__[D](self, 
+                    data:Iterable[D], 
+                    key:Callable[[D], K],
+                    selector:Callable[[D], V]=None
+                ):
         
         selector = selector or (lambda d:d)
         temp = defaultdict(lambda: [])
