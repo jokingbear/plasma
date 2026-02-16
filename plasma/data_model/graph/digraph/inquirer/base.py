@@ -43,10 +43,11 @@ class Inquirer:
     def node_ids(self, node_ids):
         return Nodes(self._index, self, node_ids)
     
-    def select(self, node_id, *attrs:str):
+    def select(self, node_id, *attrs:str, default=None):
         assert len(attrs) > 0
         data = self.data(node_id)
-        return ObjectInquirer(data).select(attrs)
+        inq = ObjectInquirer(data)
+        return tuple(inq.get(a, default) for a in attrs)
 
     def type(self, node_id):
         return self._index.type(node_id)
