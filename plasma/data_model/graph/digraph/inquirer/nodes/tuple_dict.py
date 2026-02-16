@@ -22,6 +22,8 @@ class TupleDict:
         return key in self._name_arg_map
     
     def __iter__(self):
+        yield self.node_id
+
         for v in self._values:
             yield v
     
