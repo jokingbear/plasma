@@ -5,6 +5,7 @@ from ..index import Index
 from ...object_inquirer import ObjectInquirer
 from .....functional import auto_map
 
+
 class Inquirer:
     
     def __init__(self, 
@@ -54,10 +55,3 @@ class Inquirer:
     
     def data(self, node_id):
         return self._index.data(node_id)
-    
-
-def select(node_id, data_inquirer:ObjectInquirer, attrs:tuple[str]):
-    if len(attrs) == 0:
-        return node_id
-    else:
-        return node_id, *data_inquirer.select(attrs)
