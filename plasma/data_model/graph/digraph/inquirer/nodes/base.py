@@ -62,8 +62,8 @@ class Nodes[T]:
                    value:Callable[[Hashable, TupleDict], V]=None
                 ):
         
-        value_func = value or (lambda n,_: n)
-        return groupby[K, V](self._tuple_iter(), auto_map(key), value_func)
+        value = value or (lambda n,_: n)
+        return groupby[K, V](self._tuple_iter(), auto_map(key), auto_map(value))
     
     def __iter__(self):
         for nid, data in self._tuple_iter():
