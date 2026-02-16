@@ -1,10 +1,11 @@
 import itertools
 
-from typing import Callable, Hashable, Generator, Iterable
+from typing import Callable, Hashable, Iterable
 
 from .projector import Projector
+from .tuple_dict import TupleDict
 from ...index import Index
-from ....object_inquirer import ObjectInquirer, TupleDict
+from ....object_inquirer import ObjectInquirer
 from .....base_model import Field
 from ......functional.helpers import groupby, auto_map
 

@@ -3,7 +3,6 @@ import itertools
 
 from typing import Callable, NamedTuple
 from ...base_model import Field
-from .tuple_dict import TupleDict
 
 
 class ObjectInquirer:
@@ -43,9 +42,6 @@ class ObjectInquirer:
                 
         return obj
 
-    def select(self, attrs:tuple, default=None):
-        return TupleDict(attrs, [self.get(a, default) for a in attrs])
-    
     def register_type[T](self, t:type[T], func:Callable[[T, str], object]):
         self._type_accessor[t] = func
 

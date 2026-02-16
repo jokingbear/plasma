@@ -33,11 +33,11 @@ class TupleDict:
             
         return self._values[value_arg]
     
-    def __getattr__(self, name):
-        if name in self._name_arg_map:
+    def __getattribute__(self, name):
+        if name in super().__getattribute__('_name_arg_map'):
             return self[name]
         else:
-            return super().__getattr__(name)
+            return object.__getattribute__(self, name)
     
     def __len__(self):
         return len(self._values)
