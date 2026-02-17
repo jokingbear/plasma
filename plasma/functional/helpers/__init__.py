@@ -1,5 +1,6 @@
-from .automap import auto_map
 from warnings import deprecated
+
+from .automap import auto_map
 from .partials import partials
 from .chain import chain
 from .itertools import groupby
