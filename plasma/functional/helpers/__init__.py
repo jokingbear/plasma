@@ -3,6 +3,7 @@ from warnings import deprecated
 from .partials import partials
 from .chain import chain
 from .itertools import groupby
+from .color_printer import Color
 
 
 @deprecated('this class is deprecated, use auto_map instead')
