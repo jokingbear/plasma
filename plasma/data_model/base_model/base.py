@@ -5,10 +5,6 @@ from .repr import render_lines
 
 class BaseModel(metaclass=Readable):
     
-    def __init__(self):
-        for a in self.__annotations__:
-            setattr(self, a, None)
-    
     def __init_subclass__(cls):
         sub_fields = construct_field(cls)
         

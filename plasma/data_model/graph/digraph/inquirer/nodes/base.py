@@ -69,7 +69,7 @@ class Nodes[T]:
     def __iter__(self):
         for nid, data in self._tuple_iter():
             if len(data) > 0:
-                yield data
+                yield nid, *data
             else:
                 yield nid
 
