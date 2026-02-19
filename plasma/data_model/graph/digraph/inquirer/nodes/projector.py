@@ -30,7 +30,7 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
     
     def run(self, node_id:Hashable, obj_inquirer:ObjectInquirer):
         attribute_values = [obj_inquirer.get(a, self.default) for a in self.attributes]
-        results = TupleDict(node_id, [*self.attributes], attribute_values)
+        results = TupleDict([*self.attributes], attribute_values)
         
         for name, f in self.funcs:
             if not callable(f):
