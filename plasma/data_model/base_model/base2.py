@@ -1,4 +1,5 @@
 from typing import dataclass_transform
+from dataclasses import dataclass
 
 from .field import Field, Composite
 from .repr import render_lines
@@ -20,7 +21,7 @@ def model(cls):
         return '\n'.join(lines)
 
     new_cls.__repr__ = __repr__
-    return new_cls
+    return dataclass(new_cls, repr=False)
 
 
 def register_field[T](cls:type[T]) -> type[T]:
