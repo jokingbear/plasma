@@ -1,4 +1,4 @@
-from .base_model import model, Field, ModelConstructor
+from .base_model import model, Field, ModelConstructor, register_field
 from .graph import ObjectInquirer
 from warnings import warn
 from dataclasses import dataclass
