@@ -7,7 +7,7 @@ def render_lines(field_name:str, obj, lines:list, indent:str):
     else:
         prefix = f'|-{field_name}='
 
-    if isinstance(type(obj), Readable):
+    if hasattr(type(obj), '__data_model'):
         lines.append(f'{indent}{prefix}{type(obj).__name__}')
         for a in obj.__annotations__:
             render_lines(a, getattr(obj, a), lines, indent + '  ')
