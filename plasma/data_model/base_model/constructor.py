@@ -2,25 +2,29 @@ from .field import Field, Composite
 from .base2 import MODEL_FLAG
 
 
-class ModelConstructor:
+class ModelConstructor[T]:
     
-    def from_fields[T](self, cls:type[T], fields:dict[Field|Composite, object]):
+    def __init__(self, cls:type[T]):
+        assert hasattr(cls, MODEL_FLAG), f'{cls} does not have model decorator'
+        self._cls = cls
+    
+    def from_fields(self, fields:dict[Field|Composite, object]):
         data = {}
         for field in fields:
             resolve(fields, field, data)
         
-        return self.from_dict(cls, data)
+        return self.from_dict(data)
 
-    def from_dict[T](self, cls:type[T], data:dict[str, object]):
+    def from_dict(self, data:dict[str, object]):
         args = {}
         for field_name, field_value in data.items():
-            annotation = cls.__annotations__[field_name]
+            annotation = self._cls.__annotations__[field_name]
             if hasattr(annotation, MODEL_FLAG):
-                field_value = self.from_dict(annotation, field_value)
+                field_value = ModelConstructor(annotation).from_dict(field_value)
             
             args[field_name] = field_value
             
-        return cls(**args)
+        return self._cls(**args)
 
 
 def resolve(fields_values:dict[Field|Composite, object], field:Field|Composite, results:dict):
