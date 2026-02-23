@@ -15,7 +15,7 @@ class ModelConstructor:
         for field_name, field_value in data.items():
             annotation = cls.__annotations__[field_name]
             if hasattr(cls, '__data_model'):
-                field_value = annotation.from_dict(field_value)
+                field_value = self.from_dict(annotation, field_value)
             
             args[field_name] = field_value
             
