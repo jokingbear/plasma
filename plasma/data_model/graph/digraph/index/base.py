@@ -13,11 +13,11 @@ class Index:
         assert 'type' not in index_names
         
         self.graph = graph
-        indices = {n: defaultdict(lambda: set()) for n in index_names}
-        indices['type'] = defaultdict(lambda: set())    
+        indices = {n: defaultdict(set) for n in index_names}
+        indices['type'] = defaultdict(set)    
         self._indices = indices
-        self._successors = defaultdict(lambda: defaultdict(lambda: set()))
-        self._predecessors = defaultdict(lambda: defaultdict(lambda: set()))
+        self._successors = defaultdict(_default_dict_set)
+        self._predecessors = defaultdict(_default_dict_set)
     
     @property
     def node_editor(self):
@@ -57,3 +57,7 @@ class Index:
     @property
     def names(self):
         return [k for k in self._indices if k != 'type']
+
+
+def _default_dict_set():
+    return defaultdict(set)
