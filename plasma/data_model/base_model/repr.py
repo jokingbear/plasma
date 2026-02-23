@@ -1,6 +1,3 @@
-from .meta import Readable
-
-
 def render_lines(field_name:str, obj, lines:list, indent:str):
     if field_name is None:
         prefix = ''
