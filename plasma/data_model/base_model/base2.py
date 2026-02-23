@@ -5,7 +5,12 @@ from dataclasses import dataclass
 from typing import NamedTuple
 
 
-def model(cls):
+def model(cls=None, repr=True):
+    if cls is None:
+        def wrap(cls):
+            return model(cls, repr)
+        return wrap
+
     new_cls = dataclass(cls, repr=False)
     new_cls.__data_model = True
     
@@ -13,13 +18,15 @@ def model(cls):
     for name, field in sub_fields.items():
         setattr(cls, name, field)
     
-    # def __repr__(self):
-    #     lines = []
-    #     render_lines(None, self, lines, '')
-        
-    #     return '\n'.join(lines)
+    if repr:
+        def __repr__(self):
+            lines = []
+            render_lines(None, self, lines, '')
+            
+            return '\n'.join(lines)
 
-    # new_cls.__repr__ = __repr__
+        new_cls.__repr__ = __repr__
+
     return new_cls
 
 
