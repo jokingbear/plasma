@@ -2,23 +2,24 @@ from .field import Field, Composite
 from .repr import render_lines
 
 from dataclasses import dataclass
+from typing import NamedTuple
 
 
 def model(cls):
-    new_cls = dataclass(cls, frozen=True)
+    new_cls = dataclass(cls, repr=False)
     new_cls.__data_model = True
     
     sub_fields = construct_field(cls)
     for name, field in sub_fields.items():
         setattr(cls, name, field)
-
-    def __repr__(self):
-        lines = []
-        render_lines(None, self, lines, '')
+    
+    # def __repr__(self):
+    #     lines = []
+    #     render_lines(None, self, lines, '')
         
-        return '\n'.join(lines)
+    #     return '\n'.join(lines)
 
-    new_cls.__repr__ = __repr__
+    # new_cls.__repr__ = __repr__
     return new_cls
 
 
