@@ -1,17 +1,19 @@
+from dataclasses import dataclass
+from typing import dataclass_transform
+
 from .field import Field, Composite
 from .repr import render_lines
 
-from dataclasses import dataclass
-from typing import NamedTuple
 
-
+@dataclass_transform()
 def model(cls=None, repr=True):
     if cls is None:
         def wrap(cls):
             return model(cls, repr)
-        return wrap
 
-    new_cls = dataclass(cls, repr=False)
+        return dataclass_transform()(wrap)
+
+    new_cls = cls
     new_cls.__data_model = True
     
     sub_fields = construct_field(cls)
