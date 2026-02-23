@@ -1,4 +1,5 @@
 from .field import Field, Composite
+from .base2 import MODEL_FLAG
 
 
 class ModelConstructor:
@@ -14,7 +15,7 @@ class ModelConstructor:
         args = {}
         for field_name, field_value in data.items():
             annotation = cls.__annotations__[field_name]
-            if hasattr(annotation, '__data_model'):
+            if hasattr(annotation, MODEL_FLAG):
                 field_value = self.from_dict(annotation, field_value)
             
             args[field_name] = field_value
