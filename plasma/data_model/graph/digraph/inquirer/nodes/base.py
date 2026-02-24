@@ -22,6 +22,9 @@ class Nodes[T]:
         self._index = index
         self._projector = projector
     
+    def node_ids(self):
+        return Nodes(self._index, self._index, self._projector.update([], [], None, True))
+    
     def select(self, 
                 *attributes:Hashable, default=None, override=True,
                 **select_funcs:str|Field\
