@@ -42,10 +42,14 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
                 signature = inspect.signature(f)
                 has_args = any(p.kind is inspect._ParameterKind.VAR_POSITIONAL 
                                for p in signature.parameters.values())
-                if has_args or len(signature.parameters) > 2:
-                    results.update(name, f(node_id, self.inquirer, results))
-                elif len(signature.parameters) == 2:
-                    results.update(name, f(node_id, self.inquirer))
+                func_results = self.default
+                try:
+                    if has_args or len(signature.parameters) > 2:
+                        func_results = f(node_id, self.inquirer, results)
+                    elif len(signature.parameters) == 2:
+                        func_results = f(node_id, self.inquirer)
+                finally:
+                    results.update(name, func_results)
         
         return results
 

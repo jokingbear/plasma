@@ -17,6 +17,9 @@ class TupleDict:
         self._values.append(value)
         self._name_arg_map[name] = len(self._names) - 1
     
+    def keys(self):
+        return self._names
+    
     def __contains__(self, key):
         return key in self._name_arg_map
     
