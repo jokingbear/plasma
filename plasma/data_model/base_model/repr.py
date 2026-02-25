@@ -21,7 +21,6 @@ def render_lines(field_name:str, obj, lines:list, indent:str):
             if multi_line:
                 lines[-1] = lines[-1][:-1] + ':'
                 lines.extend(indent + '  ' + e for e in element_reprs)
-                lines.append(f'{indent}')
             else:
                 lines[-1] += '[' + ', '.join(element_reprs) + ']'
         else:
