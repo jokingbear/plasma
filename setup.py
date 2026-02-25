@@ -14,7 +14,7 @@ with open(requirement_path) as f:
 
 setup(
     name='plasma',
-    version='4.4.24a88',
+    version='4.4.25dev89',
     packages=[*packages],
     license='MIT',
     author='jokingbear',
