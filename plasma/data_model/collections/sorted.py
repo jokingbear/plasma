@@ -29,22 +29,14 @@ class SortedInquirer[T]:
         self._key = key
         self._metric = metric
     
-    def __getitem__(self, idx:int|slice):
-        if isinstance(idx, int):
-            return self._sorted_data[idx]
-        else:
-            return SortedInquirer(
-                        self._sorted_data[idx], 
-                        self._key, 
-                        self._metric
-                    )
-    
     def arg_search(self, input:T):
         sorted_array = self._sorted_data
         arg = len(sorted_array) // 2
         offset = 0
         dist = partials(self._metric, input, pre_apply_before=False)
+        counter = 0
         while len(sorted_array) > 0:
+            counter += 1
             if len(sorted_array) <= 2:
                 arg = min(range(len(sorted_array)), key=lambda a: dist(sorted_array[a]))
                 break
@@ -55,5 +47,21 @@ class SortedInquirer[T]:
                 sorted_array = sorted_array[arg:]
                 offset += arg
                 arg = len(sorted_array) // 2
-        
+        print(f'counter={counter}')
         return offset + arg
+
+    def __getitem__(self, idx:int|slice):
+        if isinstance(idx, int):
+            return self._sorted_data[idx]
+        else:
+            return SortedInquirer(
+                        self._sorted_data[idx], 
+                        self._key, 
+                        self._metric
+                    )
+    
+    def __len__(self):
+        return len(self._sorted_data)
+
+    def __repr__(self):
+        return repr(self._sorted_data)
