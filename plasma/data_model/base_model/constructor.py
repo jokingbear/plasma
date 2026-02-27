@@ -1,4 +1,4 @@
-from .field import Field, Composite
+from .field import Field
 from .base2 import MODEL_FLAG
 
 
@@ -8,7 +8,7 @@ class ModelConstructor[T]:
         assert hasattr(cls, MODEL_FLAG), f'{cls} does not have model decorator'
         self._cls = cls
     
-    def from_fields(self, fields:dict[Field|Composite, object]):
+    def from_fields(self, fields:dict[Field, object]):
         data = {}
         for field in fields:
             resolve(fields, field, data)
@@ -19,7 +19,7 @@ class ModelConstructor[T]:
         args = {}
         for field_name, field_value in data.items():
             annotation = self._cls.__annotations__[field_name]
-            if hasattr(annotation, MODEL_FLAG):
+            if hasattr(annotation, MODEL_FLAG) and isinstance(field_value, dict):
                 field_value = ModelConstructor(annotation).from_dict(field_value)
             
             args[field_name] = field_value
@@ -27,17 +27,12 @@ class ModelConstructor[T]:
         return self._cls(**args)
 
 
-def resolve(fields_values:dict[Field|Composite, object], field:Field|Composite, results:dict):
-    if isinstance(field, Composite):
-        for sub_field in field.sub_fields:
-            resolve(fields_values, sub_field, results)
-    else:
-        _, *accessors, name = field.context
-        
-        temp_dict = results
-        for a in accessors:
-            if a not in temp_dict:
-                temp_dict[a] = {}
-            temp_dict = temp_dict[a]
-
-        temp_dict[name] = fields_values.get(field, None)
+def resolve(fields_values:dict[Field, object], field:Field, results:dict):
+    _, *accessors, name = field.context
+    temp_dict = results
+    for a in accessors:
+        if a not in temp_dict:
+            temp_dict[a] = {}
+        temp_dict = temp_dict[a]
+    
+    temp_dict[name] = fields_values[field]
