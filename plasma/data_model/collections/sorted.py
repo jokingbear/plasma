@@ -9,14 +9,14 @@ def _abs_diff(x, y):
     return abs(x - y)
 
 
-def sorted_inquirer[T](data:Iterable[T], 
+def sorted[T](data:Iterable[T], 
                        key:Callable[[T], object]=_identity,
                        metric:Callable[[T, T], float]=_abs_diff):
     sorted_list = sorted(data, key=key)
-    return SortedInquirer[T](sorted_list, key, metric)
+    return SortedTuple[T](sorted_list, key, metric)
 
 
-class SortedInquirer[T]:
+class SortedTuple[T]:
     
     def __init__(self, 
                 sorted_data:list[T], 
@@ -54,7 +54,7 @@ class SortedInquirer[T]:
         if isinstance(idx, int):
             return self._sorted_data[idx]
         else:
-            return SortedInquirer(
+            return SortedTuple(
                         self._sorted_data[idx], 
                         self._key, 
                         self._metric

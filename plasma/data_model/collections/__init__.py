@@ -1,1 +1,1 @@
-from .sorted import sorted_inquirer
+from .sorted import sorted
