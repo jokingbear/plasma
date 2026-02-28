@@ -1,7 +1,6 @@
 import numpy as np
 
 from typing import Callable, NamedTuple
-from .defaults import abs_diff, identity
 from ..tuple_interface import PseudoTuple
 from ....functional import partials, chain
 
@@ -17,8 +16,8 @@ class MetrizableIndex[D, K](PseudoTuple[D]):
     
     def __init__(self, 
                 sorted_data:list[D], 
-                key:Callable[[D], K]=identity,
-                metric:Callable[[K, K], float]=abs_diff
+                key:Callable[[D], K],
+                metric:Callable[[K, K], float],
             ):
         super().__init__(sorted_data)
         
