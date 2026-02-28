@@ -1,1 +1,2 @@
-from .sorted import sorted
+from .sorted import sorted, SortedTuple
+
