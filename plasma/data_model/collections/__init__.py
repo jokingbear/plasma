@@ -1,2 +1,2 @@
-from .sorted import sorted, SortedTuple
+from .sorted_sequence import sorted, MetrizableIndex
 

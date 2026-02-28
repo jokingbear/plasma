@@ -1,25 +1,33 @@
 import numpy as np
 
-from typing import Iterable, Callable
-
+from typing import Callable, NamedTuple
+from .defaults import abs_diff, identity
 from ..tuple_interface import PseudoTuple
 from ....functional import partials, chain
 
 
-class MetrizableDataKeyIndex[D, K](PseudoTuple[D]):
+class Nearest[D, K](NamedTuple):
+    arg:int
+    value:D
+    key:K
+    dist:float
+
+
+class MetrizableIndex[D, K](PseudoTuple[D]):
     
     def __init__(self, 
                 sorted_data:list[D], 
-                key:Callable[[D], K],
-                metric:Callable[[K, K], float]=None
+                key:Callable[[D], K]=identity,
+                metric:Callable[[K, K], float]=abs_diff
             ):
         super().__init__(sorted_data)
         
         self.key = key
-        self.metric = metric
+        self.metric = metric or _abs_diff
     
-    def nearest(self, *, data:D=None, key:K=None) -> tuple[int, float]:
-        assert data is not None ^ key is not None
+    def nearest(self, *, data:D=None, key:K=None) -> Nearest[D, K]:
+        assert (data is not None) ^ (key is not None), \
+                'either data or key must not be None'
         
         if data is not None:
             data_key = self.key(data)
@@ -32,7 +40,7 @@ class MetrizableDataKeyIndex[D, K](PseudoTuple[D]):
         offset = 0
         dist = chain(
                     self.key,
-                    partials(self._metric, data_key)
+                    partials(self.metric, data_key),
                 )
         while len(sorted_array) > 0:
             if len(sorted_array) <= 2:
@@ -42,18 +50,18 @@ class MetrizableDataKeyIndex[D, K](PseudoTuple[D]):
                     )
                 candidate = self[offset + arg]
                 candidate_key = self.key(candidate)
-                return offset + arg, dist(candidate_key)
-            elif data_key < candidate_key:
+                return Nearest(offset + arg, candidate, candidate_key, dist(candidate))
+            elif data_key <= candidate_key:
                 sorted_array = sorted_array[:arg + 1]
-            elif input > sorted_array[arg]:
+            elif data_key > candidate_key:
                 sorted_array = sorted_array[arg:]
                 offset += arg
             
             arg = len(sorted_array) // 2
-            candidate_key = self.key(self._sorted_data[arg])
+            candidate_key = self.key(sorted_array[arg])
     
     def _slice_init(self, sliced_data):
-        return MetrizableDataKeyIndex(
+        return MetrizableIndex(
             sliced_data,
             self.key,
             self.metric
