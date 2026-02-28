@@ -17,7 +17,7 @@ class sorted[D, K](MetrizableIndex[D, K]):
         super().__init__(sorted_data, key, metric)
     
     @staticmethod
-    def from_sorted(sorted_data:list[D], 
-                    key:Callable[[D], K]=identity, 
-                    metric:Callable[[K, K], float]=abs_diff):
-        return MetrizableIndex(sorted_data, key, metric)
+    def from_sorted[D, K](sorted_data:list[D], 
+                          key:Callable[[D], K]=identity, 
+                          metric:Callable[[K, K], float]=abs_diff):
+        return MetrizableIndex[D, K](sorted_data, key, metric)
