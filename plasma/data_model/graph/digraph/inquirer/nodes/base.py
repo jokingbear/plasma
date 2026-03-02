@@ -23,7 +23,7 @@ class Nodes[T]:
         self._projector = projector
     
     def node_ids(self):
-        return Nodes(self._index, self._index, self._projector.update([], [], None, True))
+        return Nodes(self._index, self._ids, self._projector.update([], [], None, True))
     
     def select(self, 
                 *attributes:Hashable, default=None, override=True,
