@@ -33,23 +33,23 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
         results = TupleDict([*self.attributes], attribute_values)
         
         for name, f in self.funcs:
-            if not callable(f):
-                if f in results:
-                    results.rename(f, name)
-                else:
-                    results.update(name, obj_inquirer.get(f, self.default))
-            else:
+            if callable(f):
                 signature = inspect.signature(f)
                 has_args = any(p.kind is inspect._ParameterKind.VAR_POSITIONAL 
                                for p in signature.parameters.values())
-                func_results = self.default
                 try:
                     if has_args or len(signature.parameters) > 2:
-                        func_results = f(node_id, self.inquirer, results)
+                        qresult = f(node_id, self.inquirer, results)
                     elif len(signature.parameters) == 2:
-                        func_results = f(node_id, self.inquirer)
-                finally:
-                    results.update(name, func_results)
+                        qresult = f(node_id, self.inquirer)
+                except:
+                    qresult = self.default
+            elif f in results:
+                qresult = results[f]
+            else:
+                qresult = obj_inquirer.get(f, self.default)
+            
+            results.update(name, qresult)
         
         return results
 

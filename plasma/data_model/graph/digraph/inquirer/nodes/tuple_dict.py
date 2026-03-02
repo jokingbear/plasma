@@ -2,47 +2,39 @@ class TupleDict:
     
     def __init__(self, names:list, values:list):
         self._names = names
-        self._values = values
-        
-        self._name_arg_map = {n: i for i, n in enumerate(names)}
+        self._name_value_map = dict(zip(names, values))
     
-    def rename(self, old_name, new_name):
-        current_arg = self._name_arg_map[old_name]
-        self._names[current_arg] = new_name
-        self._name_arg_map[new_name] = current_arg
-        del self[old_name]
-
     def update(self, name, value):
-        self._names.append(name)
-        self._values.append(value)
-        self._name_arg_map[name] = len(self._names) - 1
+        self._name_value_map[name] = value
+        
+        if name not in self:
+            self._names.append(name)
     
     def keys(self):
-        return self._names
+        return self._name_value_map.keys()
     
     def __contains__(self, key):
-        return key in self._name_arg_map
+        return key in self._name_value_map
     
     def __iter__(self):
-        for v in self._values:
+        for v in self._name_value_map.values():
             yield v
     
     def __getitem__(self, key:int|object):
+        name = key
         if isinstance(key, int):
-            value_arg = key
-        else:
-            value_arg = self._name_arg_map[key]
+            name = self._names[key]
             
-        return self._values[value_arg]
+        return self._name_value_map[name]
     
     def __getattribute__(self, name):
-        if name in super().__getattribute__('_name_arg_map'):
+        if name in super().__getattribute__('_name_value_map'):
             return self[name]
         else:
-            return object.__getattribute__(self, name)
+            return super().__getattribute__(name)
     
     def __len__(self):
-        return len(self._values)
+        return len(self._names)
 
     def __repr__(self):
         components = []
