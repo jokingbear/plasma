@@ -64,7 +64,7 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
             ):
         return Projector(
             self.inquirer,
-            attributes if override else {*self._projector.attributes, *attributes},
+            attributes if override else [*self.attributes, *attributes],
             tuple(funcs) if override else tuple(itertools.chain(self.funcs, funcs)),
             default=default
         )
