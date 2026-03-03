@@ -37,10 +37,11 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
                 signature = inspect.signature(f)
                 has_args = any(p.kind is inspect._ParameterKind.VAR_POSITIONAL 
                                for p in signature.parameters.values())
+                parameters = {k:p for k, p in signature.parameters if k != 'self'}
                 try:
-                    if has_args or len(signature.parameters) > 2:
+                    if has_args or len(parameters) > 2:
                         qresult = f(node_id, self.inquirer, results)
-                    elif len(signature.parameters) == 2:
+                    elif len(parameters) == 2:
                         qresult = f(node_id, self.inquirer)
                 except:
                     qresult = self.default
