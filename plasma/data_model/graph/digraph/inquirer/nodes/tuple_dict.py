@@ -38,6 +38,6 @@ class TupleDict:
 
     def __repr__(self):
         components = []
-        for name, value in zip(self._names, self._values):
+        for name, value in self._name_value_map.items():
             components.append(f'{name}={value}')
         return '(' + ', '.join(components) + ')'
