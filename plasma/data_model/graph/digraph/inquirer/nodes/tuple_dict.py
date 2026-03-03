@@ -5,11 +5,11 @@ class TupleDict:
         self._name_value_map = dict(zip(names, values))
     
     def update(self, name, value):
-        self._name_value_map[name] = value
-        
         if name not in self:
             self._names.append(name)
-    
+            
+        self._name_value_map[name] = value
+        
     def keys(self):
         return self._name_value_map.keys()
     
