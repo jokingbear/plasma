@@ -43,6 +43,8 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
                         qresult = f(node_id, self.inquirer, results)
                     elif len(parameters) == 2:
                         qresult = f(node_id, self.inquirer)
+                    else:
+                        raise SyntaxError('unsupported signature, signature must be nodeid, inquirer or nodeid, inquirer, qdata')
                 except:
                     qresult = self.default
             elif f in results:

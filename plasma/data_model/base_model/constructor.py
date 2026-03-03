@@ -23,7 +23,11 @@ class ModelConstructor[T]:
                 field_value = ModelConstructor(annotation).from_dict(field_value)
             
             args[field_name] = field_value
-            
+        
+        for field in self._cls.__annotations__:
+            if field not in data:
+                args[field] = None
+        
         return self._cls(**args)
 
 
