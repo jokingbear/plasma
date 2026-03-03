@@ -38,15 +38,12 @@ class Projector[T](AutoPipe[[Hashable, ObjectInquirer], TupleDict]):
                 has_args = any(p.kind is inspect._ParameterKind.VAR_POSITIONAL 
                                for p in signature.parameters.values())
                 parameters = {k:p for k, p in signature.parameters.items() if k != 'self'}
-                try:
-                    if has_args or len(parameters) > 2:
-                        qresult = f(node_id, self.inquirer, results)
-                    elif len(parameters) == 2:
-                        qresult = f(node_id, self.inquirer)
-                    else:
-                        raise SyntaxError('unsupported signature, signature must be nodeid, inquirer or nodeid, inquirer, qdata')
-                except:
-                    qresult = self.default
+                if has_args or len(parameters) > 2:
+                    qresult = f(node_id, self.inquirer, results)
+                elif len(parameters) == 2:
+                    qresult = f(node_id, self.inquirer)
+                else:
+                    raise SyntaxError('unsupported signature, signature must be nodeid, inquirer or nodeid, inquirer, qdata')
             elif f in results:
                 qresult = results[f]
             else:
