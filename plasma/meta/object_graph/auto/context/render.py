@@ -11,7 +11,7 @@ def render_context(graph:ContextGraph, context):
     rendered = set()
     for node_name in graph.inquirer.node_names(context):
         node_id = context, node_name
-        if graph.in_degree(node_id) == 0:
+        if graph.inquirer.context_in_degree(node_id) == 0:
             indent = ''
             render_node(graph, node_id, indent, lines, rendered)
     return '\n'.join(lines)

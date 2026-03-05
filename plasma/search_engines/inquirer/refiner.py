@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 from ...functional import AutoPipe
 from .segment import Segment, Match
@@ -23,7 +24,6 @@ class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
         return [segments[a] for a in unbound_args]
 
 
-
 class MatchRefiner(AutoPipe[[list[Match]], list[Match]]):
     
     def run(self, matches:list[Match]):
@@ -39,4 +39,14 @@ class MatchRefiner(AutoPipe[[list[Match]], list[Match]]):
         limits = np.array([interval_counts[s, e] for s, e in intervals])
         unbound_args, = np.where(bound_counts == limits)
 
-        return [matches[a] for a in unbound_args]
+        unique_matches = _unique_matches(matches[a] for a in unbound_args)
+        return [*unique_matches]
+
+
+def _unique_matches(matches:list[Match]):
+    for _, grouped_matches in itertools.groupby(matches, key=_unique_key):
+        yield max(grouped_matches, key=lambda m: m.harmonic_score)
+
+
+def _unique_key(m:Match):
+    return m.qchar_start, m.qchar_end, m.db_arg, m.db_char_start, m.db_char_end

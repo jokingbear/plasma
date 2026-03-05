@@ -33,7 +33,6 @@ class PathInquirer(AutoPipe[[str], list[Match]]):
         qtoken_2_dbtokens = self.token_matcher(qtoken_frame['token'].unique())
         position_graph = PositionGraph(self.index, qtoken_frame, qtoken_2_dbtokens)
         
-
         paths = [*position_graph.generate_paths()]
         segments = []
         solver = Solver(position_graph, self.index.get_path_args)

@@ -1,10 +1,8 @@
 import pandas as pd
+import itertools
 
-from typing import Callable
-from ..base_model import Field
-
-
-class EmptyResult:...
+from typing import Callable, NamedTuple
+from ...base_model import Field
 
 
 class ObjectInquirer:
@@ -30,7 +28,7 @@ class ObjectInquirer:
             qresult = EmptyResult
             if obj_type in self._type_accessor:
                 qresult = self._type_accessor[obj_type](obj, n)
-            elif isinstance(obj, (list, tuple)):
+            elif isinstance(obj, (list, tuple)) and not hasattr(obj, '__orig_bases__'):
                 qresult = obj[int(n)]
             elif isinstance(obj, dict):
                 qresult = obj.get(n, qresult)
@@ -44,39 +42,8 @@ class ObjectInquirer:
                 
         return obj
 
-    def select(self, attrs, default=None):
-        return TupleDict(attrs, [self.get(a, default) for a in attrs])
-    
     def register_type[T](self, t:type[T], func:Callable[[T, str], object]):
         self._type_accessor[t] = func
 
 
-class TupleDict:
-    
-    def __init__(self, 
-                names:tuple, 
-                values:tuple
-            ):
-        
-        self._dict = {n: v for n, v in zip(names, values)}
-        self._tuple = values
-    
-    @property
-    def selectors(self):
-        for n in self._dict:
-            yield n
-    
-    @property
-    def items(self):
-        return self._dict.items()
-    
-    @property
-    def values(self):
-        return self._tuple
-    
-    def __getitem__(self, name):
-        return self._dict[name]
-    
-    def __iter__(self):
-        for v in self._tuple:
-            yield v
+class EmptyResult:...

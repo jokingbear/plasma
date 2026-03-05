@@ -25,8 +25,9 @@ class Context(AutoPipe):
                 context_vars[c] = {}
 
         context_vars[self.name] = global_vars
+        type_caches = {}
         for i in inputs:
-            init_object(self.graph, (self.name, i), context_vars, global_vars)
+            init_object(self.graph, (self.name, i), context_vars, global_vars, type_caches)
 
         return pd.Series({i: context_vars[self.name][i] for i in inputs}).loc[list(inputs)]
 
@@ -37,7 +38,7 @@ class Context(AutoPipe):
         return render_context(self.graph, self.name)
 
 
-def init_object(graph:ContextGraph, node, context_vars:dict, global_vars:dict):
+def init_object(graph:ContextGraph, node, context_vars:dict, global_vars:dict, type_cache:dict):
     context, node_name = node
     if node_name not in context_vars[context]:
         node_type = graph.inquirer.type(node)
@@ -52,21 +53,26 @@ def init_object(graph:ContextGraph, node, context_vars:dict, global_vars:dict):
         elif node_type is Node.FACTORY:
             obj = {}
             for m in graph.successors(node):
-                init_object(graph, m, context_vars, global_vars)
+                init_object(graph, m, context_vars, global_vars, type_cache)
                 child_context, child_name = m
                 obj[child_name[1]] = context_vars[child_context][child_name]
         elif node_type is Node.DELEGATE:
             delegated_node, = graph.successors(node)
-            init_object(graph, delegated_node, context_vars, global_vars)
+            init_object(graph, delegated_node, context_vars, global_vars, type_cache)
             delegated_context, delegated_name = delegated_node
             obj = context_vars[delegated_context][delegated_name]
         else:
-            args = {}
-            for m in graph.successors(node):
-                init_object(graph, m, context_vars, global_vars)
-                child_context, child_name = m
-                args[child_name] = context_vars[child_context][child_name]
             initiator, = graph.inquirer.select(node, 'value')
-            obj = initiator(**args)
+            if initiator in type_cache:
+                obj = type_cache[initiator]
+            else:
+                args = {}
+                for m in graph.successors(node):
+                    init_object(graph, m, context_vars, global_vars, type_cache)
+                    child_context, child_name = m
+                    args[child_name] = context_vars[child_context][child_name]
+                
+                obj = initiator(**args)
+                type_cache[initiator] = obj
         
         context_vars[context][node_name] = obj

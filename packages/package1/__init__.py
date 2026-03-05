@@ -12,6 +12,7 @@ CONTEXT\
         class1=Class1,
         class2=Class2,
         class4=Class4,
-        class5=Class5
+        class5=Class5,
+        class7=Class1,
     )\
     .link_name(p2_context)
