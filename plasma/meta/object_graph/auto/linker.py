@@ -20,9 +20,15 @@ class Linker(AutoPipe):
         candidate_names = {*inquirer.node_names(linking_context)}
         
         shared_names = current_names.intersection(candidate_names).difference(excludes)
-        if len(shared_names) == 0:
-            warn(f'{current_context} does not share any name with {linking_context}')
-        else:
-            for n in shared_names:
-                delegator = Delegator(self.graph, current_context, source)
-                delegator.run(n, linking_context, n)
+        return self.run_map(context1, context2, source, {n:n for n in shared_names})
+
+    def run_map(self, context1:Context, context2:Context, source:str, map:dict):
+        current_context = context1.name
+        linking_context = context2.name
+        
+        if len(map) == 0:
+            warn('empty map')
+        
+        delegator = Delegator(self.graph, current_context, source)
+        for source, target in map.items():
+            delegator.run(source, linking_context, target)

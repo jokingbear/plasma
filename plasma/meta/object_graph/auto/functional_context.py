@@ -20,6 +20,12 @@ class FunctionalContext(Context):
         self.linker.run(self, context, source, *excludes)
         return self
     
+    def link(self, context:Context, mappings:dict):
+        caller = get_caller_frame()
+        source = caller.filename
+        self.linker.run_map(self, context, source, mappings)
+        return self
+    
     def register(self, source:str=None, **blocks):
         if source is None:
             caller = get_caller_frame()
