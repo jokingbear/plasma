@@ -1,3 +1,4 @@
+from logging import exception
 from typing import get_args, get_origin
 
 from .base2 import MODEL_FLAG
@@ -6,51 +7,41 @@ from ...functional import AutoPipe
 
 class Validator[T](AutoPipe[[T], None]):
     
-    def __init__(self, cls:type[T], context=None):
+    def __init__(self, cls:type[T]):
         super().__init__()
         assert hasattr(cls, MODEL_FLAG), 'only support data model validation'
         
         self.cls = cls
-        self.context = context
     
     def run(self, object:T):
-        exceptions = []
-        for field_name, field_type in self.cls.__annotations__.items():
-            field_value = getattr(object, field_name)
+        exceptions = [*_validate_object(None, self.cls, object)]
             
-            if self.context is not None:
-                field_name = f'{self.context}.{field_name}'
+        if len(exceptions) > 0:
+            messages = [e.args[0] for e in exceptions]
+            fields = [e.args[1] for e in exceptions]
             
-            if field_value is None:
-                continue
+            error = TypeError(fields)
+            error.add_note('\n'.join(messages))
+            raise error
+
+
+def _validate_object(context, field_type:type, obj):
+    exception = _validate_instance(context, field_type, obj)
+    
+    if exception is not None:
+        yield exception
+    elif hasattr(field_type, MODEL_FLAG):
+        for field_name, field_type in field_type.__annotations__.items():
+            field_value = getattr(obj, field_name)
+            field_name = field_name if context is None else f'{context}.{field_name}'
             
             if _is_list(field_type):
-                _validate_instance(field_name, (tuple, list), field_value)
-                
-                origin = get_origin(field_type)
-                if origin is not None:
-                    field_type, *_ = get_args(field_type)
-
-                for i, v in enumerate(field_value):
-                    new_field_name = f'{field_name}[{i}]'
-                    try:
-                        _validate_instance(new_field_name, field_type, v)
-                        
-                        if hasattr(field_type, MODEL_FLAG):
-                            Validator(field_type, new_field_name)(v)
-                    except TypeError as e:
-                        exceptions.append(e)
+                iterator = _validate_list(field_name, field_type, field_value)
             else:
-                try:
-                    _validate_instance(field_name, field_type, field_value)
-                    
-                    if hasattr(field_type, MODEL_FLAG):
-                        Validator(field_type, field_name)(field_value)
-                except TypeError as e:
-                    exceptions.append(e)
-            
-            if len(exceptions) > 0:
-                raise TypeError(*[str(e) for e in exceptions])
+                iterator = _validate_object(field_name, field_type, field_value)
+
+            for e in iterator:
+                yield e
 
 
 def _is_list(cls:type):
@@ -59,6 +50,27 @@ def _is_list(cls:type):
             or origin is None and issubclass(cls, (tuple, list)) 
 
 
+def _validate_list(field_name, field_type, field_value):
+    exception = _validate_instance(field_name, (tuple, list), field_value)
+    
+    if exception is not None:
+        yield exception
+
+    else:
+        origin = get_origin(field_type)
+        if origin is not None:
+            field_type, *_ = get_args(field_type)
+
+        for i, v in enumerate(field_value):
+            new_field_name = f'{field_name}[{i}]'
+            for e in _validate_object(new_field_name, field_type, v):
+                yield e
+
+
 def _validate_instance(field_name, cls, obj):
     if not isinstance(obj, cls):
-        raise TypeError(f'{obj} is not instance of {cls} at field {field_name}')
+        msg = f'{obj} is not instance of {cls}'
+        if field_name is not None:
+            msg += f'at field {field_name}'
+
+        return TypeError(msg, field_name)
