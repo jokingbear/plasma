@@ -1,7 +1,7 @@
 from .base_model import (
     model, Field, ModelConstructor, 
     register_field, Parser, Validator,
-    ModelInquirer
+    type_inquirer
 )
 from .graph import ObjectInquirer
 from warnings import warn

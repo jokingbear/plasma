@@ -1,14 +1,17 @@
+from typing import get_args, get_origin
+
 from .base2 import MODEL_FLAG
-from ...functional import ReadableClass
+
+    
+def is_data_model(cls:type):
+    return hasattr(cls, MODEL_FLAG)
+    
+
+def fields(cls:type):
+    return cls.__annotations__
 
 
-class ModelInquirer(ReadableClass):
-    
-    def __init__(self, cls:type):
-        self.cls = cls
-    
-    def is_data_model(self):
-        return hasattr(self.cls, MODEL_FLAG)
-    
-    def fields(self):
-        return self.cls.__annotations__
+def is_list(cls:type):
+    origin = get_origin(cls)
+    return origin is not None and issubclass(origin, (tuple, list)) \
+            or origin is None and issubclass(cls, (tuple, list)) 
