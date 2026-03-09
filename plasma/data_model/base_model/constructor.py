@@ -1,3 +1,5 @@
+from typing import get_origin, get_args
+
 from .field import Field
 from .base2 import MODEL_FLAG
 
@@ -16,18 +18,7 @@ class ModelConstructor[T]:
         return self.from_dict(data)
 
     def from_dict(self, data:dict[str, object]):
-        args = {}
-        for field_name, field_value in data.items():
-            annotation = self._cls.__annotations__[field_name]
-            if hasattr(annotation, MODEL_FLAG) and isinstance(field_value, dict):
-                field_value = ModelConstructor(annotation).from_dict(field_value)
-            
-            args[field_name] = field_value
-        
-        for field in self._cls.__annotations__:
-            if field not in data:
-                args[field] = None
-        
+        args = _Args(self._cls, data)
         return self._cls(**args)
 
 
@@ -40,3 +31,36 @@ def resolve(fields_values:dict[Field, object], field:Field, results:dict):
         temp_dict = temp_dict[a]
     
     temp_dict[name] = fields_values[field]
+
+
+class _Args(dict[str, object]):
+    
+    def __init__(self, root_type:type, data:dict[str, object]):
+        super().__init__()
+        
+        for field_name, field_type in root_type.__annotations__.items():
+            self.__update(field_name, field_type, data.get(field_name))
+    
+    def __update(self, field_name, field_type:type, value):
+        field_value = value
+        if value is not None:
+            if hasattr(field_type, MODEL_FLAG) and not isinstance(value, field_type):
+                assert isinstance(value, dict), 'model must have dict value'
+                field_value = ModelConstructor(field_type).from_dict(value)
+            
+            elif isinstance(value, (list, tuple)):
+                origin = get_origin(field_type)
+                if origin is not None:
+                    field_type, *_ = get_args(field_type)
+
+                if hasattr(field_type, MODEL_FLAG):
+                    field_value = []
+                    for v in value:
+                        if isinstance(v, field_type):
+                            field_value.append(v)
+                        elif isinstance(v, dict):
+                            field_value.append(ModelConstructor(field_type).from_dict(v))
+                        else:
+                            raise ValueError(f'{v} is not of type {field_type} or dict')
+
+        self[field_name] = field_value

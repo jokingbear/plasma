@@ -12,7 +12,6 @@ MODEL_FLAG = '__data_model'
 def model(cls):
     new_cls = register_field(cls)
     setattr(cls, MODEL_FLAG, True)
-    new_cls.__data_model = True
     
     def __repr__(self):
         lines = []
