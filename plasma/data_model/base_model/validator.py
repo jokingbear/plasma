@@ -20,12 +20,15 @@ class Validator[T](AutoPipe[[T], None]):
             messages = [e.args[0] for e in exceptions]
             fields = [e.args[1] for e in exceptions]
             
-            error = TypeError(fields)
+            error = TypeError(*fields)
             error.add_note('\n'.join(messages))
             raise error
 
 
 def _validate_object(context, field_type:type, obj):
+    if obj is None:
+        return
+
     exception = _validate_instance(context, field_type, obj)
     
     if exception is not None:
