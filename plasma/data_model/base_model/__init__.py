@@ -3,3 +3,4 @@ from .base2 import model, register_field
 from .constructor import ModelConstructor
 from .parser import Parser
 from .validator import Validator
+from .inquirer import ModelInquirer
