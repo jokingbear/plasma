@@ -11,11 +11,14 @@ class Timer:
         self.log_func = log_func
         self.name = name or ''
         self._io:TimeIO = None
-
-    def __enter__(self):
+    
+    def init(self):
         timeio = TimeIO(self.name)
         self._io = timeio
         return timeio
+    
+    def __enter__(self):
+        return self.init()
 
     def __exit__(self, *_):
         self._io.finalize()
