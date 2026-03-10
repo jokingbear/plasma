@@ -1,4 +1,4 @@
-from typing import dataclass_transform
+from typing import dataclass_transform, get_origin, get_args
 from dataclasses import dataclass
 
 from .field import Field, Composite
@@ -32,13 +32,14 @@ def register_field[T](cls:type[T]) -> type[T]:
     return cls
 
 
-def _construct_field(cls:type, context=None):
+def _construct_field(cls:type, context=None) -> Field:
     if hasattr(cls, FIELD_FLAG):
         context = context or (cls,)
-        sub_fields = {name: _construct_field(annotation, (*context, name)) for name, annotation in cls.__annotations__.items()}
-        if context == (cls,):
-            return sub_fields
-        else:
-            return Composite(context, sub_fields)
+        sub_fields = {name: _construct_field(annotation, (*context, name)) 
+                      for name, annotation in cls.__annotations__.items()}
+        
+        return Composite(context, sub_fields)
+    elif isinstance(cls, type) and issubclass(cls, (tuple, list)) \
+         or not isinstance(cls, type) and get(orig)
     else:
         return Field(context)
