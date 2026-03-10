@@ -1,13 +1,14 @@
 from typing import get_origin, Mapping
 
 from .constants import MODEL_FLAG, ACCESSORS
+from .field import Field
 
     
 def is_data_model(cls:type):
     return hasattr(cls, MODEL_FLAG)
     
 
-def accessors(cls:type) -> Mapping[str, type]:
+def accessors(cls:type) -> Mapping[str, Field]:
     assert is_data_model(cls)
     return getattr(cls, ACCESSORS)
 

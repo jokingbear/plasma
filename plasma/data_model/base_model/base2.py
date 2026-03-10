@@ -47,7 +47,7 @@ def _construct_field(cls:type, context=None):
         return Field(context, cls)
 
 
-class Accessors(dict[str, type]):
+class Accessors(dict[str, Field]):
     
     def __init__(self, model_cls:type):
         super().__init__()
@@ -59,13 +59,10 @@ class Accessors(dict[str, type]):
         if isinstance(field, Composite):
             for f in field.sub_fields.values():
                 self.__update(f)
-        elif isinstance(field, List):
-            if is_data_model(field.cls):
-                accessors = Accessors(field.cls)
-                current_accessor = field.accessor + '.@idx.'
-                for a, t in accessors.items():
-                    self[current_accessor + a] = t
-            else:
-                self[field.accessor] = list, tuple
+        elif isinstance(field, List) and is_data_model(field.cls):
+            accessors = Accessors(field.cls)
+            current_accessor = field.accessor + '.@idx.'
+            for a, f in accessors.items():
+                self[current_accessor + a] = f
         else:
-            self[field.accessor] = field.cls or object
+            self[field.accessor] = field
