@@ -3,8 +3,8 @@ from typing import (
     Iterator, Callable
 )
 
-from .field import Field
-from .base2 import MODEL_FLAG
+from ..field import Field
+from ..constants import MODEL_FLAG
 
 
 class ModelConstructor[T]:
@@ -27,6 +27,10 @@ class ModelConstructor[T]:
     
     def from_accessor(self, data:dict[str, object]):
         pass
+    
+    def register[T](self, cls:type[T], parser:Callable[[T], object]):
+        self._type_parser[cls] = parser
+        return self
 
 
 def resolve(fields_values:dict[Field, object], field:Field, results:dict):

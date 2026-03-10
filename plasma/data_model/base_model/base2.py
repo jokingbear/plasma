@@ -1,10 +1,10 @@
 from typing import dataclass_transform, get_args
 from dataclasses import dataclass
 
-from .constants import MODEL_FLAG, FIELD_FLAG
+from .constants import MODEL_FLAG, FIELD_FLAG, ACCESSORS
 from .field import Field, Composite, List
 from .repr import render_lines
-from .inquirer import is_list
+from .inquirer import is_list, is_data_model
 
 
 @dataclass_transform()
@@ -19,6 +19,7 @@ def model(cls):
         return '\n'.join(lines)
 
     new_cls.__repr__ = __repr__
+    setattr(new_cls, ACCESSORS, Accessors(cls))
     return dataclass(new_cls, repr=False)
 
 
@@ -44,3 +45,27 @@ def _construct_field(cls:type, context=None):
         return List(context, contained_cls)
     else:
         return Field(context, cls)
+
+
+class Accessors(dict[str, type]):
+    
+    def __init__(self, model_cls:type):
+        super().__init__()
+        
+        for a in model_cls.__annotations__:
+            self.__update(getattr(model_cls, a))
+    
+    def __update(self, field:Field):
+        if isinstance(field, Composite):
+            for f in field.sub_fields.values():
+                self.__update(f)
+        elif isinstance(field, List):
+            if is_data_model(field.cls):
+                accessors = Accessors(field.cls)
+                current_accessor = field.accessor + '.@idx.'
+                for a, t in accessors.items():
+                    self[current_accessor + a] = t
+            else:
+                self[field.accessor] = list, tuple
+        else:
+            self[field.accessor] = field.cls or object

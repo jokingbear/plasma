@@ -1,18 +1,15 @@
-from typing import get_origin, Iterator
+from typing import get_origin, Mapping
 
-from .constants import MODEL_FLAG
-from .field import Field
+from .constants import MODEL_FLAG, ACCESSORS
 
     
 def is_data_model(cls:type):
     return hasattr(cls, MODEL_FLAG)
     
 
-def fields(cls:type) -> Iterator[Field]:
+def accessors(cls:type) -> Mapping[str, type]:
     assert is_data_model(cls)
-    
-    for a in cls.__annotations__:
-        yield getattr(cls, a)
+    return getattr(cls, ACCESSORS)
 
 
 def is_list(cls:type):
