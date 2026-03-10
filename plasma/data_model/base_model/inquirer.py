@@ -1,6 +1,6 @@
 from typing import get_origin, Mapping
 
-from .constants import MODEL_FLAG, ACCESSORS
+from .constants import MODEL_FLAG, ACCESSORS, STRUCT
 from .field import Field
 
     
@@ -11,6 +11,11 @@ def is_data_model(cls:type):
 def accessors(cls:type) -> Mapping[str, Field]:
     assert is_data_model(cls)
     return getattr(cls, ACCESSORS)
+
+
+def struct(cls:type) -> Mapping:
+    assert is_data_model(cls)
+    return getattr(cls, STRUCT)
 
 
 def is_list(cls:type):

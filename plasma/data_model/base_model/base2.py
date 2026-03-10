@@ -1,10 +1,11 @@
 from typing import dataclass_transform, get_args
 from dataclasses import dataclass
 
-from .constants import MODEL_FLAG, FIELD_FLAG, ACCESSORS
+from .constants import MODEL_FLAG, FIELD_FLAG, ACCESSORS, STRUCT
 from .field import Field, Composite, List
 from .repr import render_lines
 from .inquirer import is_list, is_data_model
+from .accessors import Accessors, Struct
 
 
 @dataclass_transform()
@@ -19,7 +20,10 @@ def model(cls):
         return '\n'.join(lines)
 
     new_cls.__repr__ = __repr__
-    setattr(new_cls, ACCESSORS, Accessors(cls))
+
+    accessors = Accessors(cls)
+    setattr(new_cls, ACCESSORS, accessors)
+    setattr(new_cls, STRUCT, Struct(accessors))
     return dataclass(new_cls, repr=False)
 
 
@@ -45,24 +49,3 @@ def _construct_field(cls:type, context=None):
         return List(context, contained_cls)
     else:
         return Field(context, cls)
-
-
-class Accessors(dict[str, Field]):
-    
-    def __init__(self, model_cls:type):
-        super().__init__()
-        
-        for a in model_cls.__annotations__:
-            self.__update(getattr(model_cls, a))
-    
-    def __update(self, field:Field):
-        if isinstance(field, Composite):
-            for f in field.sub_fields.values():
-                self.__update(f)
-        elif isinstance(field, List) and is_data_model(field.cls):
-            accessors = Accessors(field.cls)
-            current_accessor = field.accessor + '.@idx.'
-            for a, f in accessors.items():
-                self[current_accessor + a] = f
-        else:
-            self[field.accessor] = field
