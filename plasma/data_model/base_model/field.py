@@ -17,4 +17,10 @@ class Composite(Field):
         for name, field in sub_fields.items():
             setattr(self, name, field)
             
-        self.sub_fields = sub_fields.values()
+        self.sub_fields = sub_fields
+
+
+class List(Field):
+    
+    def __init__(self, context, contained_type):
+        super().__init__(context, contained_type)
