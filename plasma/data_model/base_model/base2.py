@@ -1,12 +1,10 @@
 from typing import dataclass_transform
 from dataclasses import dataclass
 
+from .constants import MODEL_FLAG, FIELD_FLAG
 from .field import Field, Composite
 from .repr import render_lines
 
-
-FIELD_FLAG = '__fields' 
-MODEL_FLAG = '__data_model'
 
 @dataclass_transform()
 def model(cls):

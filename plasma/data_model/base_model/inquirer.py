@@ -1,14 +1,18 @@
-from typing import get_args, get_origin
+from typing import get_origin, Iterator
 
-from .base2 import MODEL_FLAG
+from .constants import MODEL_FLAG
+from .field import Field
 
     
 def is_data_model(cls:type):
     return hasattr(cls, MODEL_FLAG)
     
 
-def fields(cls:type):
-    return cls.__annotations__
+def fields(cls:type) -> Iterator[Field]:
+    assert is_data_model(cls)
+    
+    for a in cls.__annotations__:
+        yield getattr(cls, a)
 
 
 def is_list(cls:type):

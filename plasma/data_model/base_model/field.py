@@ -1,7 +1,8 @@
 class Field:
     
-    def __init__(self, context):
+    def __init__(self, context, cls:type):
         self.context = context
+        self.cls = cls
     
     def __repr__(self):
         type_str = self.context[0].__name__
@@ -10,8 +11,8 @@ class Field:
 
 class Composite(Field):
     
-    def __init__(self, context, sub_fields:dict[str, Field]):
-        super().__init__(context)
+    def __init__(self, context, cls, sub_fields:dict[str, Field]):
+        super().__init__(context, cls)
 
         for name, field in sub_fields.items():
             setattr(self, name, field)
