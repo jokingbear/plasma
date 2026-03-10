@@ -10,11 +10,15 @@ class groupby[K, V](dict[K, tuple[V]]):
                     selector:Callable[[D], V]=None
                 ):
         
-        selector = selector or (lambda d:d)
-        temp = defaultdict(lambda: [])
+        selector = selector or _identity
+        temp = defaultdict(list)
         for d in data:
             dkey = key(d)
             temp[dkey].append(selector(d))
         
         for k, v in temp.items():
             self[k] = tuple(v)
+
+
+def _identity(x):
+    return x

@@ -1,7 +1,7 @@
 import numpy as np
 
 from typing import Callable, NamedTuple
-from ..tuple_interface import PseudoTuple
+from ..pseudo_tuple import PseudoTuple
 from ....functional import partials, chain
 
 
