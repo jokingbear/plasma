@@ -4,9 +4,13 @@ class Field:
         self.context = context
         self.cls = cls
     
+    @property
+    def accessor(self):
+        return '.'.join(str(c) for c in self.context[1:])
+    
     def __repr__(self):
         type_str = self.context[0].__name__
-        return type_str + '.' + '.'.join(str(c) for c in self.context[1:])
+        return type_str + '.' + self.accessor
 
 
 class Composite(Field):
