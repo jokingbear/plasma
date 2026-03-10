@@ -5,7 +5,7 @@ from .constants import MODEL_FLAG, FIELD_FLAG, ACCESSORS, STRUCT
 from .field import Field, Composite, List
 from .repr import render_lines
 from .inquirer import is_list, is_data_model
-from .accessors import Accessors, Struct
+from .index import Accessors, Struct
 
 
 @dataclass_transform()
