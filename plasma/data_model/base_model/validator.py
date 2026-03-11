@@ -57,7 +57,7 @@ class Validator[T](AutoPipe[[T], None]):
 def _validate_object(field_name, field_type:type, obj):
     if isinstance(field_type, type) and issubclass(field_type, Enum) and not isinstance(obj, Enum):
         return f'{obj} is not of enum {field_type} at field {field_name}'
-    elif not isinstance(obj, field_type):
+    elif obj is not None and not isinstance(obj, field_type):
         return f'{obj} is not of instance {field_type} at field {field_name}'
 
 
