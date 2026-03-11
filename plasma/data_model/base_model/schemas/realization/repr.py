@@ -15,7 +15,7 @@ class Repr:
         return '\n'.join(lines)
     
     def _iterate(self, node, indent=''):
-        if len(key) == 0:
+        if len(node) == 0:
             key = ''
         else:
             key = str(node[-1])

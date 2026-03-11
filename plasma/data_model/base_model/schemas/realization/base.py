@@ -8,8 +8,10 @@ class Realization(nx.DiGraph):
     
     def __init__(self, rep:GraphRepresetation, obj):
         super().__init__()
-        
-        self.__update(rep, '', '', obj)
+
+        root = rep.root
+        self.__update(rep, root, root, obj)
+        self.root = root
         
     def __update(self, rep:GraphRepresetation, rep_node, real_node, value):
         self.add_node(real_node, value=value)

@@ -11,4 +11,4 @@ class Schema:
         return Realization(self.rep, obj)
     
     def __repr__(self):
-        return repr(self.representation)
+        return repr(self.rep)
