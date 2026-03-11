@@ -28,5 +28,13 @@ class Realization(nx.DiGraph):
                     self.add_edge(real_node, next_real_node)
                     self.__update(rep, s, next_real_node, getattr(value, s[-1]))
 
+    def value(self, node):
+        return self.nodes[node]['value']
+    
+    def endpoints(self):
+        for n in self:
+            if self.out_degree(n) == 0:
+                yield n
+    
     def __repr__(self):
         return Repr(self).run()
