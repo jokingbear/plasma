@@ -8,7 +8,7 @@ from ....functional import ReadableClass
 
 class Serializer[T](ReadableClass):
     
-    def __init__(self, cls:type[T]):
+    def __init__(self, cls:type[T], type_serializer:dict[type, Callable]):
         super().__init__()
 
         assert is_data_model(cls)
@@ -17,7 +17,7 @@ class Serializer[T](ReadableClass):
         self._accessor_schema = accessor
         self._struct_schema = StructSchema(accessor)
 
-        self.type_serializer = dict[type, Callable]()
+        self.type_serializer = type_serializer
         
     def register[T](self, cls:T, serializer:Callable[[T], object]):
         self.type_serializer[cls] = serializer
