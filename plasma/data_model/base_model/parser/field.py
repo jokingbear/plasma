@@ -10,7 +10,7 @@ class FieldParser[T]:
         assert is_data_model(cls), f'{cls} does not have model decorator'
         self.cls = cls
     
-    def from_fields(self, fields:dict[Field, object]):
+    def from_fields(self, fields:dict[Field, object]) -> T:
         data = {}
         for field in fields:
             resolve(fields, field, data)
