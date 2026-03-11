@@ -31,10 +31,14 @@ class Realization(nx.DiGraph):
     def value(self, node):
         return self.nodes[node]['value']
     
+    @property
     def endpoints(self):
         for n in self:
             if self.out_degree(n) == 0:
                 yield n
+
+    def mutate(self, node, value):
+        self.add_node(node, value=value)
     
     def __repr__(self):
         return Repr(self).run()

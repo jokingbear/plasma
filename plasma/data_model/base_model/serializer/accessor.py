@@ -8,4 +8,5 @@ class AccessorState(dict[str, object]):
 
         for p in real.endpoints:
             value = real.value(p)
-            self['.'.join(p[1:])] = value
+            key = '.'.join(str(a) for a in p)
+            self[key] = value
