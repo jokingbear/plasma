@@ -27,7 +27,12 @@ class Parser[T](ReadableClass):
             schema_key = re.sub(r'\.\d+', '.@idx', k)
             schema_type = self._accessor_schema[schema_key].cls
             parser = self._type_parser.get(schema_type, lambda x:x)
-            parsed_accessors[k] = parser(v)
+            try:
+                parsed_accessors[k] = parser(v)
+            except Exception as e:
+                error = ValueError(k, v)
+                error.add_note(f'error parsing {v} at {k}')
+                raise error from e
         
         struct = accessor2struct(self._struct_schema, parsed_accessors)
         return _construct(self.cls, struct)
