@@ -46,12 +46,14 @@ class Parser[T](ReadableClass):
 
 def _construct(cls:type, struct):
     if is_list(cls):
-        contained_type = next(get_args(cls), None)
-        
         if struct is None:
-            return []
-        elif contained_type is not None:
-            return [_construct(contained_type, s) for s in struct]
+            struct = []
+        
+        contained_type = get_args(cls)
+        if len(contained_type) > 0:
+            return [_construct(contained_type[0], s) for s in struct]
+        else:
+            return struct
     elif isinstance(struct, dict) and is_data_model(cls):
         args = {}
         for a, at in cls.__annotations__.items():

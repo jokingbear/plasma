@@ -13,8 +13,9 @@ class Serializer[T](ReadableClass):
 
         assert is_data_model(cls)
         
-        self._accessor_schema = AccessorSchema(cls)
-        self._struct_schema = StructSchema(cls)
+        accessor = AccessorSchema(cls)
+        self._accessor_schema = accessor
+        self._struct_schema = StructSchema(accessor)
 
         self.type_serializer = dict[type, Callable]()
         
