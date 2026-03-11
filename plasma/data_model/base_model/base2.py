@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from .constants import MODEL_FLAG, FIELD_FLAG, ACCESSORS, STRUCT
 from .field import Field, Composite, List
 from .repr import render_lines
-from .inquirer import is_list, is_data_model
-from .index import Accessors, Struct
+from .inquirer import is_list
+from .schemas import AccessorSchema, StructSchema
 
 
 @dataclass_transform()
@@ -21,9 +21,9 @@ def model(cls):
 
     new_cls.__repr__ = __repr__
 
-    accessors = Accessors(cls)
+    accessors = AccessorSchema(cls)
     setattr(new_cls, ACCESSORS, accessors)
-    setattr(new_cls, STRUCT, Struct(accessors))
+    setattr(new_cls, STRUCT, StructSchema(accessors))
     return dataclass(new_cls, repr=False)
 
 
