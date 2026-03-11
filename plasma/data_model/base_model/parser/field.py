@@ -19,7 +19,7 @@ class FieldParser[T]:
 
     def _from_dict(self, data:dict[str, object]):
         args = _Args(self._cls, data)
-        return self._cls(**args)
+        return self.cls(**args)
 
 
 def resolve(fields_values:dict[Field, object], field:Field, results:dict):
