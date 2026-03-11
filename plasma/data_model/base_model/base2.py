@@ -20,10 +20,6 @@ def model(cls):
         return '\n'.join(lines)
 
     new_cls.__repr__ = __repr__
-
-    accessors = AccessorSchema(cls)
-    setattr(new_cls, ACCESSORS, accessors)
-    setattr(new_cls, STRUCT, StructSchema(accessors))
     return dataclass(new_cls, repr=False)
 
 
