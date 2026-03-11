@@ -51,7 +51,7 @@ class Validator[T](AutoPipe[[T], None]):
             for n in notes:
                 error.add_note(n)
 
-            raise AttributeError(fields)
+            raise error
 
 
 def _validate_object(field_type:type, obj):
