@@ -1,7 +1,7 @@
 from typing import dataclass_transform, get_args
 from dataclasses import dataclass
 
-from .constants import MODEL_FLAG, FIELD_FLAG, ACCESSORS, STRUCT
+from .constants import MODEL_FLAG, FIELD_FLAG
 from .field import Field, Composite, List
 from .repr import render_lines
 from .inquirer import is_list
@@ -20,10 +20,6 @@ def model(cls):
         return '\n'.join(lines)
 
     new_cls.__repr__ = __repr__
-
-    accessors = AccessorSchema(cls)
-    setattr(new_cls, ACCESSORS, accessors)
-    setattr(new_cls, STRUCT, StructSchema(accessors))
     return dataclass(new_cls, repr=False)
 
 

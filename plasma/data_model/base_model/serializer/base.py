@@ -8,7 +8,7 @@ from ....functional import ReadableClass
 
 class Serializer[T](ReadableClass):
     
-    def __init__(self, cls:type[T]):
+    def __init__(self, cls:type[T], type_serializer:dict[type, Callable]):
         super().__init__()
 
         assert is_data_model(cls)
@@ -16,19 +16,13 @@ class Serializer[T](ReadableClass):
         accessor = AccessorSchema(cls)
         self._accessor_schema = accessor
         self._struct_schema = StructSchema(accessor)
-
-        self.type_serializer = dict[type, Callable]()
-        
-    def register[T](self, cls:T, serializer:Callable[[T], object]):
-        self.type_serializer[cls] = serializer
-        
-        return self
+        self._type_serializer = type_serializer
     
     def to_accessors(self, obj:T) -> dict[str, object]:
         accessor = AccessorState(self._accessor_schema, obj)
         results = {}
         for k, v in accessor.items():
-            serializer = self.type_serializer.get(type(v), lambda x:x)
+            serializer = self._type_serializer.get(type(v), lambda x:x)
             results[k] = serializer(v)
         return results
     

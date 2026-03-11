@@ -1,21 +1,10 @@
-from typing import get_origin, Mapping
+from typing import get_origin
 
-from .constants import MODEL_FLAG, ACCESSORS, STRUCT
-from .field import Field
-
+from .constants import MODEL_FLAG
     
+
 def is_data_model(cls:type):
     return hasattr(cls, MODEL_FLAG)
-    
-
-def accessors(cls:type) -> Mapping[str, Field]:
-    assert is_data_model(cls)
-    return getattr(cls, ACCESSORS)
-
-
-def struct(cls:type) -> Mapping:
-    assert is_data_model(cls)
-    return getattr(cls, STRUCT)
 
 
 def is_list(cls:type):

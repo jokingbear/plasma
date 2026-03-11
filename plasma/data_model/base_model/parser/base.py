@@ -1,3 +1,5 @@
+import re
+
 from typing import Callable, get_args
 
 from ..inquirer import is_data_model, is_list
@@ -8,7 +10,7 @@ from ....functional import ReadableClass
 
 class Parser[T](ReadableClass):
     
-    def __init__(self, cls:type[T]):
+    def __init__(self, cls:type[T], type_parser:dict[type, Callable[[object], object]]):
         super().__init__()
         
         accessor_schema = AccessorSchema(cls)
@@ -17,16 +19,14 @@ class Parser[T](ReadableClass):
         self.cls = cls
         self._struct_schema = struct_schema
         self._accessor_schema = accessor_schema
-        self.type_parser = dict[type, Callable]()
-    
-    def register[T](self, cls:type[T], parser:Callable[[T], object]) -> T:
-        self.type_parser[cls] = parser
-        return self
+        self._type_parser = type_parser
     
     def from_accessors(self, accessors:dict[str, object]) -> T:
         parsed_accessors = {}
         for k, v in accessors.items():
-            parser = self.type_parser.get(type(v), lambda x:x)
+            schema_key = re.sub(r'\.\d+', '.@idx', k)
+            schema_type = self._accessor_schema[schema_key].cls
+            parser = self._type_parser.get(schema_type, lambda x:x)
             parsed_accessors[k] = parser(v)
         
         struct = accessor2struct(self._struct_schema, parsed_accessors)
@@ -46,12 +46,14 @@ class Parser[T](ReadableClass):
 
 def _construct(cls:type, struct):
     if is_list(cls):
-        contained_type = next(get_args(cls), None)
-        
         if struct is None:
-            return []
-        elif contained_type is not None:
-            return [_construct(contained_type, s) for s in struct]
+            struct = []
+        
+        contained_type = get_args(cls)
+        if len(contained_type) > 0:
+            return [_construct(contained_type[0], s) for s in struct]
+        else:
+            return struct
     elif isinstance(struct, dict) and is_data_model(cls):
         args = {}
         for a, at in cls.__annotations__.items():
