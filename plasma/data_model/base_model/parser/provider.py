@@ -14,6 +14,6 @@ class ParsingProvider(AutoPipe):
     def run[T](self, cls:type[T]):
         return Parser[T](cls, self.type_parser)
 
-    def register[T](self, cls:type[T], parser:Callable[[object, type[T]], object]):
+    def register[T](self, cls:type[T], parser:Callable[[object], T]):
         self.type_parser[cls] = parser
         return self
