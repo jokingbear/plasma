@@ -13,3 +13,7 @@ class SerializationProvider(AutoPipe):
     
     def run[T](self, cls:type[T]):
         return Serializer[T](cls, self._type_serializer)
+
+    def register[T](self, cls:T, serializer:Callable[[T], object]):
+        self.type_serializer[cls] = serializer
+        return self

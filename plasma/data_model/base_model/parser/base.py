@@ -10,7 +10,7 @@ from ....functional import ReadableClass
 
 class Parser[T](ReadableClass):
     
-    def __init__(self, cls:type[T]):
+    def __init__(self, cls:type[T], type_parser:dict[type, Callable[[object, type], object]]):
         super().__init__()
         
         accessor_schema = AccessorSchema(cls)
@@ -19,18 +19,14 @@ class Parser[T](ReadableClass):
         self.cls = cls
         self._struct_schema = struct_schema
         self._accessor_schema = accessor_schema
-        self.type_parser = dict[type, Callable]()
-    
-    def register[T](self, cls:type[T], parser:Callable[[object, type[T]], object]) -> T:
-        self.type_parser[cls] = parser
-        return self
+        self._type_parser = type_parser
     
     def from_accessors(self, accessors:dict[str, object]) -> T:
         parsed_accessors = {}
         for k, v in accessors.items():
             schema_key = re.sub(r'\.\d+', '.@idx', k)
             schema_type = self._accessor_schema[schema_key].cls
-            parser = self.type_parser.get(schema_type, lambda x,t:x)
+            parser = self._type_parser.get(schema_type, lambda x,t:x)
             parsed_accessors[k] = parser(v, schema_type)
         
         struct = accessor2struct(self._struct_schema, parsed_accessors)
