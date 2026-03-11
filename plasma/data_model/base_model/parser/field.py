@@ -18,7 +18,7 @@ class FieldParser[T]:
         return self._from_dict(data)
 
     def _from_dict(self, data:dict[str, object]):
-        args = _Args(self._cls, data)
+        args = _Args(self.cls, data)
         return self.cls(**args)
 
 
