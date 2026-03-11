@@ -1,9 +1,9 @@
 from typing import Callable, get_args
 
-from .inquirer import is_data_model, is_list
-from .schemas import AccessorSchema, StructSchema, struct2accessor, accessor2struct
-from .field import Field
-from ...functional import ReadableClass
+from ..inquirer import is_data_model, is_list
+from ..schemas import AccessorSchema, StructSchema, struct2accessor, accessor2struct
+from ..field import Field
+from ....functional import ReadableClass
 
 
 class Parser[T](ReadableClass):
@@ -46,14 +46,12 @@ class Parser[T](ReadableClass):
 
 def _construct(cls:type, struct):
     if is_list(cls):
-        if struct is None:
-            struct = []
+        contained_type = next(get_args(cls), None)
         
-        contained_type = get_args(cls)
-        if len(contained_type) > 0:
-            return [_construct(contained_type[0], s) for s in struct]
-        else:
-            return struct
+        if struct is None:
+            return []
+        elif contained_type is not None:
+            return [_construct(contained_type, s) for s in struct]
     elif isinstance(struct, dict) and is_data_model(cls):
         args = {}
         for a, at in cls.__annotations__.items():
