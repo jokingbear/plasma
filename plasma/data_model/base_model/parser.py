@@ -1,3 +1,4 @@
+import re
 from typing import Callable, get_args
 
 from .inquirer import is_data_model, is_list
@@ -19,15 +20,17 @@ class Parser[T](ReadableClass):
         self._accessor_schema = accessor_schema
         self.type_parser = dict[type, Callable]()
     
-    def register[T](self, cls:type[T], parser:Callable[[T], object]) -> T:
+    def register[T](self, cls:type[T], parser:Callable[[object, type[T]], object]) -> T:
         self.type_parser[cls] = parser
         return self
     
     def from_accessors(self, accessors:dict[str, object]) -> T:
         parsed_accessors = {}
         for k, v in accessors.items():
-            parser = self.type_parser.get(type(v), lambda x:x)
-            parsed_accessors[k] = parser(v)
+            schema_key = re.sub(r'\.\d+', '.@idx', k)
+            schema_type = self._accessor_schema[schema_key].cls
+            parser = self.type_parser.get(schema_type, lambda x,t:x)
+            parsed_accessors[k] = parser(v, schema_type)
         
         struct = accessor2struct(self._struct_schema, parsed_accessors)
         return _construct(self.cls, struct)
