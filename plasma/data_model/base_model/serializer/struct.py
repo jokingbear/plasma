@@ -1,9 +1,9 @@
-from ..inquirer import struct
+from ..schemas import Realization, Representation
 
 
 class StructState(dict):
     
-    def __init__(self, struct_schema, obj):
+    def __init__(self, rep:Representation, r:Realization):
         super().__init__()
 
         if obj is not None:

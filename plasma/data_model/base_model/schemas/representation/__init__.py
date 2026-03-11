@@ -1,1 +1,1 @@
-from .base import GraphRepresetation
+from .base import Representation

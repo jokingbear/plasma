@@ -5,7 +5,7 @@ from .repr import Repr
 from ...inquirer import is_data_model
 
 
-class GraphRepresetation(nx.DiGraph):
+class Representation(nx.DiGraph):
     
     def __init__(self, cls):
         super().__init__()

@@ -1,19 +1,19 @@
 import networkx as nx
 
 from .repr import Repr
-from ..representation import GraphRepresetation
+from ..representation import Representation
 
 
 class Realization(nx.DiGraph):
     
-    def __init__(self, rep:GraphRepresetation, obj):
+    def __init__(self, rep:Representation, obj):
         super().__init__()
 
         root = rep.root
         self.__update(rep, root, root, obj)
         self.root = root
         
-    def __update(self, rep:GraphRepresetation, rep_node, real_node, value):
+    def __update(self, rep:Representation, rep_node, real_node, value):
         self.add_node(real_node, value=value)
         
         if value is not None:
