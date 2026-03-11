@@ -9,11 +9,11 @@ class ParsingProvider(AutoPipe):
     def __init__(self):
         super().__init__()
         
-        self._type_serializer = dict[type, Callable[[object], object]]()
+        self.type_parser = dict[type, Callable[[object], object]]()
     
     def run[T](self, cls:type[T]):
-        return Parser[T](cls, self._type_serializer)
+        return Parser[T](cls, self.type_parser)
 
-    def register[T](self, cls:type[T], parser:Callable[[object, type[T]], object]) -> T:
+    def register[T](self, cls:type[T], parser:Callable[[object, type[T]], object]):
         self.type_parser[cls] = parser
         return self
