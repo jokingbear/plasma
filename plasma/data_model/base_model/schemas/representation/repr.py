@@ -26,7 +26,7 @@ class Repr:
         type_str = origin.__name__
         if len(args) > 0:
             type_str += f'[{','.join(a.__name__ for a in args)}]'
-        key = '.'.join(node)        
+        key = '' if len(node) == 0 else node[-1]     
         self.lines.append(f'{indent}|->{key}:{type_str}')
 
         for s in self.graph.successors(node):
