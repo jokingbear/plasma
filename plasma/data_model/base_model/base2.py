@@ -1,7 +1,7 @@
 from typing import dataclass_transform, get_args
 from dataclasses import dataclass
 
-from .constants import MODEL_FLAG, FIELD_FLAG, ACCESSORS, STRUCT
+from .constants import MODEL_FLAG, FIELD_FLAG
 from .field import Field, Composite, List
 from .repr import render_lines
 from .inquirer import is_list
