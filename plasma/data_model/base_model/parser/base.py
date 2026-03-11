@@ -1,9 +1,9 @@
 from typing import Callable, get_args
 
-from .inquirer import is_data_model, is_list
-from .schemas import AccessorSchema, StructSchema, struct2accessor, accessor2struct
-from .field import Field
-from ...functional import ReadableClass
+from ..inquirer import is_data_model, is_list
+from ..schemas import AccessorSchema, StructSchema, struct2accessor, accessor2struct
+from ..field import Field
+from ....functional import ReadableClass
 
 
 class Parser[T](ReadableClass):

@@ -20,7 +20,3 @@ class StructSchema(dict):
                     current = container.setdefault(c, {})
                 
                 container = current
-
-    def __repr__(self):
-        
-        return super().__repr__()
