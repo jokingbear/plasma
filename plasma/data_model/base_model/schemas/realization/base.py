@@ -19,6 +19,7 @@ class Realization(nx.DiGraph):
         if value is not None:
             for s in rep.successors(rep_node):
                 if s[-1] == '@idx':
+                    assert isinstance(value, (tuple, list)), f'expect tuple or list at {'.'.join(str(a) for a in real_node)}'
                     for i, v in enumerate(value):
                         next_real_node = (*real_node, i)
                         self.add_edge(real_node, next_real_node)
