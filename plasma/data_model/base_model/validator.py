@@ -23,8 +23,8 @@ class Validator[T](AutoPipe[[T], None]):
             rep = self._schema.real_to_rep(e)
             origin, args = self._schema.rep.type(rep)
             
-            field_name = 'f.'.join(str(a) for a in e)
-            if isinstance(origin, (tuple, list)):
+            field_name = '.'.join(str(a) for a in e)
+            if issubclass(origin, (tuple, list)):
                 enotes = [*_validate_list(field_name, args, value)]
                 error_fields.append(field_name)
                 notes.extend(enotes)
