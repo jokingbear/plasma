@@ -36,7 +36,7 @@ class Validator[T](AutoPipe[[T], None]):
                     notes.append(enotes)
         
         if len(error_fields) > 0:
-            error = AttributeError(*error_fields)
+            error = TypeError(*error_fields)
             for n in notes:
                 error.add_note(n)
             raise error
