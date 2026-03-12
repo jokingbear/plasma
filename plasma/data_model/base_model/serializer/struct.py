@@ -1,22 +1,37 @@
-from ..inquirer import struct
+import networkx as nx
+
+from ..schemas import Realization
 
 
 class StructState(dict):
     
-    def __init__(self, struct_schema, obj):
+    def __init__(self, r:Realization):
         super().__init__()
 
-        if obj is not None:
-            for k in struct_schema:
-                self.__update(struct, k, obj)
+        temp_graph = nx.DiGraph()
+        temp_graph.add_nodes_from(r.nodes)
+        temp_graph.add_edges_from(r.edges)
+        temp_graph.add_node(r.root, value=self)
         
-    def __update(self, schema, key, obj):
-        next_template = schema[key]
-        value = getattr(obj, key)
-        if isinstance(next_template, dict):
-            self[key] = StructState(value)
-        elif isinstance(next_template, list):
-            assert isinstance(value, (list, tuple)), f'expected list or tuple for {obj} at {key}'
-            self[key] = [StructState(v) for v in value]
+        for s in r.successors(r.root):
+            self.__update(r, temp_graph, s)
+        
+    def __update(self, r:Realization, values:nx.DiGraph, key):
+        predecessor, = values.predecessors(key)
+        container = values.nodes[predecessor]['value']
+        
+        successors = [*values.successors(key)]
+        if len(successors) == 0:
+            value = r.value(key)
+        elif isinstance(successors[0][-1], int):
+            value = [{} for _ in successors]
+        elif isinstance(key[-1], int):
+            value = container[key[-1]]
         else:
-            self[key] = value
+            value = {}
+            
+        container[key[-1]] = value
+        values.add_node(key, value=value)
+    
+        for s in successors:
+            self.__update(r, values, s)

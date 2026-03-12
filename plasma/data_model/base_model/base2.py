@@ -5,13 +5,14 @@ from .constants import MODEL_FLAG, FIELD_FLAG
 from .field import Field, Composite, List
 from .repr import render_lines
 from .inquirer import is_list
-from .schemas import AccessorSchema, StructSchema
+from .schemas import Schema
 
 
 @dataclass_transform()
 def model(cls):
     new_cls = register_field(cls)
     setattr(cls, MODEL_FLAG, True)
+    setattr(cls, MODEL_FLAG, Schema(new_cls))
     
     def __repr__(self):
         lines = []
