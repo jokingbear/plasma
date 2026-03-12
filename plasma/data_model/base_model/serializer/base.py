@@ -10,13 +10,15 @@ from ....functional import ReadableClass
 class Serializer[T](ReadableClass):
     
     def __init__(self, cls:type[T], 
-                 sub_serializers:dict[type, Callable]={}):
+                 sub_serializers:dict[type, Callable]={},
+                 expand_none=False):
         super().__init__()
 
         assert is_data_model(cls)
         
         self._schema = schema(cls)
         self._type_serializer = sub_serializers
+        self.expand_none = expand_none
     
     def to_accessors(self, obj:T) -> dict[str, object]:
         r = self._realize(obj)
@@ -27,7 +29,7 @@ class Serializer[T](ReadableClass):
         return StructState(r)
     
     def _realize(self, obj):
-        r = self._schema.realize(obj)
+        r = self._schema.realize(obj, self.expand_none)
         
         for k in r.endpoints:
             value = r.value(k)

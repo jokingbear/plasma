@@ -7,8 +7,8 @@ class Schema:
     def __init__(self, cls:type):
         self.rep = Representation(cls)
 
-    def realize(self, obj):
-        return Realization(self.rep, obj)
+    def realize(self, obj, expand_none=False):
+        return Realization(self.rep, obj, expand_none)
     
     def real_to_rep(self, real_node):
         if real_node == self.rep.root:
