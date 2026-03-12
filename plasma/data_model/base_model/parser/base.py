@@ -32,13 +32,11 @@ class Parser[T](ReadableClass):
 
     def _parse(self, graph:nx.DiGraph):
         for n in graph:
-            if graph.out_degree(n) == 0:
-                try:
-                    value = graph.nodes[n]['value']
-                except:
-                    print(n)
-                    raise 
-                parser = self.type_parser.get(type(value), lambda x:x)
+            if graph.out_degree(n) == 0: 
+                value = graph.nodes[n]['value']
+                rep_node = self._schema.real_to_rep(n)
+                origin = self._schema.rep.origin(rep_node)
+                parser = self.type_parser.get(origin, lambda x:x)
                 
                 try:
                     value = parser(value)
