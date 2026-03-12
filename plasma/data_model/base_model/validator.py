@@ -26,8 +26,9 @@ class Validator[T](AutoPipe[[T], None]):
             field_name = '.'.join(str(a) for a in e)
             if issubclass(origin, (tuple, list)):
                 enotes = [*_validate_list(field_name, args, value)]
-                error_fields.append(field_name)
-                notes.extend(enotes)
+                if len(enotes) > 0:
+                    error_fields.append(field_name)
+                    notes.extend(enotes)
             else:
                 enotes = _validate_object(field_name, origin, value)
                 if enotes is not None:
