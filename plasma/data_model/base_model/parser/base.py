@@ -38,7 +38,9 @@ class Parser[T](ReadableClass):
                 except:
                     print(n)
                     raise 
-                parser = self.type_parser.get(type(value), lambda x:x)
+                rep_node = self._schema.real_to_rep(n)
+                origin = self._schema.rep.origin(rep_node)
+                parser = self.type_parser.get(origin, lambda x:x)
                 
                 try:
                     value = parser(value)
