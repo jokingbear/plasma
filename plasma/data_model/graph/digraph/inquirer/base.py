@@ -6,10 +6,10 @@ from ...object_inquirer import ObjectInquirer
 from .....functional import auto_map
 
 
-class Inquirer:
+class Inquirer[T:nx.DiGraph]:
     
     def __init__(self, 
-                graph:nx.DiGraph, 
+                graph:T, 
                 index:Index
             ):
         
