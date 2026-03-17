@@ -8,6 +8,10 @@ class Chain[**I, O]:
     def chain[O2](self, other:Callable[[O], O2]):
         return Chained(self, other)
 
+    @staticmethod
+    def cast[**I, O](func:Callable[I, O]):
+        return InitChain(func)
+
 
 class Chained[**I, O2](Chain[I, O2]):
     
@@ -28,3 +32,16 @@ class Chained[**I, O2](Chain[I, O2]):
         rep1 = repr(self.func1)
         rep2 = repr(self.func2)
         return f'{rep1}\n--> {rep2}'
+
+
+class InitChain[**I, O](Chain[I, O]):
+    
+    def __init__(self, func:Callable[I, O]):
+        super().__init__()
+        self.func = func
+    
+    def __call__(self, *args, **kwds):
+        return self.func(*args, **kwds)
+
+    def __repr__(self):
+        return repr(self.func)
