@@ -45,7 +45,7 @@ class MetrizableIndex[D, K](PseudoTuple[D]):
             if len(sorted_array) <= 2:
                 arg = min(
                         range(len(sorted_array)), 
-                        key=lambda a: dist(sorted_array[a])
+                        key=lambda a: pick(data_key, a, sorted_array[a], dist),
                     )
                 candidate = self[offset + arg]
                 candidate_key = self.key(candidate)
@@ -65,3 +65,9 @@ class MetrizableIndex[D, K](PseudoTuple[D]):
             self.key,
             self.metric
         )
+
+
+def pick(input_data, arg, value, dist_func):
+    dist = dist_func(value)
+    sign = -1 if input_data > value else 1
+    return dist, sign * arg

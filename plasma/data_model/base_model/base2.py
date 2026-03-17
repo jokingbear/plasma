@@ -1,17 +1,18 @@
-from typing import dataclass_transform
+from typing import dataclass_transform, get_args
 from dataclasses import dataclass
 
-from .field import Field, Composite
+from .constants import MODEL_FLAG, FIELD_FLAG
+from .field import Field, Composite, List
 from .repr import render_lines
+from .inquirer import is_list
+from .schemas import Schema
 
-
-FIELD_FLAG = '__fields' 
-MODEL_FLAG = '__data_model'
 
 @dataclass_transform()
 def model(cls):
     new_cls = register_field(cls)
     setattr(cls, MODEL_FLAG, True)
+    setattr(cls, MODEL_FLAG, Schema(new_cls))
     
     def __repr__(self):
         lines = []
@@ -25,8 +26,8 @@ def model(cls):
 
 def register_field[T](cls:type[T]) -> type[T]:
     setattr(cls, FIELD_FLAG, True)
-    sub_fields = _construct_field(cls)
-    for name, field in sub_fields.items():
+    composite:Composite = _construct_field(cls)
+    for name, field in composite.sub_fields.items():
         setattr(cls, name, field)
     
     return cls
@@ -36,9 +37,12 @@ def _construct_field(cls:type, context=None):
     if hasattr(cls, FIELD_FLAG):
         context = context or (cls,)
         sub_fields = {name: _construct_field(annotation, (*context, name)) for name, annotation in cls.__annotations__.items()}
-        if context == (cls,):
-            return sub_fields
-        else:
-            return Composite(context, sub_fields)
+        return Composite(context, cls, sub_fields)
+    elif is_list(cls):
+        args = get_args(cls)
+        contained_cls = None
+        if len(args) > 0:
+            contained_cls = args[0]
+        return List(context, contained_cls)
     else:
-        return Field(context)
+        return Field(context, cls)

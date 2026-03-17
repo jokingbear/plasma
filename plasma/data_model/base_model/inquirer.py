@@ -1,14 +1,10 @@
-from typing import get_args, get_origin
+from typing import get_origin
 
-from .base2 import MODEL_FLAG
-
+from .constants import MODEL_FLAG
     
+
 def is_data_model(cls:type):
     return hasattr(cls, MODEL_FLAG)
-    
-
-def fields(cls:type):
-    return cls.__annotations__
 
 
 def is_list(cls:type):
