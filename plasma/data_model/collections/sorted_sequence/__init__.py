@@ -20,4 +20,9 @@ class sorted[D, K](MetrizableIndex[D, K]):
     def from_sorted[D, K](sorted_data:list[D], 
                           key:Callable[[D], K]=identity, 
                           metric:Callable[[K, K], float]=abs_diff):
+        for before, after in zip(sorted_data[:-1], sorted_data[1:]):
+            bkey = key(before)
+            akey = key(after)
+            assert bkey <= akey, f'{sorted_data} is not sorted by given key'
+
         return MetrizableIndex[D, K](sorted_data, key, metric)

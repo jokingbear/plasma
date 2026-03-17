@@ -1,8 +1,12 @@
+from typing import Callable
+from functools import wraps
+
+from .chainable import Chain
 from .readable import ReadableClass
 from ..signature import Signature
 
 
-class AutoPipe[**I, O](ReadableClass):
+class AutoPipe[**I, O](ReadableClass, Chain[I, O]):
 
     def run(self, *inputs, **kwargs) -> O:...
     
