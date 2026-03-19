@@ -1,13 +1,16 @@
 import pandas as pd
 import itertools
 
-from ..index import Index
 from typing import Callable
+
 from .solver import Solver
 from .position_graph import PositionGraph
+from .position_path import PositionPath
 from .refiner import SegmentRefiner, MatchRefiner
-from .segment import Match
+from .segment import Match, Segment
+from ..index import Index
 from ...functional import AutoPipe
+from ...functional.helpers import groupby
 
 
 class PathInquirer(AutoPipe[[str], list[Match]]):
@@ -34,16 +37,16 @@ class PathInquirer(AutoPipe[[str], list[Match]]):
         position_graph = PositionGraph(self.index, qtoken_frame, qtoken_2_dbtokens)
         
         paths = [*position_graph.generate_paths()]
-        segments = []
+        segments = list[Segment]()
         solver = Solver(position_graph, self.index.get_path_args)
         for position_path in paths:
             segments.extend(solver(position_path))
 
-        matches = []
+        matches = list[Match]()
         if len(segments) > 0:
             refined_segments = self.segment_refiner(segments)
-            grouped_segments = itertools.groupby(refined_segments, key=lambda s: (s.token_start, s.token_end))
-            for _, gsegments in grouped_segments:
+            grouped_segments = groupby[tuple, Segment](refined_segments, key=lambda s: (s.token_start, s.token_end))
+            for _, gsegments in grouped_segments.items():
                 gsegments = sorted(gsegments, key=lambda s:s.score, reverse=True)
                 
                 matched_paths:list[Match] = []
@@ -51,8 +54,5 @@ class PathInquirer(AutoPipe[[str], list[Match]]):
                     matched_paths.extend(s.get_matches(qtoken_frame, self.index))
                 matched_paths = sorted(matched_paths, key=lambda p:(p.matching_score, p.matched_len, p.coverage_score), reverse=True)
                 matches.extend(matched_paths[:self.topk])
-
-            if len(matches) > 0:
-                matches = self.match_refiner(matches)
         
         return matches
