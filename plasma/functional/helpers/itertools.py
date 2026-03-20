@@ -2,15 +2,17 @@ from typing import Iterable, Callable
 from collections import defaultdict
 
 
+def _identity(x):
+    return x
+
+
 class groupby[K, V](dict[K, tuple[V]]):
     
     def __init__[D](self, 
                     data:Iterable[D], 
                     key:Callable[[D], K],
-                    selector:Callable[[D], V]=None
+                    selector:Callable[[D], V]=_identity,
                 ):
-        
-        selector = selector or _identity
         temp = defaultdict(list)
         for d in data:
             dkey = key(d)
@@ -18,7 +20,3 @@ class groupby[K, V](dict[K, tuple[V]]):
         
         for k, v in temp.items():
             self[k] = tuple(v)
-
-
-def _identity(x):
-    return x

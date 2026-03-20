@@ -1,9 +1,9 @@
 import numpy as np
 import itertools
 
-from ...functional import AutoPipe
+from collections import defaultdict, Counter
 from .segment import Segment, Match
-from collections import defaultdict
+from ...functional import AutoPipe
 
 
 class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
@@ -27,7 +27,7 @@ class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
 class MatchRefiner(AutoPipe[[list[Match]], list[Match]]):
     
     def run(self, matches:list[Match]):
-        interval_counts = defaultdict(lambda: 0)
+        interval_counts = Counter()
         intervals = []
         for s in matches:
             interval_counts[s.qchar_start, s.qchar_end] += 1
