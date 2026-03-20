@@ -1,22 +1,17 @@
-from typing import Iterable, Callable
-from collections import defaultdict
+from typing import Callable, Iterable
+from warnings import deprecated
 
+from .color_printer import Color
+from ...data_model.collections import groupby as col_groupby
 
-def _identity(x):
-    return x
-
-
-class groupby[K, V](dict[K, tuple[V]]):
+_msg = 'use plasma.data_model.collections.groupby instead'
+@deprecated(_msg)
+class groupby[K, V](col_groupby[K, V]):
     
-    def __init__[D](self, 
+    def __init__[D](self,                     
                     data:Iterable[D], 
                     key:Callable[[D], K],
-                    selector:Callable[[D], V]=_identity,
-                ):
-        temp = defaultdict(list)
-        for d in data:
-            dkey = key(d)
-            temp[dkey].append(selector(d))
+                    selector:Callable[[D], V]=lambda x:x):
+        super().__init__(data, key, selector)
         
-        for k, v in temp.items():
-            self[k] = tuple(v)
+        print(Color.YELLOW.render(_msg))
