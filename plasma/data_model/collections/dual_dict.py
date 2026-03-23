@@ -14,12 +14,12 @@ class DualDict[S, T]:
         self._ts_map = target_source_map
     
     @property
-    def source(self):
-        return Mapping(self._st_map)
+    def source_inquirer(self):
+        return Mapping(self._ts_map)
     
     @property
-    def target(self):
-        return Mapping(self._ts_map)
+    def target_inquirer(self):
+        return Mapping(self._st_map)
     
     def __repr__(self):
         lines = [f'{s} - {t}' for s, t in self._st_map.items()]
