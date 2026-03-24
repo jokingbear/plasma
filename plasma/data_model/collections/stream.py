@@ -39,6 +39,9 @@ class Stream[T]:
         else:
             return group
     
+    def evaluate(self):
+        return [*self]
+    
     def _clone(self):
         iter1, iter2 = tee(self._data)
         self._data = iter1
