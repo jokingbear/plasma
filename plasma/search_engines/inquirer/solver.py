@@ -27,5 +27,7 @@ class Solver(AutoPipe[[PositionPath], Iterable[Segment]]):
                 yield Segment(position_path[start:offset], scores, shared_path_args)
                 start = offset
                 shared_path_args = set(db_path_args)
+            else:
+                shared_path_args = updated_shared_paths
 
         yield Segment(position_path[start:offset + 1], scores, shared_path_args)
