@@ -45,6 +45,7 @@ class Stream[T]:
     def evaluate(self):
         return [*self]
     
+    @property
     def empty(self):
         for _ in self:
             return False
