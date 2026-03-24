@@ -5,7 +5,7 @@ from typing import Callable
 
 from .solver import Solver
 from .position_graph import PositionGraph
-from .refiner import SegmentRefiner, MatchRefiner
+from .refiner import SegmentRefiner, PathRefiner
 from .segment import Match, Segment
 from ..index import Index
 from ...functional import AutoPipe
@@ -26,8 +26,8 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
         self.tokenizer = tokenizer
         self.token_matcher = token_matcher
         self.topk = topk
-        self.segment_refiner = SegmentRefiner()
-        self.match_refiner = MatchRefiner()
+        self._path_refiner = PathRefiner()
+        self._segment_refiner = SegmentRefiner()
     
     def run(self, query:str):
         query = query.lower()
@@ -36,6 +36,8 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
         position_graph = PositionGraph(self.index, qtoken_frame, qtoken_2_dbtokens)
         
         paths = [*position_graph.generate_paths()]
+        paths = self._path_refiner(paths)
+
         segments = list[Segment]()
         solver = Solver(position_graph, self.index.get_path_args)
         for position_path in paths:
@@ -43,11 +45,9 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
 
         matches = list[Match]()
         if len(segments) > 0:
-            refined_segments = self.segment_refiner(segments)
-            grouped_segments = groupby[tuple, Segment](refined_segments, key=lambda s: (s.token_start, s.token_end))
-            for _, gsegments in grouped_segments.items():
-                gsegments = sorted(gsegments, key=lambda s:s.score, reverse=True)
-                
+            segments = self._segment_refiner(segments)
+            grouped_segments = groupby[tuple, Segment](segments, key=lambda s: (s.token_start, s.token_end))
+            for _, gsegments in grouped_segments.items():                
                 matched_paths:list[Match] = []
                 for s in gsegments:
                     matched_paths.extend(s.get_matches(qtoken_frame, self.index))

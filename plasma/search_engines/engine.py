@@ -33,14 +33,15 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
             matches = self.path_inquirer(context).select(lambda m:m.update(start))
             data.extend(matches)
         
-        if return_frame:
-            print(Color.YELLOW.render(f'frame will be deprecated in the future, please set it to false'))
-            columns = [
-                'query_start_idx', 'query_end_idx',
-                'data_index', 'original_start', 'original_end', 'original',
-                'substring_matching_score', 'coverage_score',
-                'matched_len', 'harmonic_score'
-            ]
-            return pd.DataFrame(data, columns=columns).set_index(['query_start_idx', 'query_end_idx']).sort_index()
+        columns = [
+            'query_start_idx', 'query_end_idx',
+            'data_index', 'original_start', 'original_end', 'original',
+            'substring_matching_score', 'coverage_score',
+            'matched_len', 'harmonic_score'
+        ]
         
-        return Stream(data).sort(lambda m: (m.qchar_start, m.qchar_end))
+        
+        return pd.DataFrame(data, columns=columns).set_index(['query_start_idx', 'query_end_idx']).sort_values(
+            ['query_start_idx', 'substring_matching_score', 'matched_len', 'harmonic_score'],
+            ascending=[True, False, False, False]
+        )
