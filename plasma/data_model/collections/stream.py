@@ -1,4 +1,4 @@
-from itertools import tee
+from itertools import tee, chain
 from typing import Callable, Iterable
 
 from .group import groupby
@@ -50,6 +50,14 @@ class Stream[T]:
             return False
 
         return True
+    
+    @staticmethod
+    def from_iterable[T](iterable:Iterable[Iterable[T]]):
+        return Stream(chain.from_iterable(iterable))
+    
+    @staticmethod
+    def chain[T](*data:Iterable[T]):
+        return Stream(chain(*data))
     
     def _clone(self):
         iter1, iter2 = tee(self._data)
