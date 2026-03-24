@@ -39,8 +39,17 @@ class Stream[T]:
         else:
             return group
     
+    def sort[K](self, key:Callable[[T], K]=None, reverse=False):
+        return Stream[T](sorted(self, key=key, reverse=reverse))
+    
     def evaluate(self):
         return [*self]
+    
+    def empty(self):
+        for _ in self:
+            return False
+
+        return True
     
     def _clone(self):
         iter1, iter2 = tee(self._data)

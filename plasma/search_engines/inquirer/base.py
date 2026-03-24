@@ -5,15 +5,14 @@ from typing import Callable
 
 from .solver import Solver
 from .position_graph import PositionGraph
-from .position_path import PositionPath
 from .refiner import SegmentRefiner, MatchRefiner
 from .segment import Match, Segment
 from ..index import Index
 from ...functional import AutoPipe
-from ...functional.helpers import groupby
+from ...data_model.collections import groupby, Stream
 
 
-class PathInquirer(AutoPipe[[str], list[Match]]):
+class PathInquirer(AutoPipe[[str], Stream[Match]]):
     
     def __init__(self, 
                 index:Index, 
@@ -55,4 +54,4 @@ class PathInquirer(AutoPipe[[str], list[Match]]):
                 matched_paths = sorted(matched_paths, key=lambda p:(p.matching_score, p.matched_len, p.coverage_score), reverse=True)
                 matches.extend(matched_paths[:self.topk])
         
-        return matches
+        return Stream(matches)

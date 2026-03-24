@@ -1,11 +1,12 @@
 import plasma.functional as F
 import pandas as pd
 
-from typing import Iterable
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
-from .inquirer import PathInquirer
+from .inquirer import PathInquirer, Match
 from .token_matcher import TokenMatcher
+from ..functional.helpers.color_printer import Color
+from ..data_model.collections import Stream
 
 
 class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
@@ -25,36 +26,21 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
         self.context_splitter = RegexTokenizer(group_splitter)
         self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher, topk)
     
-    def run(self, query:str):
+    def run(self, query:str, return_frame=True):
         contexts = self.context_splitter(query)
-        data = []
+        data = list[Match]()
         for start, end, context in contexts.itertuples(index=False):
-            matches = self.path_inquirer(context)
-            if len(matches) > 0:
-                match_frame = pd.DataFrame(matches)
-                match_frame['qchar_start'] = match_frame['qchar_start'] + start
-                data.append(match_frame)
+            matches = self.path_inquirer(context).select(lambda m:m.update(start))
+            data.extend(matches)
         
-        if len(data) > 0:
-            data = pd.concat(data, axis=0, ignore_index=True).rename(columns=column_map)
-        else:
+        if return_frame:
+            print(Color.YELLOW.render(f'frame will be deprecated in the future, please set it to false'))
             columns = [
                 'query_start_idx', 'query_end_idx',
                 'data_index', 'original_start', 'original_end', 'original',
                 'substring_matching_score', 'coverage_score',
                 'matched_len', 'harmonic_score'
             ]
-            data = pd.DataFrame(columns=columns)
+            return pd.DataFrame(data, columns=columns).set_index(['query_start_idx', 'query_end_idx']).sort_index()
         
-        return data.set_index(['query_start_idx', 'query_end_idx']).sort_index()
-
-
-column_map = {
-    'qchar_start': 'query_start_idx',
-    'qchar_end': 'query_end_idx',
-    'db_arg': 'data_index',
-    'db_char_start': 'original_start',
-    'db_char_end': 'original_end',
-    'db_value':'original',
-    'matching_score': 'substring_matching_score',
-}
+        return Stream(data).sort(lambda m: (m.qchar_start, m.qchar_end))
