@@ -7,7 +7,8 @@ from .tuple_dict import TupleDict
 from ...index import Index
 from ....object_inquirer import ObjectInquirer
 from .....base_model import Field
-from ......functional.helpers import groupby, auto_map
+from .....collections import groupby
+from ......functional.helpers import auto_map
 
 
 class Nodes[T]:
