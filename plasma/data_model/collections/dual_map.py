@@ -22,7 +22,7 @@ class DualMap[S:Hashable, T:Hashable]:
 
         return tuple(self._ts_map.get(target, defaults))
     
-    def get_targets(self, source:S, default:S|Literal['empty']=None):
+    def get_targets(self, source:S, default:T|Literal['empty']=None):
         if default == 'empty':
             defaults = []
         else:
