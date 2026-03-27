@@ -58,6 +58,9 @@ def mass_import(pattern):
         raise RuntimeError('mass_import can only be used in packaged folder with __init__ file')
     
     for p in parent_path.glob(pattern):
+        if '__init__' in p.name:
+            continue
+
         module_name = p.name.replace('.py', '')
         importlib.import_module(f'.{module_name}', caller.__package__)
 
