@@ -65,3 +65,11 @@ class Match(NamedTuple):
             s.score, coverage_score, match.size,
             hmean([s.score, coverage_score])
         )
+
+    def update(self, offset:int):
+        qstart, qend, *remaining = self
+        return Match(
+            qstart + offset,
+            qend + offset,
+            *remaining
+        )

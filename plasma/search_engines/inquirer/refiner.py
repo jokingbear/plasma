@@ -2,6 +2,7 @@ import numpy as np
 import itertools
 
 from collections import defaultdict, Counter
+from .position_path import PositionPath
 from .segment import Segment, Match
 from ...functional import AutoPipe
 
@@ -9,9 +10,15 @@ from ...functional import AutoPipe
 class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
     
     def run(self, segments:list[Segment]):
+        unique_segments = dict[tuple, Segment]()
+        for s in segments:
+            key = tuple(s.position_path)
+            if key not in unique_segments:
+                unique_segments[key] = s
+
         interval_counts = defaultdict(lambda: 0)
         intervals = []
-        for s in segments:
+        for s in unique_segments.values():
             interval_counts[s.token_start, s.token_end] += 1
             intervals.append([s.token_start, s.token_end])
         
@@ -24,14 +31,14 @@ class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
         return [segments[a] for a in unbound_args]
 
 
-class MatchRefiner(AutoPipe[[list[Match]], list[Match]]):
+class PathRefiner(AutoPipe[[list[PositionPath]], list[PositionPath]]):
     
-    def run(self, matches:list[Match]):
+    def run(self, data:list[PositionPath]):
         interval_counts = Counter()
         intervals = []
-        for s in matches:
-            interval_counts[s.qchar_start, s.qchar_end] += 1
-            intervals.append([s.qchar_start, s.qchar_end])
+        for p in data:
+            interval_counts[p.offset(0), p.offset(-1)] += 1
+            intervals.append([p.offset(0), p.offset(-1)])
         
         intervals = np.array(intervals)
         bounds = (intervals[:, 0] <= intervals[:, [0]]) & (intervals[:, [1]] <= intervals[:, 1])
@@ -39,14 +46,4 @@ class MatchRefiner(AutoPipe[[list[Match]], list[Match]]):
         limits = np.array([interval_counts[s, e] for s, e in intervals])
         unbound_args, = np.where(bound_counts == limits)
 
-        unique_matches = _unique_matches(matches[a] for a in unbound_args)
-        return [*unique_matches]
-
-
-def _unique_matches(matches:list[Match]):
-    for _, grouped_matches in itertools.groupby(matches, key=_unique_key):
-        yield max(grouped_matches, key=lambda m: m.harmonic_score)
-
-
-def _unique_key(m:Match):
-    return m.qchar_start, m.qchar_end, m.db_arg, m.db_char_start, m.db_char_end
+        return [data[a] for a in unbound_args]

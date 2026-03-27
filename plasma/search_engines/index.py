@@ -4,13 +4,15 @@ import networkx as nx
 from typing import Callable, Iterable, NamedTuple
 from collections import defaultdict
 
+from ..data_model.collections import Stream
+
 
 class Index:
     
     def __init__(self, data:tuple[str], tokenizer:Callable[[str], pd.DataFrame]):
         assert len(data) == len(set(data)), 'data must be unique'
         
-        token2positions = defaultdict[str, dict[TokenPosition, tuple[int, int]]](lambda: {})
+        token2positions = defaultdict[str, dict[TokenPosition, tuple[int, int]]](dict)
         graph = nx.DiGraph()
         path_args = {}
         paths:list[tuple[str]] = []
@@ -30,10 +32,9 @@ class Index:
         self._paths = paths
         self._data = data
     
-    def get_path_args(self, token:str) -> Iterable[int]:
+    def get_path_args(self, token:str) -> Stream[int]:
         positions = self._token2positions.get(token, {})
-        for p in positions:
-            yield p.path_arg
+        return Stream(p.path_arg for p in positions)
     
     def get_char_interval(self, token:str, path_arg:int, token_offset:int):
         position = TokenPosition(path_arg, token_offset)
