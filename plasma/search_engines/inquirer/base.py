@@ -36,7 +36,8 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
         position_graph = PositionGraph(self.index, qtoken_frame, qtoken_2_dbtokens)
         
         paths = [*position_graph.generate_paths()]
-        paths = self._path_refiner(paths)
+        if len(paths) > 0:
+            paths = self._path_refiner(paths)
 
         segments = list[Segment]()
         solver = Solver(position_graph, self.index.get_path_args)
