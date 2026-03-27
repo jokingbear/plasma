@@ -29,6 +29,14 @@ class DualMap[S:Hashable, T:Hashable]:
             defaults = [default]
 
         return tuple(self._st_map.get(source, defaults))
+    
+    @property
+    def sources(self):
+        return tuple(self._st_map)
+    
+    @property
+    def targets(self):
+        return tuple(self._ts_map)
         
     def __repr__(self):
         lines = []
