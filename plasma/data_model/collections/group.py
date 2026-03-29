@@ -2,7 +2,7 @@ from typing import Iterable, Callable
 from collections import defaultdict
 
 
-def _identity(x):
+def _identity[T](x:T):
     return x
 
 
