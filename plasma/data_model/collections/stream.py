@@ -31,13 +31,9 @@ class Stream[T]:
         return Stream(v for d in self 
                       for v in func(d))
     
-    def groupby[K, V](self, key:Callable[[T], K], value:Callable[[T], V]=None, as_stream=True):
+    def groupby[K, V](self, key:Callable[[T], K], value:Callable[[T], V]=None):
         group = groupby(self, key, value)
-        
-        if as_stream:
-            return Stream(group.items())
-        else:
-            return group
+        return Stream(group.items())
     
     def sort[K](self, key:Callable[[T], K]=None, reverse=False):
         return Stream[T](sorted(self, key=key, reverse=reverse))
