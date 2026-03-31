@@ -43,7 +43,7 @@ class Accumulator[D, A](State):
         with tqdm(total=self.total, **tqdm_kwargs) as prog:
             n = self.finished
             prog.update(n)
-            while self.finished != self.total:
+            while not self.finished:
                 time.sleep(self.sleep)
                 new_n = self.finished
                 diff = new_n - n
@@ -61,10 +61,11 @@ class Accumulator[D, A](State):
 
     @property
     def finished(self):
-        if isinstance(self._finished, int):
-            return self._finished
+        value = self._finished
+        if isinstance(self._finished, mp.Value):
+            value = self._finished.value
         
-        return self._finished.value
+        return value == self.total
 
     def release(self):
         self._results = []
