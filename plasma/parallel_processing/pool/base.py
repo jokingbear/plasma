@@ -12,11 +12,11 @@ from ..queues import Queue
 class Pool:
     
     def __init__(self, num_workers:int):
-        pass
+        self.resolver = Resolver()
     
     def stream[T](self, data:Iterable[T]):
         id = uuid4()
-        return Stream(id, data, Chain(None, Init[T]()), Resolver())
+        return Stream(id, data, Chain(None, Init[T]()), self.resolver)
     
     def _create_data_queue(self) -> Queue:...
     
