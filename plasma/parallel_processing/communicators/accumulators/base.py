@@ -60,7 +60,7 @@ class Accumulator[D, A](State):
         return self.finalize()
 
     @property
-    def finished(self):
+    def finished(self) -> bool:
         value = self._finished
         if isinstance(self._finished, mp.Value):
             value = self._finished.value
