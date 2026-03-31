@@ -1,7 +1,6 @@
 from collections import defaultdict
 from typing import Callable, Iterable
-from .utils import Invalid, End
-from ..communicators.accumulators import DynamicAccumulator
+from .utils import Invalid, End, StreamAccumulator
 from ..communicators.distributors import Distributor
 from ...functional.decorators import propagate
 
@@ -40,22 +39,13 @@ class Unwinder[I, O](Operator[I, O], Distributor):
                     q.put(d)
 
 
-class Groupby[I, K, V](Operator[I, tuple[K, tuple[V]]], DynamicAccumulator[I, dict[K, tuple[V]]]):
+class Groupby[I, K, V](Operator[I, tuple[K, tuple[V]]], StreamAccumulator):
     
     def __init__(self, key:Callable[[I], K], value:Callable[[I], V]):
-        DynamicAccumulator.__init__(self)
+        StreamAccumulator.__init__(self)
         self.key = key
         self.value = value
-        self._end = False
         self._results = defaultdict[K, list[V]](list)
-    
-    def run(self, data):
-        self._end = data is End
-        return super().run(data)
-    
-    @property
-    def finished(self):
-        return self._end
     
     @propagate(End)
     @propagate(Invalid)
@@ -68,7 +58,7 @@ class Groupby[I, K, V](Operator[I, tuple[K, tuple[V]]], DynamicAccumulator[I, di
         return dict(self._results)
 
 
-class Accumulator[I, D, S](Operator[I, S], DynamicAccumulator[I, S]):
+class Accumulator[I, D, S](Operator[I, S], StreamAccumulator):
     
     def __init__(
             self, initial_state:S,
@@ -76,18 +66,13 @@ class Accumulator[I, D, S](Operator[I, S], DynamicAccumulator[I, S]):
             combiner:Callable[[S, D], S|None],
             stateful=True
         ):
-        super().__init__()
+        StreamAccumulator.__init__(self)
         
         self._state = initial_state
-        self._end = False
         
         self.selector = selector
         self.combiner = combiner
         self.stateful = stateful
-    
-    def run(self, data):
-        self._end = data is End
-        return super().run(data)
     
     @propagate(Invalid)
     @propagate(End)
