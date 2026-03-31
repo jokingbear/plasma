@@ -3,7 +3,7 @@ from typing import Iterable, Callable, Hashable
 
 from .chain import Chain
 from .flow import Flow
-from .operators import Simple, Unwinder, Groupby
+from .operators import Simple, Unwinder, Groupby, Accumulator
 from .utils import Invalid
 
 
@@ -39,6 +39,20 @@ class Stream[T]:
     
     def groupby[K, V](self, key:Callable[[T], K], value:Callable[[T], V]):
         return Stream(self.id, self.data, self.chain.next(Groupby(key, value)), self.resolver)
+    
+    def accumulate[S, D](
+            self, initial_state:S, 
+            selector:Callable[[T], D], 
+            accumulator:Callable[[S, D], S|None],
+            stateful=True
+        ) -> S:
+        new_chain = self.chain.next(Accumulator(initial_state, selector, accumulator, stateful))
+        flow = self.resolver(new_chain)
+        with flow:
+            for d in self._clone():
+                flow.put(d)
+            
+            return flow.accumulator.wait()
     
     def to_list(self):
         flow = self.resolver(self.chain)

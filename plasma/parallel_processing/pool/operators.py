@@ -66,3 +66,37 @@ class Groupby[I, K, V](Operator[I, tuple[K, tuple[V]]], DynamicAccumulator[I, di
 
     def finalize(self):
         return dict(self._results)
+
+
+class Accumulator[I, D, S](Operator[I, S], DynamicAccumulator[I, S]):
+    
+    def __init__(
+            self, initial_state:S,
+            selector:Callable[[I], D],
+            combiner:Callable[[S, D], S|None],
+            stateful=True
+        ):
+        super().__init__()
+        
+        self._state = initial_state
+        self._end = False
+        
+        self.selector = selector
+        self.combiner = combiner
+        self.stateful = stateful
+    
+    def run(self, data):
+        self._end = data is End
+        return super().run(data)
+    
+    @propagate(Invalid)
+    @propagate(End)
+    def aggregate(self, data):
+        transformed = self.selector(data)
+        new_state = self.combiner(self._state, transformed)
+        
+        if not self.stateful:
+            self._state = new_state
+
+    def finalize(self):
+        return self._state
