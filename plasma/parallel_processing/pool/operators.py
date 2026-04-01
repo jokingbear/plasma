@@ -1,7 +1,5 @@
-from collections import defaultdict
 from typing import Callable, Iterable
 from .utils import Invalid, End, StreamAccumulator
-from ..communicators.distributors import Distributor
 from ...functional.decorators import propagate
 
 
@@ -23,20 +21,15 @@ class Simple[I, O](Operator[I, O]):
         return self.func(inputs)
 
 
-class Unwinder[I, O](Operator[I, O], Distributor):
+class Unwinder[I, O](Operator[I, O], StreamAccumulator):
     
     def __init__(self, func:Callable[[I], Iterable[O]]):
-        Distributor.__init__(self)
+        StreamAccumulator.__init__(self)
         self.func = func
 
-    def run(self, data, *queues, **named_queues):
-        if data is End or data is Invalid:
-            for q in queues:
-                q.put(data)
-        else:
-            for q in queues:
-                for d in self.func(data):
-                    q.put(d)
+    @propagate(Invalid)
+    def aggregate(self, data):
+        self._results.extend(self.func(data))
 
 
 class Groupby[I, K, V](Operator[I, tuple[K, tuple[V]]], StreamAccumulator):
@@ -45,17 +38,16 @@ class Groupby[I, K, V](Operator[I, tuple[K, tuple[V]]], StreamAccumulator):
         StreamAccumulator.__init__(self)
         self.key = key
         self.value = value
-        self._results = defaultdict[K, list[V]](list)
+        self._results = dict[K, list[V]](list)
     
-    @propagate(End)
     @propagate(Invalid)
     def aggregate(self, data):
         key = self.key(data)
         value = self.value(data)
-        self._results[key].append(value)
+        self._results.setdefault(key, []).append(value)
 
     def finalize(self):
-        return dict(self._results)
+        return self._results.items()
 
 
 class Accumulator[I, D, S](Operator[I, S], StreamAccumulator):
@@ -75,7 +67,6 @@ class Accumulator[I, D, S](Operator[I, S], StreamAccumulator):
         self.stateful = stateful
     
     @propagate(Invalid)
-    @propagate(End)
     def aggregate(self, data):
         transformed = self.selector(data)
         new_state = self.combiner(self._state, transformed)

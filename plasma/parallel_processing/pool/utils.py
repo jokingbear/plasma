@@ -10,15 +10,10 @@ class End:...
 class StreamAccumulator(DynamicAccumulator):
     
     def __init__(self):
-        super().__init__()
+        super().__init__(0, ignore_none=False)
         
         self._end = False 
-    
-    def run(self, data):
-        self._end = data is End
-        return super().run(data)
-    
-    @propagate(End)
+        
     @propagate(Invalid)
     def aggregate(self, data):
         return super().aggregate(data)

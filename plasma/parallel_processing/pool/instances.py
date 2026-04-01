@@ -2,7 +2,7 @@ from .base import Pool
 from ..queues import ThreadQueue, ProcessQueue, TransferQueue
 
 
-class ThreadPool(Pool):
+class Thread(Pool):
     
     def __init__(self, num_workers, prefetch=0):
         super().__init__(num_workers)
@@ -16,7 +16,7 @@ class ThreadPool(Pool):
         return ThreadQueue(1, qsize=self.prefect)
 
 
-class ProcessPool(Pool):
+class Process(Pool):
 
     def __init__(self, num_workers, prefetch=0):
         super().__init__(num_workers)

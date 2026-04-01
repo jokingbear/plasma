@@ -1,1 +1,1 @@
-from .instances import ProcessPool, ThreadPool
+from .instances import Process, Thread

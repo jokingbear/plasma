@@ -3,4 +3,4 @@ from ..communicators.accumulators import DynamicAccumulator
 
 
 class Flow(AsyncFlow):
-    accumulator:DynamicAccumulator[object, list]
+    accumulator:DynamicAccumulator

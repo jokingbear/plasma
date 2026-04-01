@@ -3,8 +3,8 @@ from typing import Iterable, Callable
 
 from .chain import Chain
 from .flow import Flow
-from .operators import Simple, Unwinder, Groupby, Accumulator
-from .utils import Invalid, End
+from .operators import Simple, Unwinder, Groupby, Accumulator, Init
+from .utils import Invalid
 
 
 class Stream[T]:
@@ -35,10 +35,28 @@ class Stream[T]:
         return Stream(self.id, self.data, self.chain.next(Simple(alt_filter)), self.resolver)
 
     def unwind[V](self, unwinder:Callable[[T], Iterable[V]]):
-        return Stream(self.id, self.data, self.chain.next(Unwinder(unwinder)), self.resolver)
+        new_chain = self.chain.next(Unwinder(unwinder))
+        counter = 0
+        with self.resolver(new_chain) as flow:
+            for d in self._clone():
+                flow.put(d)
+                counter += 1
+            
+            data = flow.accumulator.wait(total=counter, desc='unwinding')
+
+        return Stream[V](self.id, data, Init[V](), self.resolver)
     
     def groupby[K, V](self, key:Callable[[T], K], value:Callable[[T], V]):
-        return Stream(self.id, self.data, self.chain.next(Groupby(key, value)), self.resolver)
+        new_chain = self.chain.next(Groupby(key, value))
+        counter = 0
+        with self.resolver(new_chain) as flow:
+            for d in self._clone():
+                flow.put(d)
+                counter += 1
+            
+            grouped = flow.accumulator.wait(total=counter, desc='grouping')
+
+        return Stream[tuple[K, tuple[V]]](self.id, grouped, Init(), self.resolver)
     
     def accumulate[S, D](
             self, initial_state:S, 
@@ -47,22 +65,22 @@ class Stream[T]:
             stateful=True
         ) -> S:
         new_chain = self.chain.next(Accumulator(initial_state, selector, accumulator, stateful))
-        flow = self.resolver(new_chain)
-        with flow:
-            for d in self._clone():
-                flow.put(d)
-            
-            return flow.accumulator.wait()
-    
-    def to_list(self) -> list[T]:
-        flow = self.resolver(self.chain)
-        with flow:
-            counter = 0
+        counter = 0
+        with self.resolver(new_chain) as flow:
             for d in self._clone():
                 flow.put(d)
                 counter += 1
-            flow.put(End)
-            return flow.accumulator.wait(total=counter)
+            
+            return flow.accumulator.wait(counter)
+    
+    def to_list(self) -> list[T]:
+        counter = 0
+        with self.resolver(self.chain) as flow:
+            for d in self._clone():
+                flow.put(d)
+
+            counter += 1
+            return flow.accumulator.wait(counter)
     
     def _clone(self):
         iter1, iter2 = tee(self.data)
