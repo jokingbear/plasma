@@ -11,4 +11,4 @@ class Chain[I, O]:
         self.op = op
 
     def next[V](self, op:Operator[O, V]):
-        return Chain(self.prevs, op)
+        return Chain[I, V](self, op)

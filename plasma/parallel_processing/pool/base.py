@@ -12,7 +12,9 @@ from ...functional import ReadableClass
 class Pool(ReadableClass):
     
     def __init__(self, num_workers:int):
-        self.resolver = Resolver(num_workers)
+        super().__init__()
+        
+        self.resolver = Resolver(num_workers, self._create_data_queue, self._create_join_queue)
     
     def stream[T](self, data:Iterable[T]):
         id = uuid4()

@@ -45,7 +45,7 @@ class Accumulator[D, A](State):
             prog.update(n)
             while not self.finished:
                 time.sleep(self.sleep)
-                new_n = self.finished
+                new_n = self._counter
                 diff = new_n - n
                 n = new_n
                 prog.update(diff)

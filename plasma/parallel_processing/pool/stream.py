@@ -1,10 +1,10 @@
 from itertools import tee
-from typing import Iterable, Callable, Hashable
+from typing import Iterable, Callable
 
 from .chain import Chain
 from .flow import Flow
 from .operators import Simple, Unwinder, Groupby, Accumulator
-from .utils import Invalid
+from .utils import Invalid, End
 
 
 class Stream[T]:
@@ -23,7 +23,7 @@ class Stream[T]:
         return self._id
     
     def select[V](self, selector:Callable[[T], V]):
-        return Stream(self.id, self._data, self.chain.next(Simple(selector)), self.resolver)
+        return Stream(self.id, self.data, self.chain.next(Simple(selector)), self.resolver)
     
     def filter(self, *funcs:Callable[[T], bool]):
         def alt_filter(inputs:T) -> T:
@@ -32,7 +32,7 @@ class Stream[T]:
             else:
                 return Invalid
 
-        return Stream(self.id, self._data, self.chain.next(Simple(alt_filter)), self.resolver)
+        return Stream(self.id, self.data, self.chain.next(Simple(alt_filter)), self.resolver)
 
     def unwind[V](self, unwinder:Callable[[T], Iterable[V]]):
         return Stream(self.id, self.data, self.chain.next(Unwinder(unwinder)), self.resolver)
@@ -54,19 +54,18 @@ class Stream[T]:
             
             return flow.accumulator.wait()
     
-    def to_list(self):
+    def to_list(self) -> list[T]:
         flow = self.resolver(self.chain)
         with flow:
             counter = 0
             for d in self._clone():
                 flow.put(d)
                 counter += 1
-            
-            data:list[T] = flow.accumulator.wait(total=counter)
-        return data
+            flow.put(End)
+            return flow.accumulator.wait(total=counter)
     
     def _clone(self):
-        iter1, iter2 = tee(self._data)
+        iter1, iter2 = tee(self.data)
         self.data = iter1
         return iter2
 

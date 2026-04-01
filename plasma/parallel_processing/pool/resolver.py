@@ -29,13 +29,14 @@ class Resolver:
             op for op in merged_ops
             if not isinstance(op, (Distributor, Accumulator))
         ])      
-        return self.create_flow(merged_ops, num_bucket)
+        return self.create_flow(merged_ops, self.num_workers // num_bucket)
 
     def build_ops(self, chain:Chain):
         ops = list[Operator]()
         while not isinstance(chain.op, Init):
             ops.append(chain.op)
             chain = chain.prevs
+
         ops = ops[::-1]
         if not isinstance(ops[-1], Accumulator):
             ops.append(StreamAccumulator())
@@ -45,26 +46,29 @@ class Resolver:
     def merge_ops(self, ops:tuple[Operator,...]):
         merged = []
         for op in ops:                
-            if len(merged) > 0 and not isinstance(merged[-1], (Distributor, Accumulator)):
+            if len(merged) == 0 or isinstance(op, (Distributor, Accumulator)):
+                merged.append(op)
+            elif not isinstance(merged[-1], (Distributor, Accumulator)):
                 merged[-1] = chain(merged[-1], op)
             else:
                 merged.append(op)
         
         return merged
 
-    def create_flow(self, ops, num_bucket):
+    def create_flow(self, ops, num_workers):
         flow = Flow()
         prev_op = None
         for op in ops:
             if isinstance(op, (Distributor, Accumulator)):
                 pipe = self.join_qcreator(), op
             else:
-                pipe = self.data_qcreator(num_bucket), op
+                pipe = self.data_qcreator(num_workers), op
             
             if prev_op is None:
                 flow.chain(pipe)
             else:
                 flow.chain((prev_op, *pipe))
             prev_op = op
-        
+
+        flow.accumulator = prev_op
         return flow

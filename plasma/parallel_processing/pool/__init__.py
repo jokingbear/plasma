@@ -1,1 +1,1 @@
-from .instances import ProcessQueue, ThreadQueue
+from .instances import ProcessPool, ThreadPool
