@@ -62,7 +62,7 @@ class Accumulator[D, A](State):
     @property
     def finished(self) -> bool:
         value = self._counter
-        if isinstance(self._counter, mp.Value):
+        if not isinstance(value, int):
             value = self._counter.value
         
         return value == self.total
