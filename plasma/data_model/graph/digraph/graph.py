@@ -62,3 +62,8 @@ class DiGraph(nx.DiGraph):
         edge_editor = self._index.edge_editor
         for n1, n2, *_ in iter2:
             edge_editor.delete(n1, n2)
+
+    def remove_nodes_from(self, nodes):
+        for n in nodes:
+            self._index.node_editor.delete(n)
+        return super().remove_nodes_from(nodes)
