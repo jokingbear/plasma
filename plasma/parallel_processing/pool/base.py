@@ -5,14 +5,14 @@ from .chain import Chain
 from .operators import Init
 from .stream import Stream
 from .resolver import Resolver
-
 from ..queues import Queue
+from ...functional import ReadableClass
 
 
-class Pool:
+class Pool(ReadableClass):
     
     def __init__(self, num_workers:int):
-        self.resolver = Resolver()
+        self.resolver = Resolver(num_workers)
     
     def stream[T](self, data:Iterable[T]):
         id = uuid4()

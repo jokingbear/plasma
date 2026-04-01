@@ -22,18 +22,14 @@ class Resolver:
         self.join_qcreator = join_qcreator
     
     def __call__(self, chain:Chain):
-        flow = Flow()
         ops = self.build_ops(chain)
         merged_ops = self.merge_ops(ops)
         
         num_bucket = len([
             op for op in merged_ops
-            if isinstance(op, tuple) or not (isinstance)
-        ]) 
-        for op in merged_ops:
-            pass
-        
-        return flow
+            if not isinstance(op, (Distributor, Accumulator))
+        ])      
+        return self.create_flow(merged_ops, num_bucket)
 
     def build_ops(self, chain:Chain):
         ops = list[Operator]()
@@ -48,17 +44,27 @@ class Resolver:
 
     def merge_ops(self, ops:tuple[Operator,...]):
         merged = []
-        for op in ops:
-            if len(merged) == 0:
-                merged.append(op)
-            elif isinstance(op, Distributor):
-                merged[-1] = (merged[-1], op)
-            elif len(merged) > 0 and not isinstance(merged[-1], (tuple, Accumulator)):
+        for op in ops:                
+            if len(merged) > 0 and not isinstance(merged[-1], (Distributor, Accumulator)):
                 merged[-1] = chain(merged[-1], op)
             else:
                 merged.append(op)
         
         return merged
 
-    def create_queue(self, ops):
-        pass
+    def create_flow(self, ops, num_bucket):
+        flow = Flow()
+        prev_op = None
+        for op in ops:
+            if isinstance(op, (Distributor, Accumulator)):
+                pipe = self.join_qcreator(), op
+            else:
+                pipe = self.data_qcreator(num_bucket), op
+            
+            if prev_op is None:
+                flow.chain(pipe)
+            else:
+                flow.chain((prev_op, *pipe))
+            prev_op = op
+        
+        return flow
