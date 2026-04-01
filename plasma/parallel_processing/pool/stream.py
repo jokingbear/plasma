@@ -92,7 +92,7 @@ class Stream[T]:
             
             return flow.accumulator.wait(counter)
     
-    def to_list(self) -> list[T]:
+    def evaluate(self) -> list[T]:
         if isinstance(self.chain, Init):
             return list(self._clone())
 
@@ -110,5 +110,5 @@ class Stream[T]:
         return iter2
 
     def __iter__(self):
-        for d in self.to_list():
+        for d in self.evaluate():
             yield d
