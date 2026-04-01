@@ -1,6 +1,3 @@
-import re
-
-
 class ReadableClass:
     
     def __init__(self):
@@ -13,34 +10,14 @@ class ReadableClass:
         super().__setattr__(key, value)
 
     def __repr__(self):
-        rep = []
+        lines = [f'{type(self).__name__}(']
         indent = ' ' * 2
         for attr in self._marked_attributes:
             val = getattr(self, attr)
-            if isinstance(val, (str,int,float,bool)):
-                val_rep = self._format_primitive(val)
-            else:
-                val_rep = self._format_complex(val)
-
-            lines_rep = val_rep.split('\n')
-
-            if len(lines_rep) == 1:
-                rep.append(f'{indent}{attr}={lines_rep[0]},\n')
-            elif len(lines_rep) > 1:
-                body = []
-                for line in lines_rep[1:-1]:
-                    body.append(indent + line + '\n')
-                body = ''.join(body)
-                rep.append(f'{indent}{attr}={lines_rep[0]}\n{body}{indent}{lines_rep[-1]},\n')
-
-        rep = ''.join(rep)
-        if len(rep) > 0:
-            rep = '\n' + rep
-            rep = re.sub(r'\([\t\n\s]{1,}\)', '()', rep)
-        return f'{type(self).__name__}({rep})'
-
-    def _format_primitive(self, val:str|int|float|bool):
-        return repr(val)
-    
-    def _format_complex(self, val:object):
-        return repr(val)
+            val_rep = repr(val)
+            val_lines = val_rep.split('\n')
+            val_lines[0] = f'{attr}={val_lines[0]}'
+            val_lines[-1] += ','
+            lines.extend(indent + vl for vl in val_lines)
+        lines.append(')')
+        return '\n'.join(lines)
