@@ -41,7 +41,7 @@ class Accumulator[D, A](State):
 
     def wait(self, **tqdm_kwargs):
         with tqdm(total=self.total, **tqdm_kwargs) as prog:
-            n = self.finished
+            n = self._counter
             prog.update(n)
             while not self.finished:
                 time.sleep(self.sleep)
