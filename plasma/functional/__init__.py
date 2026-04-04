@@ -1,4 +1,4 @@
 from .helpers import partials, auto_map, chain
 from .pipes import *
 from . import decorators
-from .chain import pipe
+from .chainer import pipe
