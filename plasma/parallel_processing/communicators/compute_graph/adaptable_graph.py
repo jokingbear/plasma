@@ -53,6 +53,6 @@ def _standardize_inputs(block:tuple) -> Link:
         link = _standardize_inputs(block[:-1])
         block = Link(link.head, link.connector, link.tail, distributor)
     else:
-        raise RuntimeError(f'unsupported type')
+        raise RuntimeError('unsupported type')
     
     return block
