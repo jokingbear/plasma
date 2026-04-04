@@ -1,4 +1,4 @@
 from . import distributors
 from .handler import FlowExceptionHandler
-from .async_flow import AsyncFlow
+from .chain_flow import ChainFlow as AsyncFlow
 from .accumulators import Accumulator
