@@ -17,11 +17,11 @@ class Stream[T]:
     
     def accumulate[S, D](self, initial_state:S, 
                          selector:Callable[[T], D],
-                         accumulator:Callable[[D], S], stateful=True):
+                         accumulator:Callable[[S, D], S], stateful=True):
         state = initial_state
         for d in self:
             temp_data = selector(d)
-            new_state = accumulator(temp_data)
+            new_state = accumulator(state, temp_data)
             if not stateful:
                 state = new_state
         
