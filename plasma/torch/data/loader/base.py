@@ -1,3 +1,5 @@
+import numpy as np
+
 from queue import Queue
 from torch.utils.data import Dataset
 from typing import Callable
@@ -37,7 +39,8 @@ class ProcessLoader(ReadableClass):
                 self.collator or Identity()
             ) 
         with flow:
-            for i in range(len(self.dataset)):
+            arr = range(len(self.dataset))
+            for i in np.random.shuffle(arr):
                 flow.put(i)
             
             for i in range(len(self)):
