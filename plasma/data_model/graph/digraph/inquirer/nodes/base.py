@@ -7,7 +7,7 @@ from .tuple_dict import TupleDict
 from ...index import Index
 from ....object_inquirer import ObjectInquirer
 from .....base_model import Field
-from .....collections import groupby
+from .....collections import groupby, Stream
 from ......functional.helpers import auto_map
 
 
@@ -43,9 +43,7 @@ class Nodes[T]:
         return Nodes(self._index, new_iterator, self._projector)
     
     def unwind[V](self, list_func:Callable[[Hashable, TupleDict], Iterable[V]]):
-        for i, data in self._tuple_iter():
-            for new_value in list_func(i, data):
-                yield new_value
+        return Stream.from_iterable(list_func(i, data) for i, data in self._tuple_iter())
     
     def accumulate[T, V](self, 
                         initial:V, 
