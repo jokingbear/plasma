@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 from typing import Callable
 
 from .flow import LoaderFlow
-from ....functional import ReadableClass
+from ....functional import ReadableClass, Identity
 
 
 class ProcessLoader(ReadableClass):
@@ -33,7 +33,8 @@ class ProcessLoader(ReadableClass):
         flow =LoaderFlow(
                 self.dataset, 
                 self.workers, self.batch_size, 
-                self.num_prefetch, self._queue
+                self.num_prefetch, self._queue,
+                self.collator or Identity()
             ) 
         with flow:
             for i in range(len(self.dataset)):
