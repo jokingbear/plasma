@@ -39,8 +39,8 @@ class ProcessLoader(ReadableClass):
                 self.collator or Identity()
             ) 
         with flow:
-            arr = range(len(self.dataset))
-            for i in np.random.shuffle(arr):
+            arr = np.random.choice(len(self.dataset), size=len(self.dataset), replace=False)
+            for i in arr:
                 flow.put(i)
             
             for i in range(len(self)):
