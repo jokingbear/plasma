@@ -41,4 +41,7 @@ class ProcessLoader(ReadableClass):
                 flow.put(i)
             
             for i in range(len(self)):
-                yield self._queue.get()
+                data = self._queue.get()
+                if isinstance(data, Exception):
+                    raise data
+                yield data

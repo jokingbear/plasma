@@ -24,6 +24,18 @@ class LoaderFlow(communicators.AsyncFlow):
             >> result_queue.put
 
 
+class ItemGetter:
+    
+    def __init__(self, dataset):
+        self.dataset = dataset
+    
+    def __call__(self, arg):
+        try:
+            return self.dataset[arg]
+        except Exception as e:
+            return e
+
+
 class Accumulator:
     
     def __init__(self, batch_size:int, collator):
@@ -32,12 +44,20 @@ class Accumulator:
         self.collator = collator
     
     def __call__(self, d):
-        data = self._data
-        data.append(d)
+        if isinstance(d, Exception):
+            yield d
+        else:
+            data = self._data
+            data.append(d)
 
-        while len(data) >= self.batch_size:
-            yield self.collator(data[:self.batch_size])
-            data = data[self.batch_size:]
-        
-        self._data = data
-        yield queues.Signal.IGNORE
+            while len(data) >= self.batch_size:
+                try:
+                    yield self.collator(data[:self.batch_size])
+                    data = data[self.batch_size:]
+                except Exception as e:
+                    yield e
+                    data = []
+                    break
+                
+            self._data = data
+            yield queues.Signal.IGNORE
