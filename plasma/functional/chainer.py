@@ -24,7 +24,19 @@ class chain[I, O]:
         self.func = func
     
     def __call__(self, inputs:I) -> O:
-        return self.func(self.prev(inputs))
+        funcs = []
+        current = self
+        while True:
+            funcs.insert(0, current.func)
+            if isinstance(current, pipe):
+                break
+            current = current.prev
+        
+        results = inputs
+        for f in funcs:
+            results = f(results)
+        
+        return results
     
     def __rshift__[T](self, other:Callable[[O], T]):
         return chain[I, T](self, other)

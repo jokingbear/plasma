@@ -19,5 +19,9 @@ class ReadableClass:
             val_lines[0] = f'{attr}={val_lines[0]}'
             val_lines[-1] += ','
             lines.extend(indent + vl for vl in val_lines)
-        lines.append(')')
+        
+        if len(lines) == 1:
+            lines[-1] += ')'
+        else:
+            lines.append(')')
         return '\n'.join(lines)
