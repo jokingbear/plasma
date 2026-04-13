@@ -22,7 +22,7 @@ class MetrizableIndex[D, K](PseudoTuple[D]):
         super().__init__(sorted_data)
         
         self.key = key
-        self.metric = metric or _abs_diff
+        self.metric = metric
     
     def nearest(self, *, data:D=None, key:K=None) -> Nearest[D, K]:
         assert (data is not None) ^ (key is not None), \
