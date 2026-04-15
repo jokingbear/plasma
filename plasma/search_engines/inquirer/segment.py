@@ -1,11 +1,13 @@
 import pandas as pd
 import difflib
 
-from ...functional import ReadableClass
 from scipy.stats import hmean
-from typing import NamedTuple, Callable
-from ..index import Index
+from typing import NamedTuple
+
 from .position_path import PositionPath
+from ..index import Index
+from ...functional import ReadableClass
+
 
 
 class Segment(ReadableClass):
@@ -67,5 +69,5 @@ class Match(NamedTuple):
         return Match(
             qstart + offset,
             qend + offset,
-            *remaining
+            *remaining # type: ignore
         )
