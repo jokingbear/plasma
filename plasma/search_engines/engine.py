@@ -40,9 +40,11 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
             'matched_len', 'harmonic_score'
         ]
         
+        unique_columns = ['query_start_idx', 'query_end_idx', 'data_index', 'original_start', 'original_end']
         sort_columns = ['query_start_idx', 'query_end_idx', 'substring_matching_score', 'matched_len', 'harmonic_score']
         return (
             pd.DataFrame(data, columns=columns)
+            .drop_duplicates(subset=unique_columns)
             .set_index(['query_start_idx', 'query_end_idx'])
             .sort_values(sort_columns,ascending=[True, True, False, False, False])
         )
