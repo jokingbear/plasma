@@ -25,6 +25,7 @@ class TransferQueue(Queue[Thread]):
         return thread
 
     def release(self):
+        assert self._state is not None, 'queue has not been run'
         self._receiver.put(Signal.CANCEL)
         self._state.join()
 
@@ -38,4 +39,8 @@ class TransferQueue(Queue[Thread]):
         super().release()
 
     def is_alive(self):
-        return self.running and self._state.is_alive()
+        return (
+            self.running
+            and self._state is not None 
+            and self._state.is_alive()
+        )

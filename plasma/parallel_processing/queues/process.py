@@ -29,7 +29,7 @@ class ProcessQueue(Queue[list[mp.Process]]):
         self._queue.join()
         if self._state is not None:
             for _ in self._state:
-                self.put(Signal.CANCEL)
+                self._queue.put(Signal.CANCEL)
             self._queue.join()
 
             for p in self._state:
@@ -46,4 +46,8 @@ class ProcessQueue(Queue[list[mp.Process]]):
         super().release()
 
     def is_alive(self):        
-        return self.running and any(p.is_alive() for p in self._state)
+        return (
+            self.running 
+            and self._state is not None 
+            and any(p.is_alive() for p in self._state)
+        )
