@@ -1,3 +1,6 @@
+from typing import overload, Self
+
+
 class PositionPath:
     
     def __init__(self, raw_path:list[tuple[int, str]]):        
@@ -9,6 +12,12 @@ class PositionPath:
     def token(self, i:int):
         return self._raw[i][1]
 
+    @overload
+    def __getitem__(self, idx:int) -> tuple[int, str]:...
+    
+    @overload
+    def __getitem__(self, idx:slice) -> Self:...
+    
     def __getitem__(self, idx:int|slice):
         if isinstance(idx, int):
             return self._raw[idx]

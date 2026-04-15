@@ -1,21 +1,21 @@
 import plasma.functional as F
 import pandas as pd
 
+from typing import Sequence
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
 from .inquirer import PathInquirer, Match
 from .token_matcher import TokenMatcher
-from ..functional.helpers.color_printer import Color
-from ..data_model.collections import Stream
 
 
 class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
     
-    def __init__(self, 
-                data:list[str],
-                group_splitter=r'[^\.\n]+', tokenizer=r'\w+',
-                token_threshold=0.7, topk=5,
-            ):
+    def __init__(
+            self, 
+            data:Sequence[str],
+            group_splitter=r'[^\.\n]+', tokenizer=r'\w+',
+            token_threshold=0.7, topk=5,
+        ):
         super().__init__()
         
         tokenizer = RegexTokenizer(tokenizer)
@@ -26,7 +26,7 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
         self.context_splitter = RegexTokenizer(group_splitter)
         self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher, topk)
     
-    def run(self, query:str, return_frame=True):
+    def run(self, query:str):
         contexts = self.context_splitter(query)
         data = list[Match]()
         for start, end, context in contexts.itertuples(index=False):
@@ -40,8 +40,9 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
             'matched_len', 'harmonic_score'
         ]
         
-        
-        return pd.DataFrame(data, columns=columns).set_index(['query_start_idx', 'query_end_idx']).sort_values(
-            ['query_start_idx', 'substring_matching_score', 'matched_len', 'harmonic_score'],
-            ascending=[True, False, False, False]
+        sort_columns = ['query_start_idx', 'query_end_idx', 'substring_matching_score', 'matched_len', 'harmonic_score']
+        return (
+            pd.DataFrame(data, columns=columns)
+            .set_index(['query_start_idx', 'query_end_idx'])
+            .sort_values(sort_columns,ascending=[True, True, False, False, False])
         )
