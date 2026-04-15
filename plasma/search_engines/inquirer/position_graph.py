@@ -32,5 +32,4 @@ class PositionGraph(nx.DiGraph):
 
         for r in roots:
             for p in nx.all_simple_paths(self, r, leaves):
-                scores = [self.nodes[n]['score'] for n in p]
-                yield PositionPath(p, scores)
+                yield PositionPath(p)

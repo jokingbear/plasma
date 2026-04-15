@@ -39,10 +39,6 @@ class Match(NamedTuple):
     matched_len:int
     harmonic_score:float
     
-    @property
-    def harmonic_score(self):
-        return hmean([self.matching_score, self.coverage_score])
-    
     @staticmethod
     def construct(path_arg, s:Segment, 
                   qtoken_frame:pd.DataFrame, index:Index):

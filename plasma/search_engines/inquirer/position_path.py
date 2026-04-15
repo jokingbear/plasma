@@ -3,9 +3,8 @@ from typing import overload, Self
 
 class PositionPath:
     
-    def __init__(self, raw_path:list[tuple[int, str]], scores:list[float]):        
+    def __init__(self, raw_path:list[tuple[int, str]]):        
         self._raw = raw_path
-        self._scores = scores
 
     def offset(self, i:int):
         return self._raw[i][0]
@@ -23,7 +22,7 @@ class PositionPath:
         if isinstance(idx, int):
             return self._raw[idx]
         elif isinstance(idx, slice):
-            return PositionPath(self._raw[idx], self._scores[idx])
+            return PositionPath(self._raw[idx])
 
     def __len__(self):
         return len(self._raw)
