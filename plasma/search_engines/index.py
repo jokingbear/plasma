@@ -1,7 +1,7 @@
 import pandas as pd
 import networkx as nx
 
-from typing import Callable, Iterable, NamedTuple
+from typing import Callable, Iterable, NamedTuple, Sequence
 from collections import defaultdict
 
 from ..data_model.collections import Stream
@@ -9,7 +9,7 @@ from ..data_model.collections import Stream
 
 class Index:
     
-    def __init__(self, data:tuple[str], tokenizer:Callable[[str], pd.DataFrame]):
+    def __init__(self, data:Sequence[str], tokenizer:Callable[[str], pd.DataFrame]):
         assert len(data) == len(set(data)), 'data must be unique'
         
         token2positions = defaultdict[str, dict[TokenPosition, tuple[int, int]]](dict)

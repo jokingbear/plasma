@@ -32,7 +32,7 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
     def run(self, query:str):
         query = query.lower()
         qtoken_frame = self.tokenizer(query)
-        qtoken_2_dbtokens = self.token_matcher(qtoken_frame['token'].unique())
+        qtoken_2_dbtokens = self.token_matcher(qtoken_frame['token'].unique().tolist())
         position_graph = PositionGraph(self.index, qtoken_frame, qtoken_2_dbtokens)
         
         paths = [*position_graph.generate_paths()]

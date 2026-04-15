@@ -2,6 +2,7 @@ import networkx as nx
 import pandas as pd
 import itertools
 
+from scipy.stats import hmean
 from ..index import Index
 from .position_path import PositionPath
 
@@ -15,9 +16,8 @@ class PositionGraph(nx.DiGraph):
             db_tokens = qtoken_2_dbtokens.get(qtoken, {})
             self.add_nodes_from(((i, dbtk), {'score': score}) for dbtk, score in db_tokens.items())
         
-        for i, qtoken in qtoken_frame['token'].iloc[:-1].items():
-            next_qtoken = qtoken_frame.iloc[i + 1]['token']
-
+        sequences = zip(qtoken_frame['token'].iloc[:-1], qtoken_frame['token'].iloc[1:])
+        for i, (qtoken, next_qtoken) in enumerate(sequences):
             current_db_tokens = qtoken_2_dbtokens.get(qtoken, {})
             next_db_tokens = qtoken_2_dbtokens.get(next_qtoken, {})
             self.add_edges_from(
@@ -32,4 +32,5 @@ class PositionGraph(nx.DiGraph):
 
         for r in roots:
             for p in nx.all_simple_paths(self, r, leaves):
-                yield PositionPath(p)
+                scores = [self.nodes[n]['score'] for n in p]
+                yield PositionPath(p, scores)
