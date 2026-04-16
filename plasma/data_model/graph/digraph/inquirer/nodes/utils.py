@@ -17,7 +17,7 @@ def compile[T](
                 for p in signature.parameters.values())
     parameters = {k:p for k, p in signature.parameters.items() if k != 'self'}
     
-    if has_args or len(parameters) > 3:
+    if has_args or len(parameters) >= 3:
         return selector
     elif len(parameters) == 2:
         def alt_func(node:Hashable, inquirer:T, td:TupleDict):
