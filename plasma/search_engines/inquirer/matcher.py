@@ -32,8 +32,9 @@ def _match(position_path:PositionPath, db_path:tuple[str]):
         matching_matrix[i, j] = position_path[i][1] == db_path[j]
             
     graph = nx.Graph()
+    graph.add_nodes_from(ij for ij in product_range(m, n) if matching_matrix[*ij] == 1)
     for i, j in product_range(m - 1, n - 1):
-        if matching_matrix[i, j] == matching_matrix[i + 1, j + 1]:
+        if matching_matrix[i, j] == matching_matrix[i + 1, j + 1] == 1:
             graph.add_edge((i, j), (i + 1, j + 1))
 
     matches = (
