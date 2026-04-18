@@ -4,9 +4,9 @@ from functools import wraps
 from typing import Callable
 
 
-class propagate:
+class propagate[T]:
 
-    def __init__(self, value=None):
+    def __init__(self, value:T=None):
         self.value = value
     
     def __call__[**I, O](self, func:Callable[I, O]):
