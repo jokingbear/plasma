@@ -1,14 +1,20 @@
-from typing import Self
+from typing import Self, Sequence, overload
 
 
 class PseudoTuple[D]:
     
-    def __init__(self, data:tuple[D, ...]):
+    def __init__(self, data:Sequence[D]):
         self._data = data
     
-    def _slice_init(self, sliced_data:tuple[D,...]) -> Self:...
+    def _slice_init(self, sliced_data:Sequence[D]) -> Self:...
     
-    def __getitem__(self, idx:int|slice):
+    @overload
+    def __getitem__(self, idx:int) -> D:...
+    
+    @overload
+    def __getitem__(self, idx:slice) -> Self:...
+      
+    def __getitem__(self, idx):
         if isinstance(idx, int):
             return self._data[idx]
         else:
