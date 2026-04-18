@@ -3,6 +3,7 @@ import itertools
 
 from typing import Callable
 
+from .matcher import SegmentMatch
 from .solver import Solver
 from .position_graph import PositionGraph
 from .refiner import SegmentRefiner, PathRefiner
@@ -28,6 +29,7 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
         self.topk = topk
         self._path_refiner = PathRefiner()
         self._segment_refiner = SegmentRefiner()
+        self._segment2match = SegmentMatch()
     
     def run(self, query:str):
         query = query.lower()
@@ -47,11 +49,12 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
         matches = list[Match]()
         if len(segments) > 0:
             segments = self._segment_refiner(segments)
-            grouped_segments = groupby[tuple, Segment](segments, key=lambda s: (s.token_start, s.token_end))
+            grouped_segments = groupby[tuple, Segment](segments, key=lambda s: (s.qtoken_start, s.qtoken_end))
             for _, gsegments in grouped_segments.items():                
                 matched_paths:list[Match] = []
                 for s in gsegments:
-                    matched_paths.extend(s.get_matches(qtoken_frame, self.index))
+                    matched_paths.extend(self._segment2match(s, qtoken_frame, self.index))
+
                 matched_paths = sorted(matched_paths, key=lambda p:(p.matching_score, p.matched_len, p.coverage_score), reverse=True)
                 matches.extend(matched_paths[:self.topk])
         
