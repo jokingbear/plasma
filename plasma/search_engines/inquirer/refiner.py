@@ -16,11 +16,13 @@ class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
             if key not in unique_segments:
                 unique_segments[key] = s
 
-        interval_counts = defaultdict(lambda: 0)
-        intervals = []
+        interval_counts = Counter()
+        intervals = list[list]()
+        segments = []
         for s in unique_segments.values():
-            interval_counts[s.token_start, s.token_end] += 1
-            intervals.append([s.token_start, s.token_end])
+            interval_counts[s.qtoken_start, s.qtoken_end] += 1
+            intervals.append([s.qtoken_start, s.qtoken_end])
+            segments.append(s)
         
         intervals = np.array(intervals)
         bounds = (intervals[:, 0] <= intervals[:, [0]]) & (intervals[:, [1]] <= intervals[:, 1])

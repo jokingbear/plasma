@@ -36,7 +36,8 @@ class Index:
         positions = self._token2positions.get(token, {})
         return Stream(p.path_arg for p in positions)
     
-    def get_char_interval(self, token:str, path_arg:int, token_offset:int):
+    def get_char_interval(self, path_arg:int, token_offset:int):
+        token = self._paths[path_arg][token_offset]
         position = TokenPosition(path_arg, token_offset)
         return self._token2positions[token][position]
     
