@@ -46,7 +46,7 @@ class Nodes[T]:
             compiled_selectors.append((n, s))
         
         projector = self._projector.update(attributes, compiled_selectors, default, override)
-        return Nodes(self._index, self._ids, projector)
+        return Nodes(self._index, self._clone(), projector)
 
     def filter(self, *predicates:Callable[[Hashable, TupleDict], bool]):
         new_iterator = self._tuple_iter()        
