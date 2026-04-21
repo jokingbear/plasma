@@ -1,0 +1,77 @@
+from itertools import chain
+from typing import Callable, Iterable, Sequence
+
+from pyparsing import Group
+
+from .grouped import BasedGrouped
+from .standard import StandardStream
+from .zipped import BaseZipped
+
+
+class Stream[T](StandardStream[T]):
+    
+    def select[V](self, selector: Callable[[T], V]):
+        return Stream(super().select(selector))
+
+    def filter(self, *filters:Callable[[T], bool]):
+        return Stream(super().filter(*filters))
+                 
+    def unwind[V](self, roller:Callable[[T], Iterable[V]]):
+        return Stream(super().unwind(roller))
+    
+    def groupby[K, V](self, key:Callable[[T], K], value:Callable[[T], V]):
+        data = dict[K, list[V]]()
+        for d in self:
+            data.setdefault(key(d), []).append(value(d))
+
+        return GroupStream(data.items())
+
+    def split[*V](self, splitter:Callable[[T], tuple[*V]]):
+        return ZippedStream(splitter(d) for d in self)
+    
+    def enumerate(self):
+        return ZippedStream(enumerate(self))
+    
+    @staticmethod
+    def from_iterable[K](iterable:Iterable[Iterable[K]]):
+        return Stream(chain().from_iterable(iterable))
+    
+    @staticmethod
+    def chain[K](*data:Iterable[K]):
+        return Stream(chain(*data))
+
+
+class GroupStream[K, V](BasedGrouped[K, V]):
+
+    def collect[O](self, collector:Callable[[K, Sequence[V]], O]):
+        return Stream(super().collect(collector))
+
+    def map[K2](self, mapper:Callable[[K], K2]):
+        return GroupStream(super().map(mapper))
+
+    def select[T](self, selector:Callable[[K, Sequence[V]], T]):
+        return Stream(super().select(selector))
+    
+    def apply[T](self, applier:Callable[[K, V], T]):
+        return GroupStream(super().apply(applier))
+
+    def filter(self, *filters:Callable[[K, Sequence[V]], bool]):
+        return GroupStream(super().filter(*filters))
+                 
+    def unwind[T](self, roller:Callable[[K, Sequence[V]], Iterable[T]]):
+        return Stream(super().unwind(roller))
+
+
+class ZippedStream[*T](BaseZipped[*T]):
+    
+    def select[*V](self, selector:Callable[[*T], tuple[*V]]):
+        return ZippedStream(super().select(selector))
+
+    def project[V](self, projector:Callable[[*T], V]):
+        return Stream(projector(*d) for d in self)
+
+    def filter(self, *filters:Callable[[*T], bool]):
+        return ZippedStream(super().filter(*filters))
+                 
+    def unwind[V](self, roller:Callable[[*T], Iterable[V]]):
+        return Stream(super().unwind(roller))
