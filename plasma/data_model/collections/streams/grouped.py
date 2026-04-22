@@ -17,9 +17,9 @@ class BasedGrouped[K, V](BaseStream[tuple[K, Sequence[V]]]):
         for k, v in self:
             yield mapper(k), v 
 
-    def apply[V2](self, applier:Callable[[K, Sequence[V]], Sequence[V2]]):
+    def apply[V2](self, applier:Callable[[K, Sequence[V]], Iterable[V2]]):
         for k, vs in self:
-            yield k, applier(k, vs)
+            yield k, [*applier(k, vs)]
     
     def select[T](self, selector:Callable[[K, Sequence[V]], T]):
         for k, vs in self:

@@ -1,12 +1,13 @@
 from itertools import chain
-from typing import Callable, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
+from .generic import GenericStream
 from .grouped import BasedGrouped
 from .standard import StandardStream
 from .zipped import BaseZipped
 
 
-class Stream[T](StandardStream[T]):
+class Stream[T](StandardStream[T], GenericStream[T]):
     
     def select[V](self, selector: Callable[[T], V]):
         return Stream(super().select(selector))
@@ -16,6 +17,12 @@ class Stream[T](StandardStream[T]):
                  
     def unwind[V](self, roller:Callable[[T], Iterable[V]]):
         return Stream(super().unwind(roller))
+    
+    def sort(self, key:Callable[[T], Any], reverse=False):
+        return Stream(super().sort(key, reverse))
+    
+    def take(self, n:int):
+        return Stream(super().take(n))
     
     def groupby[K, V](self, key:Callable[[T], K], value:Callable[[T], V]):
         data = dict[K, list[V]]()
@@ -39,7 +46,7 @@ class Stream[T](StandardStream[T]):
         return Stream(chain(*data))
 
 
-class GroupStream[K, V](BasedGrouped[K, V]):
+class GroupStream[K, V](BasedGrouped[K, V], GenericStream[tuple[K, Sequence[V]]]):
 
     def collect[O](self, collector:Callable[[K, Sequence[V]], O]):
         return Stream(super().collect(collector))
@@ -50,7 +57,7 @@ class GroupStream[K, V](BasedGrouped[K, V]):
     def select[T](self, selector:Callable[[K, Sequence[V]], T]):
         return Stream(super().select(selector))
     
-    def apply[T](self, applier:Callable[[K, Sequence[V]], Sequence[T]]):
+    def apply[T](self, applier:Callable[[K, Sequence[V]], Iterable[T]]):
         return GroupStream(super().apply(applier))
 
     def filter(self, *filters:Callable[[K, Sequence[V]], bool]):
@@ -59,8 +66,14 @@ class GroupStream[K, V](BasedGrouped[K, V]):
     def unwind[T](self, roller:Callable[[K, Sequence[V]], Iterable[T]]):
         return Stream(super().unwind(roller))
 
+    def sort(self, key: Callable[[K, Sequence[V]], Any], reverse=False):
+        return GroupStream(super().sort(lambda kv: key(*kv), reverse))
 
-class ZippedStream[*T](BaseZipped[*T]):
+    def take(self, n: int):
+        return GroupStream(super().take(n))
+
+
+class ZippedStream[*T](BaseZipped[*T], GenericStream[tuple[*T]]):
     
     def select[*V](self, selector:Callable[[*T], tuple[*V]]):
         return ZippedStream(super().select(selector))
@@ -73,3 +86,9 @@ class ZippedStream[*T](BaseZipped[*T]):
                  
     def unwind[V](self, roller:Callable[[*T], Iterable[V]]):
         return Stream(super().unwind(roller))
+    
+    def sort(self, key: Callable[[*T], Any], reverse=False):
+        return ZippedStream(super().sort(lambda d: key(*d), reverse))
+
+    def take(self, n: int):
+        return ZippedStream(super().take(n))

@@ -1,6 +1,6 @@
 import itertools
 
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable
 
 from .base import BaseStream
 
