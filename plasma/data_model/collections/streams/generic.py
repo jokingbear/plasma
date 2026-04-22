@@ -14,3 +14,10 @@ class GenericStream[T](BaseStream[T]):
                 break
             
             yield d
+
+    def groupby[K, V](self, key:Callable[[T], K], value:Callable[[T], V]):
+        data = dict[K, list[V]]()
+        for d in self:
+            data.setdefault(key(d), []).append(value(d))
+
+        yield from data.items()

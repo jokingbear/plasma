@@ -13,11 +13,11 @@ class BasedGrouped[K, V](BaseStream[tuple[K, Sequence[V]]]):
         for k, v in self:
             yield k, collector(k, v)
 
-    def map[K2](self, mapper:Callable[[K], K2]):
+    def map_key[K2](self, mapper:Callable[[K], K2]):
         for k, v in self:
             yield mapper(k), v 
 
-    def apply[V2](self, applier:Callable[[K, Sequence[V]], Iterable[V2]]):
+    def map_value[V2](self, applier:Callable[[K, Sequence[V]], Iterable[V2]]):
         for k, vs in self:
             yield k, [*applier(k, vs)]
     
