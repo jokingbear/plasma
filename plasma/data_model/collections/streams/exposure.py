@@ -1,8 +1,6 @@
 from itertools import chain
 from typing import Callable, Iterable, Sequence
 
-from pyparsing import Group
-
 from .grouped import BasedGrouped
 from .standard import StandardStream
 from .zipped import BaseZipped
@@ -52,7 +50,7 @@ class GroupStream[K, V](BasedGrouped[K, V]):
     def select[T](self, selector:Callable[[K, Sequence[V]], T]):
         return Stream(super().select(selector))
     
-    def apply[T](self, applier:Callable[[K, V], T]):
+    def apply[T](self, applier:Callable[[K, Sequence[V]], Sequence[T]]):
         return GroupStream(super().apply(applier))
 
     def filter(self, *filters:Callable[[K, Sequence[V]], bool]):
