@@ -97,8 +97,4 @@ class ZippedStream[*T](BaseZipped[*T], GenericStream[tuple[*T]]):
         return ZippedStream(super().take(n))
     
     def groupby[K, V](self, key:Callable[[*T], K], value:Callable[[*T], V]):
-        data = dict[K, list[V]]()
-        for d in self:
-            data.setdefault(key(*d), []).append(value(*d))
-
         return GroupStream(super().groupby(auto_map(key), auto_map(value)))
