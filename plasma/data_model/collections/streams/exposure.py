@@ -57,9 +57,12 @@ class GroupStream[K, V](BasedGrouped[K, V], GenericStream[tuple[K, Sequence[V]]]
     def map_value[T](self, applier:Callable[[K, Sequence[V]], Iterable[T]]):
         return GroupStream(super().map_value(applier))
 
+    def project[T](self, projector:Callable[[K, Sequence[V]], T]):
+        return Stream(projector(k, v) for k, v in self)
+    
     def filter(self, *filters:Callable[[K, Sequence[V]], bool]):
         return GroupStream(super().filter(*filters))
-                 
+         
     def unwind[T](self, roller:Callable[[K, Sequence[V]], Iterable[T]]):
         return Stream(super().unwind(roller))
 
