@@ -51,7 +51,7 @@ class PathInquirer(ReadableClass):
             return (
                 Stream(segments)
                 .groupby(lambda s: (s.qtoken_start, s.qtoken_end), lambda s:s)
-                .apply(lambda _, gs: 
+                .map_value(lambda _, gs: 
                     Stream(gs)
                     .unwind(lambda s:self._segment2match(s, qtoken_frame, self.index))
                     .sort(
