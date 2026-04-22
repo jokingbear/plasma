@@ -40,7 +40,7 @@ def _match(position_path:PositionPath, db_path:tuple[str]):
     matches = (
         Stream[set[tuple[int, int]]](nx.connected_components(graph))
         .groupby(len, min)
-        .select(lambda kv: (kv[0], min(kv[1])))
+        .select(lambda _, comp: min(comp))
     )
 
     if matches.empty:

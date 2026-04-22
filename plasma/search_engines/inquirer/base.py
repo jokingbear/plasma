@@ -9,11 +9,11 @@ from .position_graph import PositionGraph
 from .refiner import SegmentRefiner, PathRefiner
 from .segment import Match, Segment
 from ..index import Index
-from ...functional import AutoPipe
-from ...data_model.collections import groupby, Stream
+from ...functional import ReadableClass
+from ...data_model.collections import Stream
 
 
-class PathInquirer(AutoPipe[[str], Stream[Match]]):
+class PathInquirer(ReadableClass):
     
     def __init__(self, 
                 index:Index, 
@@ -31,7 +31,7 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
         self._segment_refiner = SegmentRefiner()
         self._segment2match = SegmentMatch()
     
-    def run(self, query:str):
+    def __call__(self, query:str):
         query = query.lower()
         qtoken_frame = self.tokenizer(query)
         qtoken_2_dbtokens = self.token_matcher(qtoken_frame['token'].unique().tolist())
@@ -46,16 +46,21 @@ class PathInquirer(AutoPipe[[str], Stream[Match]]):
         for position_path in paths:
             segments.extend(solver(position_path))
 
-        matches = list[Match]()
         if len(segments) > 0:
             segments = self._segment_refiner(segments)
-            grouped_segments = groupby[tuple, Segment](segments, key=lambda s: (s.qtoken_start, s.qtoken_end))
-            for _, gsegments in grouped_segments.items():                
-                matched_paths:list[Match] = []
-                for s in gsegments:
-                    matched_paths.extend(self._segment2match(s, qtoken_frame, self.index))
+            return (
+                Stream(segments)
+                .groupby(lambda s: (s.qtoken_start, s.qtoken_end), lambda s:s)
+                .apply(lambda _, gs: 
+                    Stream(gs)
+                    .unwind(lambda s:self._segment2match(s, qtoken_frame, self.index))
+                    .sort(
+                        lambda m:(m.matching_score, m.matched_len, m.coverage_score), 
+                        reverse=True
+                    )
+                    .take(self.topk)
+                )
+                .unwind(lambda _, ms: ms)
+            )
 
-                matched_paths = sorted(matched_paths, key=lambda p:(p.matching_score, p.matched_len, p.coverage_score), reverse=True)
-                matches.extend(matched_paths[:self.topk])
-        
-        return Stream(matches)
+        return Stream[Match]([])
