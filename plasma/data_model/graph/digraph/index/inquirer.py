@@ -1,32 +1,38 @@
 import networkx as nx
 
-from typing import Callable, Mapping
+from typing import Any, Callable, Iterable, Mapping
+from .sub_indexes import NodeSubIndex, EdgeSubindex
+from ....collections import Stream, ZippedStream
 
 
 class Inquirer:
     
-    def __init__(self, 
-                graph:nx.DiGraph,
-                indices:Mapping[str, Mapping[object, set]],
-                successor_indices:Mapping[tuple, Mapping[object, set]],
-                predecessor_indices:Mapping[tuple, Mapping[object, set]],
-                type_getter:Callable[[object], object]
-            ):
+    def __init__(
+            self, 
+            graph:nx.DiGraph,
+            sub_indices:Mapping[str, NodeSubIndex],
+            successor:EdgeSubindex,
+            predecessor:EdgeSubindex,
+            type_getter:Callable[[object], object]
+        ):
         self._graph = graph
-        self._indices = indices
+        self._indices = sub_indices
         self._type_getter = type_getter
-        self._successor_indices = successor_indices
-        self._predcessor_indices = predecessor_indices
+        self._successor_indices = successor
+        self._predcessor_indices = predecessor
     
-    def nodes(self, index_values, index_name:str=None):
-        standardized_values = standardize_value(index_values)
-        index_name = index_name or 'type'
-        index = self._indices['type']        
-        results = set()
-        for v in standardized_values:
-            results.update(index.get(v, []))
+    def nodes(self, **index_queries:Any|list):
+        results = (
+            ZippedStream(index_queries.items())
+            .sort(lambda k,_: len(self._indices[k]))
+            .accumulate(
+                [], 
+                lambda iname, q: self._indices[iname].get_nodes(q),
+                list.extend
+            )
+        )
 
-        return results
+        return set(results)
     
     def successors(self, node_id, succ_types:object|list=None):
         ntype = self._type_getter(node_id)

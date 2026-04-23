@@ -1,52 +1,51 @@
 import networkx as nx
 
-from collections import defaultdict
+from typing import Any
+from .sub_indexes import NodeSubIndex, EdgeSubindex
 from .node_editor import NodeEditor
 from .edge_editor import EdgeEditor
 from .inquirer import Inquirer
 from ...object_inquirer import ObjectInquirer
+from ....base_model import Field
 
 
 class Index:
     
-    def __init__(self, graph:nx.DiGraph, index_names:tuple[str]):
-        assert 'type' not in index_names
-        
+    def __init__(self, graph:nx.DiGraph, named_indices:dict[str, str|Field]):        
         self.graph = graph
-        indices = {n: defaultdict(set) for n in index_names}
-        indices['type'] = defaultdict(set)    
+        
+        indices = dict(
+            (name, NodeSubIndex(_build_attr_selector(graph, 'data', selector)))
+            for name, selector in named_indices
+        )
+        
+        type_index_name = 'type'
+        indices.setdefault(type_index_name, NodeSubIndex(_build_attr_selector(graph, 'type')))  
+        
+        self.type_index_name = type_index_name
         self._indices = indices
-        self._successors = defaultdict(_default_dict_set)
-        self._predecessors = defaultdict(_default_dict_set)
+        self._successors = EdgeSubindex(_build_attr_selector(graph, type_index_name))
+        self._predecessors = EdgeSubindex(_build_attr_selector(graph, type_index_name))
     
     @property
     def node_editor(self):
-        return NodeEditor(self.graph, self._indices, 
-                          self._get_index_values, 
-                          self.edge_editor
-                        )
+        return NodeEditor(
+            self.graph, 
+            self._indices.values(), 
+            self.edge_editor
+        )
     
     @property
     def edge_editor(self):
-        return EdgeEditor(self._successors, self._predecessors, self.type)
+        return EdgeEditor(self.graph, self._successors, self._predecessors)
     
     @property
     def inquirer(self):
-        return Inquirer(self.graph, self._indices, 
-                        self._successors, self._predecessors,
-                        self.type
-                    )
-
-    def _get_index_values(self, node_id):
-        results = {'type': self.type(node_id)}
-        inquirer = ObjectInquirer(self.data(node_id))   
-        for k in self._indices:
-            if k != 'type':
-                index_value = inquirer.get(k)
-                if index_value is not None:
-                    results[k] = index_value
-
-        return results
+        return Inquirer(
+            self.graph, self._indices, 
+            self._successors, self._predecessors,
+            self.type
+        )
 
     def type(self, node_id):
         return self.graph.nodes[node_id]['type']
@@ -59,5 +58,14 @@ class Index:
         return [k for k in self._indices if k != 'type']
 
 
-def _default_dict_set():
-    return defaultdict(set)
+def _build_attr_selector(graph:nx.DiGraph, prefix:str, attr:str|Field|None=None):
+    def select(node_id):
+        data = graph.nodes[node_id][prefix]
+        if attr is None:
+            return data
+        
+        inquirer = ObjectInquirer(data)
+        value = inquirer.get(attr, default=None)
+        return value
+
+    return select
