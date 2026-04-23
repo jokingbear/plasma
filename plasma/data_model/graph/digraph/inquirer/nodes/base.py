@@ -38,9 +38,13 @@ class Nodes[T:Hashable|tuple[Hashable, TupleDict]](Iterable[T]):
             self, 
             *attributes:str|Field, 
             default=None, override=True,
-            **selectors:str|Field|Selector,
+            **selectors:(
+                str|Field
+                |Callable[[Hashable], object]
+                |Callable[[Hashable, T], object]
+                |Callable[[Hashable, T, TupleDict], object]
+            ),
         ):
-        assert len(attributes) > 0, 'must have at least 1 attribute' 
         assert len(set(attributes)) == len(attributes), 'attributes name must be unique'
         compiled_selectors = []
         for n, s in selectors.items():
