@@ -1,6 +1,6 @@
 import itertools
 
-from typing import Callable, Hashable, Iterable
+from typing import Any, Callable, Hashable, Iterable
 
 from .projector import Projector
 from .tuple_dict import TupleDict
@@ -11,8 +11,14 @@ from .....base_model import Field
 from .....collections import groupby, Stream
 from ......functional.helpers import auto_map
 
+Selector = (
+    Callable[[Hashable], object]
+    |Callable[[Hashable, Any], object]
+    |Callable[[Hashable, Any, TupleDict], object]
+)
 
-class Nodes[T]:
+
+class Nodes[T:Hashable|tuple[Hashable, TupleDict]](Iterable[T]):
     
     def __init__(
             self, 
@@ -26,19 +32,15 @@ class Nodes[T]:
         self._projector = projector
     
     def node_ids(self):
-        return Nodes(self._index, self._ids, self._projector.update([], [], None, True))
+        return Nodes(self._index, self._ids, self._projector.update([], [], None, False))
     
     def select(
             self, 
             *attributes:str|Field, 
             default=None, override=True,
-            **selectors:(
-                str|Field
-                |Callable[[Hashable], object]
-                |Callable[[Hashable, T], object]\
-                |Callable[[Hashable, T, TupleDict], object]
-            ),
+            **selectors:str|Field|Selector,
         ):
+        assert len(attributes) > 0, 'must have at least 1 attribute' 
         assert len(set(attributes)) == len(attributes), 'attributes name must be unique'
         compiled_selectors = []
         for n, s in selectors.items():

@@ -21,7 +21,7 @@ class Inquirer:
         self._successor_indices = successor
         self._predcessor_indices = predecessor
     
-    def nodes(self, **index_queries:Any|list):
+    def nodes(self, index_queries:dict[str, Any|list]):
         results = (
             ZippedStream(index_queries.items())
             .sort(lambda k,_: len(self._indices[k]))
