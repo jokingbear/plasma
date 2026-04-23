@@ -21,3 +21,9 @@ class GenericStream[T](BaseStream[T]):
             data.setdefault(key(d), []).append(value(d))
 
         yield from data.items()
+
+    def max(self, key:Callable[[T], Any]):
+        return max(self, key=key)
+    
+    def min(self, key:Callable[[T], Any]):
+        return min(self, key=key)

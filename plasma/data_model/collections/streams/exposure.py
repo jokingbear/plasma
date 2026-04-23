@@ -75,6 +75,12 @@ class GroupStream[K, V](BasedGrouped[K, V], GenericStream[tuple[K, Sequence[V]]]
     def groupby(self, key: Callable[[K, Sequence[V]], K], value: Callable[[K, Sequence[V]], V]):
         return GroupStream(super().groupby(auto_map(key), auto_map(value)))
 
+    def max(self, key: Callable[[K, Sequence[V]], Any]):
+        return super().max(key=lambda kv:key(*kv))
+    
+    def min(self, key: Callable[[K, Sequence[V]], Any]):
+        return super().min(key=lambda kv: key(*kv))
+
 
 class ZippedStream[*T](BaseZipped[*T], GenericStream[tuple[*T]]):
     
@@ -98,3 +104,9 @@ class ZippedStream[*T](BaseZipped[*T], GenericStream[tuple[*T]]):
     
     def groupby[K, V](self, key:Callable[[*T], K], value:Callable[[*T], V]):
         return GroupStream(super().groupby(auto_map(key), auto_map(value)))
+
+    def max(self, key:Callable[[*T], Any]):
+        return super().max(key=lambda t:key(*t))
+    
+    def min(self, key: Callable[[*T], Any]):
+        return super().min(key=lambda t:key(*t))

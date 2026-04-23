@@ -1,5 +1,4 @@
 from typing import Callable
-from ..signature import Signature
 
 
 class partials[O]:

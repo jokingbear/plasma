@@ -3,14 +3,15 @@ import itertools
 
 from .index import Index
 from .inquirer import Inquirer
+from ...base_model import Field
 
 
 class DiGraph(nx.DiGraph):
     
-    def __init__(self, *index_names:str):
+    def __init__(self, **index_name:str|Field):
         super().__init__()
         
-        self._index = Index(self, index_names)
+        self._index = Index(self, index_name)
 
     @property
     def inquirer(self):
@@ -52,16 +53,16 @@ class DiGraph(nx.DiGraph):
             edge_editor.add(n1, n2)
 
     def remove_edge(self, u, v):
-        super().remove_edge(u, v)
         self._index.edge_editor.delete(u, v)
-    
+        super().remove_edge(u, v)
+        
     def remove_edges_from(self, ebunch):
         iter1, iter2 = itertools.tee(ebunch)
-        super().remove_edges_from(iter1)
-        
         edge_editor = self._index.edge_editor
         for n1, n2, *_ in iter2:
             edge_editor.delete(n1, n2)
+
+        super().remove_edges_from(iter1)        
 
     def remove_node(self, n):
         self._index.node_editor.delete(n)
