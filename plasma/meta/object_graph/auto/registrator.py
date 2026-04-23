@@ -7,7 +7,7 @@ from warnings import warn
 
 class Registrator:
     
-    def __init__(self, graph:ContextGraph, context:Path, name:str, source:str):
+    def __init__(self, graph:ContextGraph, context:str, name:str, source:str):
         self.graph = graph
         
         inquirer = self.graph.inquirer
