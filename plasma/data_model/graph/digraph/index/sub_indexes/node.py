@@ -8,8 +8,8 @@ class NodeSubIndex:
         self.key = key
         self._len = 0
     
-    def get_nodes(self, keys:Any|Iterable) -> Iterable:
-        if not isinstance(keys, Iterable):
+    def get(self, keys:Any|list) -> Iterable:
+        if not isinstance(keys, list):
             keys = [keys]
 
         for k in keys:

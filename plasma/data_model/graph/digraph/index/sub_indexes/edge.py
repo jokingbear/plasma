@@ -34,13 +34,16 @@ class EdgeSubindex:
         if len(data) == 0:
             del self._dict[nid]
     
-    def get(self, nid, mtype=None) -> Iterable:
+    def get(self, nid, mtypes:Any|list|None=None) -> Iterable:
         data = self._dict.get(nid, dict())
         
-        if mtype is None:
+        if mtypes is None:
             return itertools.chain(data.values())
         else:
-            return data.get(mtype, [])  
+            if not isinstance(mtypes, list):
+                mtypes = [mtypes]
+
+            return data.get(mtypes, [])  
     
     def __contains__(self, edge):
         u, v = edge
