@@ -36,10 +36,10 @@ class Nodes[T:Hashable|tuple[Hashable, TupleDict]](Iterable[T]):
     
     def select(
             self, 
-            *attributes:str|Field, 
+            *attributes:Any, 
             default=None, override=True,
             **selectors:(
-                str|Field
+                Any
                 |Callable[[Hashable], object]
                 |Callable[[Hashable, T], object]
                 |Callable[[Hashable, T, TupleDict], object]
