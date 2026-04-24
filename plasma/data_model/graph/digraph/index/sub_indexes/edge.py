@@ -38,7 +38,7 @@ class EdgeSubindex:
         data = self._dict.get(nid, dict())
         
         if mtypes is None:
-            yield from itertools.chain(data.values())
+            yield from itertools.chain.from_iterable(data.values())
         else:
             if not isinstance(mtypes, list):
                 mtypes = [mtypes]
