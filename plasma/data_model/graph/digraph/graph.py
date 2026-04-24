@@ -8,7 +8,7 @@ from ...base_model import Field
 
 class DiGraph(nx.DiGraph):
     
-    def __init__(self, **index_name:str|Field):
+    def __init__(self, **index_name):
         super().__init__()
         
         self._index = Index(self, index_name)
