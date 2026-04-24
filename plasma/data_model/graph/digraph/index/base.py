@@ -11,12 +11,12 @@ from ....base_model import Field
 
 class Index:
     
-    def __init__(self, graph:nx.DiGraph, named_indices:dict[str, str|Field]):        
+    def __init__(self, graph:nx.DiGraph, named_indices:dict[str, Any]):        
         self.graph = graph
         
         indices = dict(
             (name, NodeSubIndex(_build_attr_selector(graph, 'data', selector)))
-            for name, selector in named_indices
+            for name, selector in named_indices.items()
         )
         
         type_index_name = 'type'
