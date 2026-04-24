@@ -32,7 +32,7 @@ class Nodes[T:Hashable|tuple[Hashable, TupleDict]](Iterable[T]):
         self._projector = projector
     
     def node_ids(self):
-        return Nodes(self._index, self._ids, self._projector.update([], [], None, False))
+        return Nodes(self._index, self._ids, self._projector.update([], [], None, True))
     
     def select(
             self, 
