@@ -63,6 +63,9 @@ class GroupStream[K, V](BasedGrouped[K, V], GenericStream[tuple[K, Sequence[V]]]
     def project[T](self, projector:Callable[[K, Sequence[V]], T]):
         return Stream(projector(k, v) for k, v in self)
     
+    def zip_project[*T](self, projector:Callable[[K, Sequence[V]], tuple[*T]]):
+        return ZippedStream(projector(k, v) for k, v in self)
+    
     def filter(self, *filters:Callable[[K, Sequence[V]], bool]):
         return GroupStream(super().filter(*filters))
          
