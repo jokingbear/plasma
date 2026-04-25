@@ -50,13 +50,16 @@ class GroupStream[K, V](BasedGrouped[K, V], GenericStream[tuple[K, Sequence[V]]]
 
     def map_key[K2](self, mapper:Callable[[K], K2]):
         return GroupStream(super().map_key(mapper))
-
-    def select[T](self, selector:Callable[[K, Sequence[V]], T]):
-        return ZippedStream(super().select(selector))
     
     def map_value[T](self, applier:Callable[[K, Sequence[V]], Iterable[T]]):
         return GroupStream(super().map_value(applier))
-
+    
+    def select[T](self, selector:Callable[[K, Sequence[V]], T]):
+        return ZippedStream(super().select(selector))
+    
+    def zip_select[*T](self, selector:Callable[[K, Sequence[V]], tuple[*T]]):
+        return ZippedStream((k, *r) for k, r in super().select(selector))
+    
     def project[T](self, projector:Callable[[K, Sequence[V]], T]):
         return Stream(projector(k, v) for k, v in self)
     
