@@ -43,7 +43,7 @@ class FunctionalContext(Context):
 
         return self
 
-    def factory(self, name:str=None):
+    def factory(self, name:str=None):#type:ignore
         caller = get_caller_frame()
         name = name or 'factory'
         return FunctionalFactory(name, self.graph, self.name, caller.filename)

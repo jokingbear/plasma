@@ -60,12 +60,12 @@ class Index:
 
 class AttributeSelector:
     
-    def __init__(self, graph:nx.DiGraph, prefix:str, attr:str|Field|None=None) -> None:
+    def __init__(self, graph:nx.DiGraph, prefix:str, attr:str|Field|None=None):
         self.graph = graph
         self.prefix = prefix
         self.attr = attr
     
-    def __call__(self, node_id) -> Any:
+    def __call__(self, node_id):
         data = self.graph.nodes[node_id][self.prefix]
         if self.attr is None:
             return data
