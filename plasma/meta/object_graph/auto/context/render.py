@@ -15,10 +15,9 @@ def render_context(graph:ContextGraph, context):
         if graph.inquirer.context_in_degree(node_id) == 0:
             render_node(graph, node_id, root, rendered)
 
-    console = Console(record=True)
+    console =  Console(force_jupyter=False, force_terminal=True)
     with console.capture() as capture:
         console.print(root)
-
     return capture.get()
 
 
