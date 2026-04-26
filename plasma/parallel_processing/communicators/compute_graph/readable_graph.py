@@ -1,8 +1,11 @@
 import networkx as nx
 
+from rich.console import Console
+from rich.tree import Tree
+
 from .adaptable_graph import AdaptableGraph
-from ...queues import Queue
 from ..distributors import UniformDistributor
+from ...queues import Queue
 from ....functional import AutoPipe, Signature
 
 
@@ -19,17 +22,21 @@ class ReadableGraph(AdaptableGraph):
         raise LookupError('the graph does not have an input')
     
     def __repr__(self):     
-        lines = []
-        self._render_lines(id(self.input), set(), '', lines)
+        tree = Tree('')
+        self._render_lines(id(self.input), tree, set())
         
-        return '\n\n'.join(lines)
+        with Console(force_jupyter=False, width=140) as console:
+            with console.capture() as capture:
+                console.print(tree.children[0])
+            return capture.get()
     
-    def _render_lines(self, key, rendered:set, prefix='', lines=[]):
+    def _render_lines(self, key, tree:Tree, rendered:set):
         structures = self._structures
         node_attributes = structures.nodes[key]
         if isinstance(node_attributes['object'], Queue):
             queue:Queue = node_attributes['object']
             line = f'[{type(queue).__name__}(name={queue.name}, runner={queue.num_runner}, id={key})]'
+            line = f'[#6c6c6c]{line}[/#6c6c6c]'
         else:
             obj = node_attributes['object']
             
@@ -45,16 +52,14 @@ class ReadableGraph(AdaptableGraph):
             
             if key in rendered:
                 line = line + '...'
+            
+            line = f'[dodger_blue1]{line}[/dodger_blue1]'
             rendered.add(key)
             
-        if structures.in_degree(key) > 0:
-            line = '|->' + line
-            
-        line = prefix + line
-        lines.append(line)      
+        tree = tree.add(line)
         if '...' != line[-3:]:
             for n in structures.successors(key):
-                self._render_lines(n, rendered, prefix + ' ' * 2, lines)
+                self._render_lines(n, tree, rendered)
 
     @property
     def graph(self):
