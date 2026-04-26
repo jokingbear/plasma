@@ -15,17 +15,17 @@ class Index:
         self.graph = graph
         
         indices = dict(
-            (name, NodeSubIndex(_build_attr_selector(graph, 'data', selector)))
+            (name, NodeSubIndex(AttributeSelector(graph, 'data', selector)))
             for name, selector in named_indices.items()
         )
         
         type_index_name = 'type'
-        indices.setdefault(type_index_name, NodeSubIndex(_build_attr_selector(graph, 'type')))  
+        indices.setdefault(type_index_name, NodeSubIndex(AttributeSelector(graph, 'type')))  
         
         self.type_index_name = type_index_name
         self._indices = indices
-        self._successors = EdgeSubindex(_build_attr_selector(graph, type_index_name))
-        self._predecessors = EdgeSubindex(_build_attr_selector(graph, type_index_name))
+        self._successors = EdgeSubindex(AttributeSelector(graph, type_index_name))
+        self._predecessors = EdgeSubindex(AttributeSelector(graph, type_index_name))
     
     @property
     def node_editor(self):
@@ -58,14 +58,18 @@ class Index:
         return [k for k in self._indices if k != 'type']
 
 
-def _build_attr_selector(graph:nx.DiGraph, prefix:str, attr:str|Field|None=None):
-    def select(node_id):
-        data = graph.nodes[node_id][prefix]
-        if attr is None:
+class AttributeSelector:
+    
+    def __init__(self, graph:nx.DiGraph, prefix:str, attr:str|Field|None=None) -> None:
+        self.graph = graph
+        self.prefix = prefix
+        self.attr = attr
+    
+    def __call__(self, node_id) -> Any:
+        data = self.graph.nodes[node_id][self.prefix]
+        if self.attr is None:
             return data
         
         inquirer = ObjectInquirer(data)
-        value = inquirer.get(attr, default=None)
+        value = inquirer.get(self.attr, default=None)
         return value
-
-    return select
