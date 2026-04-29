@@ -32,7 +32,8 @@ class Registrator:
             
             add_condition = (
                 child_id not in self.graph 
-                or self.graph.inquirer.type(child_id) is not Node.SINGLETON
+                or self.graph.inquirer.type(child_id) is Node.LEAF
+                and node_type is not Node.LEAF
             )
             if add_condition:
                 self.graph.add_node(child_id, type=node_type, value=value, source=self.source)
