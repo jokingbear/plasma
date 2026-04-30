@@ -1,3 +1,5 @@
+import re
+
 from inspect import _empty
 from rich.console import Console
 from rich.tree import Tree
@@ -61,26 +63,6 @@ def render_node(graph:ContextGraph, node, tree:Tree, rendered:set):
 
 
 def render_type(t:type):
-    generic_args = get_args(t)
-    
-    if hasattr(t, '__name__'):
-        name = t.__name__
-    else:
-        name = 'Union'
-    
-    if len(generic_args) == 0:
-        return name
-    else:
-        generic_arg_texts = []
-        for a in generic_args:
-            if isinstance(a, list):
-                rendered_args = [render_type(g) for g in a]
-                generic_arg_texts.append('[' + ', '.join(rendered_args) + ']')
-            else:
-                generic_arg_texts.append(render_type(a))
-        
-        if name == 'Union':
-            return '|'.join(generic_arg_texts)
-        else:
-            generic_arg_texts = ','.join(generic_arg_texts)
-            return f'{name}[{generic_arg_texts}]' 
+    type_str = repr(t)
+    type_str = re.sub(r'[\w_]+\.', '', type_str)
+    return type_str
