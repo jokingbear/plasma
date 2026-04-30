@@ -65,4 +65,5 @@ def render_node(graph:ContextGraph, node, tree:Tree, rendered:set):
 def render_type(t:type):
     type_str = repr(t)
     type_str = re.sub(r'[\w_]+\.', '', type_str)
+    type_str = re.sub(r'<class \'(.+?)\'>', '\1', type_str)
     return type_str
