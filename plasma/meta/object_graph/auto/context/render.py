@@ -66,4 +66,5 @@ def render_type(t:type):
     type_str = repr(t)
     type_str = re.sub(r'[\w_]+\.', '', type_str)
     type_str = re.sub(r'<class \'(.+?)\'>', r'\1', type_str)
+    type_str = type_str.replace('[', '\\[')
     return type_str
