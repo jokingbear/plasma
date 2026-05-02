@@ -37,6 +37,9 @@ class Stream[T](GenericStream[T]):
     def zip_product[*V](self, data:Iterable[tuple[*V]]):
         return ZippedStream((d1, *d2) for d1, d2 in product(self, data))
     
+    def evaluate(self):
+        return list(self)
+    
     @staticmethod
     def from_iterable[K](iterable:Iterable[Iterable[K]]):
         return Stream(chain().from_iterable(iterable))
@@ -90,6 +93,9 @@ class GroupStream[K, V](GenericStream[tuple[K, Sequence[V]]]):
     def min(self, key: Callable[[K, Sequence[V]], Any]):
         return super().min(key=lambda kv: key(*kv))
 
+    def evaluate(self):
+        return dict(self)
+
 
 class ZippedStream[*T](GenericStream[tuple[*T]]):
     
@@ -126,3 +132,6 @@ class ZippedStream[*T](GenericStream[tuple[*T]]):
     
     def zip_product[*V](self, data:Iterable[tuple[*V]]):
         return ZippedStream((*d1, *d2) for d1, d2 in product(self, data))
+
+    def evaluate(self):
+        return list(self)
