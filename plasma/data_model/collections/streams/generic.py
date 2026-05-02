@@ -1,9 +1,24 @@
-from typing import Any, Callable, Sequence
+from typing import Any, Callable, Iterable
 
 from .base import BaseStream
 
 
 class GenericStream[T](BaseStream[T]):
+    
+    def select[V](self, selector:Callable[[T], V]):
+        for d in self:
+            yield selector(d)
+    
+    def filter(self, *filters:Callable[[T], bool]):
+        for d in self:
+            if not all(f(d) for f in filters):
+                continue
+
+            yield d
+    
+    def unwind[V](self, roller:Callable[[T], Iterable[V]]):
+        for d in self:
+            yield from roller(d)
     
     def sort(self, key:Callable[[T], Any], reverse=False):
         return sorted(self, key=key, reverse=reverse)
