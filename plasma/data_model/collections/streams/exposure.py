@@ -1,4 +1,6 @@
-from itertools import chain
+import itertools
+
+from itertools import chain, product
 from typing import Any, Callable, Iterable, Sequence
 
 from .generic import GenericStream
@@ -33,6 +35,12 @@ class Stream[T](StandardStream[T], GenericStream[T]):
     
     def enumerate(self):
         return ZippedStream(enumerate(self))
+    
+    def product[V](self, data:Iterable[V]):
+        return ZippedStream((d1, d2) for d1, d2 in product(self, data))
+    
+    def zip_product[*V](self, data:Iterable[tuple[*V]]):
+        return ZippedStream((d1, *d2) for d1, d2 in product(self, data))
     
     @staticmethod
     def from_iterable[K](iterable:Iterable[Iterable[K]]):
@@ -116,3 +124,9 @@ class ZippedStream[*T](BaseZipped[*T], GenericStream[tuple[*T]]):
     
     def min(self, key: Callable[[*T], Any]):
         return super().min(key=lambda t:key(*t))
+
+    def product[V](self, data:Iterable[V]):
+        return ZippedStream((*d1, d2) for d1, d2 in product(self, data))
+    
+    def zip_product[*V](self, data:Iterable[tuple[*V]]):
+        return ZippedStream((*d1, *d2) for d1, d2 in product(self, data))
