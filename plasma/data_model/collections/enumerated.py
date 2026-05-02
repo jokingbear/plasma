@@ -31,3 +31,12 @@ class Enumerated[T]:
 
     def __iter__(self):
         yield from self._data
+
+    def __getstate__(self) -> object:
+        return {
+            "_data": self._data
+        }
+    
+    def __setstate__(self, state):
+        state['_id2arg'] = {id(d): i for i, d in enumerate(state['_data'])}
+        self.__dict__.update(state)
