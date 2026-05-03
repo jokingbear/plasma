@@ -42,3 +42,19 @@ class GenericStream[T](BaseStream[T]):
     
     def min(self, key:Callable[[T], Any]):
         return min(self, key=key)
+
+    def accumulate[D, S](
+            self,
+            intial_state:S, 
+            selector:Callable[[T], D],
+            accumulator:Callable[[S, D], S|None],
+            stateful=True
+        ):
+        state = intial_state
+        for d in self:
+            projected = selector(d)
+            new_state = accumulator(state, projected)
+            if new_state is not None and not stateful:
+                state = new_state
+
+        return state

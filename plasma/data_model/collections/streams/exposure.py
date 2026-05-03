@@ -96,6 +96,14 @@ class GroupStream[K, V](GenericStream[tuple[K, Sequence[V]]]):
     def evaluate(self):
         return dict(self)
 
+    def accumulate[D, S](
+            self, 
+            intial_state:S, selector:Callable[[K, Sequence[V]], D], 
+            accumulator:Callable[[S, D], S|None], 
+            stateful=True
+        ):
+        return super().accumulate(intial_state, auto_map(selector), accumulator, stateful)
+
 
 class ZippedStream[*T](GenericStream[tuple[*T]]):
     
@@ -135,3 +143,11 @@ class ZippedStream[*T](GenericStream[tuple[*T]]):
 
     def evaluate(self):
         return list(self)
+
+    def accumulate[D, S](
+            self, 
+            intial_state:S, selector:Callable[[*T], D], 
+            accumulator:Callable[[S, D], S|None], 
+            stateful=True
+        ):
+        return super().accumulate(intial_state, auto_map(selector), accumulator, stateful)
