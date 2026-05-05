@@ -90,7 +90,7 @@ class GroupStream[K, V](GenericStream[tuple[K, Sequence[V]]]):
     def take(self, n: int):
         return GroupStream(super().take(n))
 
-    def groupby(self, key: Callable[[K, Sequence[V]], K], value: Callable[[K, Sequence[V]], V]):
+    def groupby[K1, V1](self, key: Callable[[K, Sequence[V]], K1], value: Callable[[K, Sequence[V]], V1]):
         return GroupStream(super().groupby(auto_map(key), auto_map(value)))
 
     def max(self, key: Callable[[K, Sequence[V]], Any]):
