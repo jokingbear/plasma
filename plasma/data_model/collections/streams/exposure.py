@@ -16,6 +16,9 @@ class Stream[T](GenericStream[T]):
     def unwind[V](self, roller:Callable[[T], Iterable[V]]):
         return Stream(super().unwind(roller))
     
+    def zip_unwind[*V](self, roller:Callable[[T], Iterable[tuple[*V]]]):
+        return ZippedStream(super().unwind(roller))
+    
     def sort(self, key:Callable[[T], Any], reverse=False):
         return Stream(super().sort(key, reverse))
     
@@ -78,6 +81,9 @@ class GroupStream[K, V](GenericStream[tuple[K, Sequence[V]]]):
     def unwind[T](self, roller:Callable[[K, Sequence[V]], Iterable[T]]):
         return Stream(super().unwind(lambda kv:roller(*kv)))
 
+    def zip_unwind[*T](self, roller:Callable[[K, Sequence[V]], Iterable[tuple[*T]]]):
+        return ZippedStream(super().unwind(lambda kv:roller(*kv)))
+
     def sort(self, key: Callable[[K, Sequence[V]], Any], reverse=False):
         return GroupStream(super().sort(lambda kv: key(*kv), reverse))
 
@@ -119,6 +125,9 @@ class ZippedStream[*T](GenericStream[tuple[*T]]):
                  
     def unwind[V](self, roller:Callable[[*T], Iterable[V]]):
         return Stream(super().unwind(auto_map(roller)))
+    
+    def zip_unwind[*V](self, roller:Callable[[*T], Iterable[tuple[*V]]]):
+        return ZippedStream(super().unwind(lambda t: roller(*t)))
     
     def sort(self, key:Callable[[*T], Any], reverse=False):
         return ZippedStream(super().sort(lambda d: key(*d), reverse))
