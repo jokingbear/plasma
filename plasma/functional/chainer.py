@@ -12,6 +12,9 @@ class pipe[I, O]:
     def __rshift__[V](self, other:Callable[[O], V]):
         return chain[I, V](self, other)
     
+    def chain[V](self, other:Callable[[O], V]):
+        return chain[I, V](self, other)
+    
     def __repr__(self):
         return repr(self.func)
 
@@ -41,6 +44,9 @@ class chain[I, O]:
         return self.func(results)
     
     def __rshift__[T](self, other:Callable[[O], T]):
+        return chain[I, T](self, other)
+    
+    def chain[T](self, other:Callable[[O], T]):
         return chain[I, T](self, other)
     
     def __repr__(self):
