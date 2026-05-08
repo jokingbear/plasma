@@ -39,7 +39,7 @@ class Representation(nx.DiGraph):
         return self.origin(node), self.args(node)
     
     def __repr__(self):
-        return Repr(self).run()
+        return Repr(self.root, self, self.type)()
 
 
 def _analyze(cls:type):

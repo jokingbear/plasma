@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from .constants import MODEL_FLAG, FIELD_FLAG
 from .field import Field, Composite, List
-from .repr import render_lines
+from .repr import Repr
 from .inquirer import is_list
 from .schemas import Schema
 
@@ -13,13 +13,10 @@ def model(cls):
     new_cls = register_field(cls)
     setattr(cls, MODEL_FLAG, True)
     setattr(cls, MODEL_FLAG, Schema(new_cls))
-    
-    def __repr__(self):
-        lines = []
-        render_lines(None, self, lines, '')
-        
-        return '\n'.join(lines)
 
+    def __repr__(self):
+        return Repr()(self)
+    
     new_cls.__repr__ = __repr__
     return dataclass(new_cls, repr=False)
 

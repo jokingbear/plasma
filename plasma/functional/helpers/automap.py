@@ -1,16 +1,16 @@
 from typing import Callable
-from ..pipes import AutoPipe, SequentialPipe
+from ..pipes import AutoPipe
 from ..signature import Signature
 
 
-class auto_map[O](AutoPipe[[tuple], O]):
+class auto_map[O]:
     
     def __init__(self, func:Callable[..., O]):
         super().__init__()
         assert not isinstance(func, auto_map)
         self.func = func
 
-    def run(self, inputs):
+    def __call__(self, inputs:tuple|list|dict[str, object]):
         if isinstance(inputs, (tuple, list)):
             return self.func(*inputs)
         elif isinstance(inputs, dict):

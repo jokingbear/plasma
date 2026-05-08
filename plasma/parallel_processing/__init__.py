@@ -1,4 +1,4 @@
-import multiprocessing as mp
 import threading
+import multiprocessing as mp
 
-from . import queues, communicators
+from . import communicators, queues

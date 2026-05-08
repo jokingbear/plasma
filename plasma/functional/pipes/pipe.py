@@ -1,12 +1,17 @@
-from typing import Callable
-from functools import wraps
-
+from warnings import deprecated
 from .chainable import Chain
 from .readable import ReadableClass
 from ..signature import Signature
 
 
+@deprecated(
+    'AutoPipe is deprecated, use __call__ combine with ReadableClass '
+    'for better python signature support'
+)
 class AutoPipe[**I, O](ReadableClass, Chain[I, O]):
+    
+    def __init__(self):
+        super().__init__()
 
     def run(self, *inputs, **kwargs) -> O:...
     

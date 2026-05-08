@@ -1,7 +1,8 @@
-from ...functional import State, chain
 from abc import abstractmethod
 from typing import Callable, Any
+
 from .handler import ExceptionHandler
+from ...functional import State, chain
 
 
 class Queue[T](State):
@@ -13,7 +14,6 @@ class Queue[T](State):
         self.num_runner = num_runner
         self._running = False
         self.__clean_state()
-        self._callback = None
         self._exception_handler = ExceptionHandler()
 
     def run(self):
@@ -31,14 +31,14 @@ class Queue[T](State):
     @abstractmethod
     def put(self, x):...
 
-    def register_callback(self, callback):
+    def register_callback(self, callback:Callable[[Any], Any]):
         assert not self._running,\
             'queue is already running, please release it to register new function'
         self._callback = callback
 
         return self
 
-    def chain(self, callback):
+    def chain(self, callback:Callable[[Any], Any]):
         assert not self._running, \
             'queue is already running, please release it to chain new function'
         self._callback = chain(self._callback, callback)

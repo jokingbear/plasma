@@ -1,24 +1,25 @@
 import os
 import torch.distributed as dist
 
-from ..bases import Trainer
 from torch.nn.parallel import DistributedDataParallel as DDP
+from ..bases import Trainer
 
 
 class DistributedTrainer(Trainer):
 
-    def __init__(self, rank, world_size, 
-                 master_addr='localhost', master_port='12355', backend='gloo'):
+    def __init__(
+            self, 
+            backend='nccl'
+        ):
         super().__init__()
 
+        rank = int(os.environ['RANK'])
+        world_size = int(os.environ['WORLD_SIZE'])
         self.rank = rank
         self.world_size = world_size
 
-        os.environ['MASTER_ADDR'] = master_addr
-        os.environ['MASTER_PORT'] = master_port
-        dist.init_process_group(backend, rank=rank, world_size=world_size)
+        dist.init_process_group(backend)
 
-    def run(self):
-        super().run()
-
+    def __call__(self):
+        super()()
         dist.destroy_process_group()

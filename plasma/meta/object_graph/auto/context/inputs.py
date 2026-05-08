@@ -1,11 +1,12 @@
-from ..context_graph import Node, ContextGraph
+from typing import Sequence
 from .require import Require
+from ..context_graph import Node, ContextGraph
 from .....functional.helpers.color_printer import Color
 
 
 class InputDict(dict):
     
-    def __init__(self, graph:ContextGraph, context, names:list[str]):
+    def __init__(self, graph:ContextGraph, context, names:Sequence[str]):
         super().__init__()
         
         inquirer = graph.inquirer

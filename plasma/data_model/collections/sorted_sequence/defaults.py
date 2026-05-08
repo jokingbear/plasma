@@ -1,4 +1,7 @@
-def identity[T](x:T) -> T:
+from ...abc import Comparable
+
+
+def identity[T:Comparable](x:T) -> T:
     return x
 
 

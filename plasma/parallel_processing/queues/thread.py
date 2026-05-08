@@ -32,7 +32,7 @@ class ThreadQueue(Queue[list[threading.Thread]]):
         self._queue.join()
         if self._state is not None:
             for _ in self._state:
-                self.put(Signal.CANCEL)
+                self._queue.put(Signal.CANCEL)
             self._queue.join()
 
             for t in self._state:
@@ -48,4 +48,8 @@ class ThreadQueue(Queue[list[threading.Thread]]):
         super().release()
 
     def is_alive(self):
-        return self.running and any(t.is_alive() for t in self._state)
+        return (
+            self.running 
+            and self._state is not None
+            and any(t.is_alive() for t in self._state)
+        )

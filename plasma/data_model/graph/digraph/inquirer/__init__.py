@@ -1,4 +1,7 @@
+import networkx as nx
+
 from .base import Inquirer
 from .nodes import Nodes as _Nodes
 
-NodeIterator = _Nodes[Inquirer]
+
+class NodeIterator[T:nx.DiGraph](_Nodes[Inquirer[T]]):...

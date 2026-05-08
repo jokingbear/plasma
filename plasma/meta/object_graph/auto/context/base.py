@@ -1,9 +1,10 @@
 import pandas as pd
 
-from .....functional import AutoPipe
-from ..context_graph import ContextGraph, Node
+from typing import Sequence
 from .render import render_context
 from .inputs import InputDict
+from ..context_graph import ContextGraph, Node
+from .....functional import AutoPipe
 
 
 class Context(AutoPipe):
@@ -15,7 +16,7 @@ class Context(AutoPipe):
         self.name = context
         self.graph = graph
     
-    def run(self, *inputs:str, **kwargs):
+    def run(self, *inputs:str, **kwargs) -> Sequence:
         assert len(inputs) > 0
         
         global_vars = {k: v for k, v in kwargs.items() if '.' not in k}
@@ -29,9 +30,12 @@ class Context(AutoPipe):
         for i in inputs:
             init_object(self.graph, (self.name, i), context_vars, global_vars, type_caches)
 
-        return pd.Series({i: context_vars[self.name][i] for i in inputs}).loc[list(inputs)]
+        return (
+            pd.Series({i: context_vars[self.name][i] for i in inputs})
+            .loc[list(inputs)].tolist()
+        )
 
-    def inputs(self, *names):
+    def inputs(self, *names:str):
         return InputDict(self.graph, self.name, names)
     
     def __repr__(self):
@@ -72,7 +76,7 @@ def init_object(graph:ContextGraph, node, context_vars:dict, global_vars:dict, t
                     child_context, child_name = m
                     args[child_name] = context_vars[child_context][child_name]
                 
-                obj = initiator(**args)
+                obj = initiator(**args) #type:ignore
                 type_cache[initiator] = obj
         
         context_vars[context][node_name] = obj

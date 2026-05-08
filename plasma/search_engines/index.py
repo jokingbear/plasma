@@ -1,7 +1,7 @@
 import pandas as pd
 import networkx as nx
 
-from typing import Callable, Iterable, NamedTuple
+from typing import Callable, Iterable, NamedTuple, Sequence
 from collections import defaultdict
 
 from ..data_model.collections import Stream
@@ -9,7 +9,7 @@ from ..data_model.collections import Stream
 
 class Index:
     
-    def __init__(self, data:tuple[str], tokenizer:Callable[[str], pd.DataFrame]):
+    def __init__(self, data:Sequence[str], tokenizer:Callable[[str], pd.DataFrame]):
         assert len(data) == len(set(data)), 'data must be unique'
         
         token2positions = defaultdict[str, dict[TokenPosition, tuple[int, int]]](dict)
@@ -36,7 +36,8 @@ class Index:
         positions = self._token2positions.get(token, {})
         return Stream(p.path_arg for p in positions)
     
-    def get_char_interval(self, token:str, path_arg:int, token_offset:int):
+    def get_char_interval(self, path_arg:int, token_offset:int):
+        token = self._paths[path_arg][token_offset]
         position = TokenPosition(path_arg, token_offset)
         return self._token2positions[token][position]
     

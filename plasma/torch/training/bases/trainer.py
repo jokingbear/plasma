@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from ....functional import AutoPipe
+from ....functional import ReadableClass
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from abc import abstractmethod
@@ -9,7 +9,7 @@ from torch.optim.optimizer import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
 
-class Trainer(AutoPipe):
+class Trainer(ReadableClass):
     rank = 0
     world_size = 1
     current_epoch = -1
@@ -17,18 +17,16 @@ class Trainer(AutoPipe):
     model:nn.Module
     optimizer:Optimizer
     scheduler:LRScheduler
-    scaler: torch.GradScaler = None
+    scaler:torch.GradScaler|None = None
 
     @abstractmethod
-    def init_train_loader(self) -> DataLoader:
-        pass
+    def init_train_loader(self) -> DataLoader:...
 
     def process_inputs(self, i, inputs):
         return inputs
     
     @abstractmethod
-    def forward(self, i:int, inputs) -> torch.Tensor:
-        pass
+    def forward(self, i:int, inputs) -> torch.Tensor:...
     
     def backward(self, i:int, inputs, objective_val:torch.Tensor):
         if objective_val is not None:
@@ -44,10 +42,9 @@ class Trainer(AutoPipe):
         else:
             self.optimizer.step()
     
-    def finalize_epoch(self):
-        pass
+    def finalize_epoch(self, epoch:int):...
 
-    def run(self):
+    def __call__(self):
         loader = self.init_train_loader()
         current_epoch = self.current_epoch + 1
         for e in tqdm(range(current_epoch, self.max_epoch), desc='epoch', disable=self.rank != 0):
@@ -59,7 +56,7 @@ class Trainer(AutoPipe):
                 except Exception as e:
                     self.on_exception(i, inputs, e)
 
-            self.finalize_epoch()
+            self.finalize_epoch(e)
     
     def _run_iteration(self, i, inputs):
         forward_val = self.forward(i, inputs)

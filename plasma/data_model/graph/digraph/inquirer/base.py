@@ -3,15 +3,11 @@ import networkx as nx
 from .nodes import Nodes
 from ..index import Index
 from ...object_inquirer import ObjectInquirer
-from .....functional import auto_map
 
 
 class Inquirer[T:nx.DiGraph]:
     
-    def __init__(self, 
-                graph:T, 
-                index:Index
-            ):
+    def __init__(self, graph:T, index:Index):
         
         self.graph = graph
         self._index = index
@@ -19,18 +15,8 @@ class Inquirer[T:nx.DiGraph]:
     def nodes(self, node_type:object|list=None, **index_map:object|list):
         assert node_type is not None or len(index_map) > 0, 'must at least use one index'
         
-        index_inquirer = self._index.inquirer
-        if node_type is not None:
-            index_map[None] = node_type
-
-        values_keys = sorted(
-                            ((idv, idk) for idk, idv in index_map.items()), 
-                            key=auto_map(index_inquirer.rank)
-                        )
-        nodes = index_inquirer.nodes(*values_keys[0])
-        for vk in values_keys[1:]:
-            nodes.intersection_update(index_inquirer.nodes(*vk))
-
+        index_map[self._index.type_index_name] = node_type 
+        nodes = self._index.inquirer.nodes(index_map)
         return Nodes(self._index, self, nodes)
     
     def successors(self, node_id, succ_type:object|list=None):

@@ -15,7 +15,7 @@ class Accumulator[D, A](State):
 
         process_queue = None if not process_base else mp.JoinableQueue()
         self._process_queue = process_queue
-        self._finished:int|ValueProxy[int] = 0 if not process_base else mp.Value('i', 0)
+        self._counter:int|ValueProxy[int] = 0 if not process_base else mp.Value('i', 0)
 
         self._marked_attributes.append('finished')
         self.total = total
@@ -31,7 +31,7 @@ class Accumulator[D, A](State):
         if data is not None or (data is None and not self.ignore_none):
             self.aggregate(data)
 
-        if self._process_queue is not None and self._finished.value == self.total:
+        if self._process_queue is not None and self._counter.value == self.total:
             self._process_queue.put(self._results)
         
         if self.finished == self.total:
@@ -41,11 +41,11 @@ class Accumulator[D, A](State):
 
     def wait(self, **tqdm_kwargs):
         with tqdm(total=self.total, **tqdm_kwargs) as prog:
-            n = self.finished
+            n = self._counter
             prog.update(n)
-            while self.finished != self.total:
+            while not self.finished:
                 time.sleep(self.sleep)
-                new_n = self.finished
+                new_n = self._counter
                 diff = new_n - n
                 n = new_n
                 prog.update(diff)
@@ -60,21 +60,22 @@ class Accumulator[D, A](State):
         return self.finalize()
 
     @property
-    def finished(self):
-        if isinstance(self._finished, int):
-            return self._finished
+    def finished(self) -> bool:
+        value = self._counter
+        if not isinstance(value, int):
+            value = self._counter.value
         
-        return self._finished.value
+        return value == self.total
 
     def release(self):
         self._results = []
-        self._finished = 0 if not self.process_base else mp.Value('i', 0)
+        self._counter = 0 if not self.process_base else mp.Value('i', 0)
 
     def _update_step(self):
-        if isinstance(self._finished, int):
-            self._finished += 1
+        if isinstance(self._counter, int):
+            self._counter += 1
         else:
-            self._finished.value += 1
+            self._counter.value += 1
 
     def aggregate(self, data:D):
         self._results.append(data)

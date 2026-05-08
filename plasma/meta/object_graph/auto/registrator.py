@@ -7,7 +7,7 @@ from warnings import warn
 
 class Registrator:
     
-    def __init__(self, graph:ContextGraph, context:Path, name:str, source:str):
+    def __init__(self, graph:ContextGraph, context:str, name:str, source:str):
         self.graph = graph
         
         inquirer = self.graph.inquirer
@@ -24,10 +24,18 @@ class Registrator:
         
         for param_info in signature(cls).parameters.values():
             child_id = self.node_id[0], param_info.name
-            if child_id not in self.graph:
-                node_type, value = (Node.LEAF, param_info.annotation) if param_info.default is param_info.empty \
-                                    else (Node.SINGLETON, param_info.default)
-
+            node_type, value = (
+                (Node.LEAF, param_info.annotation )
+                if param_info.default is param_info.empty \
+                else (Node.SINGLETON, param_info.default)
+            )
+            
+            add_condition = (
+                child_id not in self.graph 
+                or self.graph.inquirer.type(child_id) is Node.LEAF
+                and node_type is not Node.LEAF
+            )
+            if add_condition:
                 self.graph.add_node(child_id, type=node_type, value=value, source=self.source)
             self.graph.add_edge(self.node_id, child_id)
     

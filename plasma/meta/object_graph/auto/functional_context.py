@@ -1,10 +1,9 @@
 from .context import Context
 from .linker import Linker
 from .registrator import Registrator
-from ...utils import get_caller_frame
 from .factory import Factory
 from .delegator import Delegator
-from pathlib import Path
+from ...utils import get_caller_frame
 
 
 class FunctionalContext(Context):
@@ -26,7 +25,7 @@ class FunctionalContext(Context):
         self.linker.run_map(self, context, source, mappings)
         return self
     
-    def register(self, source:str=None, **blocks):
+    def register(self, source:str|None=None, **blocks):
         if source is None:
             caller = get_caller_frame()
             source = caller.filename
@@ -44,7 +43,7 @@ class FunctionalContext(Context):
 
         return self
 
-    def factory(self, name:str=None):
+    def factory(self, name:str=None):#type:ignore
         caller = get_caller_frame()
         name = name or 'factory'
         return FunctionalFactory(name, self.graph, self.name, caller.filename)

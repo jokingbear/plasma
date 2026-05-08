@@ -1,10 +1,12 @@
 import networkx as nx
 
-from .meta import Meta
-from .types import Node
 from inspect import _empty
+from rich.tree import Tree
+from rich.console import Console
 from typing import get_args
 from .inquirer import Inquirer
+from .meta import Meta
+from .types import Node
 
 
 def render(meta:Meta, graph:nx.DiGraph, inquirer:Inquirer):
@@ -12,25 +14,27 @@ def render(meta:Meta, graph:nx.DiGraph, inquirer:Inquirer):
     
     lines = []
     for context in sorted_contexts:
-        lines.append(f'{context}:')
-        lines.extend('\t' + l for l in render_context(graph, inquirer, context))
-        lines.append('=' * 50)
+        context_repr = render_context(graph, inquirer, context)
+        lines.append(context_repr)
     
     return '\n'.join(lines)
         
 
 def render_context(graph:nx.DiGraph, inquirer:Inquirer, context):
-    lines = []
     rendered = set()
+    root = Tree(context)
     for n in inquirer.node_names(context):
         node_id = context, n
         if inquirer.context_in_degree(node_id) == 0:
-            indent = ''
-            render_node(graph, inquirer, node_id, indent, lines, rendered)
-    return lines
+            render_node(graph, inquirer, node_id, root, rendered)
+    
+    console = Console(force_jupyter=False, force_terminal=True)
+    with console.capture() as capture:
+        console.print(root)
+    return capture.get()
 
 
-def render_node(graph:nx.DiGraph, inquirer:Inquirer, node, indent:str, lines:list, rendered:set):
+def render_node(graph:nx.DiGraph, inquirer:Inquirer, node, tree:Tree, rendered:set):
     _, node_name = node
     if isinstance(node_name, tuple):
         node_name = str(node_name[-1])
@@ -47,7 +51,7 @@ def render_node(graph:nx.DiGraph, inquirer:Inquirer, node, indent:str, lines:lis
     elif node_type is Node.FACTORY:
         node_name += ':Factory'
     elif node_type is Node.LEAF and value is not _empty:
-        node_name += f':{render_type(value)}'
+        node_name += f':{render_type(value)}' #type:ignore
     elif node_type is Node.SINGLETON:
         node_name += f'={render_type(type(value))}'
     elif node_type is Node.DELEGATE:
@@ -56,13 +60,11 @@ def render_node(graph:nx.DiGraph, inquirer:Inquirer, node, indent:str, lines:lis
         node_name += f' --> {linked_name}:{linked_context}'
         expand = False
 
-    line = f'{indent}|->{node_name}'
-    lines.append(line)
+    tree = tree.add(node_name)
     
     if expand:
         for m in graph.successors(node):
-            new_indent = indent + ' ' * 2
-            render_node(graph, inquirer, m, new_indent, lines, rendered)
+            render_node(graph, inquirer, m, tree, rendered)
 
     rendered.add(node)
 

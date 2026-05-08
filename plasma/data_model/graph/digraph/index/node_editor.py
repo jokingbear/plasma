@@ -1,10 +1,10 @@
 import networkx as nx
 
-from collections import defaultdict
-from typing import Callable
+from typing import Iterable, Protocol
+from .sub_indexes import NodeSubIndex
 
 
-class EdgeEditor:
+class EdgeEditor(Protocol):
     
     def add(self, node1, node2):...
     
@@ -13,35 +13,33 @@ class EdgeEditor:
 
 class NodeEditor:
     
-    def __init__(self,
-                graph:nx.DiGraph,
-                indices:dict[str, defaultdict[object, set]],
-                index_getter:Callable[[object], dict],
-                edge_editor:EdgeEditor
-            ):
-        self._graph = graph
+    def __init__(
+            self,
+            graph:nx.DiGraph,
+            indices:Iterable[NodeSubIndex],
+            edge_editor:EdgeEditor
+        ):
+        self.graph = graph
         self.indices = indices
-        self.index_getter = index_getter
         self.edge_editor = edge_editor
     
     def add(self, node_id):
-        index_name_values = self.index_getter(node_id)
-        for idxn, idxv in index_name_values.items():
-            self.indices[idxn][idxv].add(node_id)
+        for i in self.indices:
+            i.add(node_id)
         
-        for succ in self._graph.successors(node_id):
+        for succ in self.graph.successors(node_id):
             self.edge_editor.add(node_id, succ)
         
-        for pred in self._graph.predecessors(node_id):
+        for pred in self.graph.predecessors(node_id):
             self.edge_editor.add(pred, node_id)
     
     def delete(self, node_id):
-        index_name_values = self.index_getter(node_id)
-        for idxn, idxv in index_name_values.items():
-            self.indices[idxn][idxv].remove(node_id)
-        
-        for succ in self._graph.successors(node_id):
+        for i in self.indices:
+            i.delete(node_id)
+            
+        for succ in self.graph.successors(node_id):
             self.edge_editor.delete(node_id, succ)
         
-        for pred in self._graph.predecessors(node_id):
+        for pred in self.graph.predecessors(node_id):
             self.edge_editor.delete(pred, node_id)
+

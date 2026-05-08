@@ -2,9 +2,9 @@ import importlib
 import inspect
 import os
 
-from .module_hub import ModuleHub
 from pathlib import Path
 from .entry_factory import get_module_entry
+from .module_hub import ModuleHub
 
 
 def import_module(path, verbose=True):
@@ -62,7 +62,7 @@ def mass_import(pattern):
             continue
 
         module_name = p.name.replace('.py', '')
-        importlib.import_module(f'.{module_name}', caller.__package__)
+        importlib.import_module(f'.{module_name}', caller.__package__) # type:ignore
 
 
 def get_caller_frame():

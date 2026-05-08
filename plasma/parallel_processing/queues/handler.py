@@ -1,7 +1,7 @@
 import plasma.functional as F
 
 
-class ExceptionHandler[T](F.AutoPipe):
+class ExceptionHandler:
     
-    def run(self, data:T, e:Exception):
+    def __call__(self, data, e:Exception):
         raise e
