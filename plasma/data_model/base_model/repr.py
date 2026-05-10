@@ -2,7 +2,7 @@ from rich.tree import Tree
 from rich.console import Console
 from typing import Sequence
 
-from .inquirer import is_data_model
+from .utils import is_data_model
 
 
 class Repr:

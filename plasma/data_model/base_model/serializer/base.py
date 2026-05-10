@@ -2,7 +2,7 @@ from typing import Callable
 
 from .accessor import AccessorState
 from .struct import StructState
-from ..inquirer import is_data_model
+from ..utils import is_data_model
 from ..schemas import schema
 from ....functional import ReadableClass
 

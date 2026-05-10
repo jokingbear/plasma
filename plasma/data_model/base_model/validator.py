@@ -1,11 +1,11 @@
 from enum import Enum
 
-from .inquirer import is_data_model
+from .utils import is_data_model
 from .schemas import schema
-from ...functional import AutoPipe
+from ...functional import ReadableClass
 
 
-class Validator[T](AutoPipe[[T], None]):
+class Validator[T](ReadableClass):
     
     def __init__(self, cls:type[T]):
         super().__init__()
@@ -14,7 +14,7 @@ class Validator[T](AutoPipe[[T], None]):
         self.cls = cls
         self._schema = schema(cls)
     
-    def run(self, object:T):
+    def __call__(self, object:T):
         realization = self._schema.realize(object)
         error_fields = []
         notes = []

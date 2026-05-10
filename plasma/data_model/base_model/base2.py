@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from .constants import MODEL_FLAG, FIELD_FLAG
 from .field import Field, Composite, List
 from .repr import Repr
-from .inquirer import is_list
+from .utils import is_list
 from .schemas import Schema
 
 
