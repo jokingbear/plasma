@@ -1,6 +1,7 @@
 import torch
 import os
 import re
+import shutil
 
 from huggingface_hub import hf_hub_download, snapshot_download
 from ..meta import import_module
@@ -15,10 +16,12 @@ def download_module(repo_id: str, patterns=('*.py', '*.json', '*.yaml', '*.yml')
 
     if local_dir is None:
         local_dir = os.environ.get('HF_HOME', 'dependencies')
-
+    
     path = f'{local_dir}/{module_name}'
+    if os.path.exists(path):
+        shutil.rmtree(path)
+        
     path = snapshot_download(repo_id, allow_patterns=patterns, local_dir=path, revision=revision)
-
     return import_module(path)
 
 
@@ -56,6 +59,8 @@ def get_dir():
 
 def download_folder(repo_id_folder, local_dir=None, repo_type='dataset'):
     matched = re.search(r'(.*?):([^@]+)(@.+){0,1}', repo_id_folder)
+    assert matched is not None
+    
     repo_id = matched.group(1)
     folder_name = matched.group(2)
     revision = matched.group(3)
@@ -64,7 +69,10 @@ def download_folder(repo_id_folder, local_dir=None, repo_type='dataset'):
         local_dir = os.environ.get('HF_HOME', '.cache/')
     local_dir = f'{local_dir}/{repo_id}'
     
-    path = snapshot_download(repo_id, revision=revision, repo_type=repo_type, 
-                             allow_patterns=[folder_name], local_dir=local_dir)
+    path = snapshot_download(
+        repo_id, 
+        revision=revision, repo_type=repo_type, 
+        allow_patterns=[folder_name], local_dir=local_dir,
+    )
     path = path + '/' + re.sub(r'\*.*', '', folder_name)
     return path
