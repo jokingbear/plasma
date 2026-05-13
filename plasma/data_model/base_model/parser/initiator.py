@@ -2,7 +2,7 @@ from typing import Callable
 from networkx import DiGraph
 
 from ..schemas import Representation
-from ..inquirer import is_data_model
+from ..utils import is_data_model
 
 
 class Initator:

@@ -2,7 +2,7 @@ import networkx as nx
 import typing
 
 from .repr import Repr
-from ...inquirer import is_data_model
+from ...utils import is_data_model
 
 
 class Representation(nx.DiGraph):

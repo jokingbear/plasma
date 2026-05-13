@@ -1,5 +1,5 @@
 from ..field import Field, Composite, List
-from ..inquirer import is_data_model
+from ..utils import is_data_model
 
 
 class AccessorSchema(dict[str, Field]):

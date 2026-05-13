@@ -15,3 +15,17 @@ class partials[O]:
             return self.func(*self.args, *new_args, **self.kwargs, **new_kwargs)
         else:
             return self.func(*new_args, *self.args, **new_kwargs, **self.kwargs)
+
+
+def partial_left[O](func:Callable[..., O], *args, **kwargs):
+    def alt_func(*new_args, **new_kwargs):
+        return func(*args, *new_args, **kwargs, **new_kwargs)
+
+    return alt_func
+
+
+def partial_right[O](func:Callable[..., O], *args, **kwargs):
+    def alt_func(*new_args, **new_kwargs):
+        return func(*new_args, *args, **new_kwargs, **kwargs)
+
+    return alt_func

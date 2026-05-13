@@ -30,7 +30,7 @@ class Repr:
         
         type_str = origin.__name__
         if len(args) > 0:
-            type_str += f'[{','.join(a.__name__ for a in args)}]'
+            type_str += f'\[{','.join(a.__name__ for a in args)}]' #type:ignore
         key = '' if len(node) == 0 else node[-1]
         tree = tree.add(f'{key}:{type_str}')
 
