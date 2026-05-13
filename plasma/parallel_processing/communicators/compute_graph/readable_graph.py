@@ -54,10 +54,11 @@ class ReadableGraph(AdaptableGraph):
                 line = line + '...'
             
             line = f'[dodger_blue1]{line}[/dodger_blue1]'
-            rendered.add(key)
+
             
         tree = tree.add(line)
-        if '...' != line[-3:]:
+        if key not in rendered or isinstance(node_attributes['object'], Queue):
+            rendered.add(key)
             for n in structures.successors(key):
                 self._render_lines(n, tree, rendered)
 

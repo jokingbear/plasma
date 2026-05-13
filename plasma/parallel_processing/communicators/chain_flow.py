@@ -36,16 +36,20 @@ class BlockChainer:
         self.block = block
     
     def __rshift__(self, other:Callable|Distributor|Queue):
-        if isinstance(other, Distributor):
+        if isinstance(other, Queue):
+            self.flow.chain((self.block, other))
+            return QueueChainer(self.flow, other)
+        
+        elif id(other) in self.flow.graph:
+            self.flow.chain((self.block, other))
+            return BlockChainer(self.flow, other)
+        
+        elif isinstance(other, Distributor):
             assert not isinstance(self.block, Distributor), 'cannot chain consecutive distributor'
             qid, = self.flow.graph.predecessors(id(self.block))
             q = self.flow.graph.nodes[qid]['object']
             self.flow.chain((q, self.block, other))
             return self
-
-        elif isinstance(other, Queue):
-            self.flow.chain((self.block, other))
-            return QueueChainer(self.flow, other)
         
         else:
             self.flow.chain((self.block, other))
