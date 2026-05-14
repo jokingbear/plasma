@@ -1,5 +1,3 @@
-from enum import Enum
-
 from .utils import is_data_model
 from .schemas import schema
 from ...functional import ReadableClass
