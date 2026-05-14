@@ -1,26 +1,32 @@
 import networkx as nx
 
+from rich.tree import Tree
+from .....utils import rich_repr
+
 
 class Repr:
     
     def __init__(self, realization:nx.DiGraph):
-        self.lines = []
         self.graph = realization
     
-    def run(self):
-        self._iterate(self.graph.root)
-        lines = self.lines
-        lines[0] = lines[0].replace('|-> = ', '')
+    def __call__(self, root):
+        tree = Tree(self._render_node(root))
+        self._iterate(tree, root)
 
-        return '\n'.join(lines)
+        return rich_repr(tree)
     
-    def _iterate(self, node, indent=''):
-        if len(node) == 0:
-            key = ''
-        else:
-            key = str(node[-1])
-        value = self.graph.nodes[node]['value']              
-        self.lines.append(f'{indent}|->{key} = {type(value).__name__}')
-
+    def _iterate(self, tree:Tree, node):
         for s in self.graph.successors(node):
-            self._iterate(s, indent=indent + ' ' * 2)
+            srepr = self._render_node(s)
+            new_tree = tree.add(srepr)
+            self._iterate(new_tree, s)
+
+    def _render_node(self, node):
+        if self.graph.in_degree(node) == 0:
+          return type(self.graph.nodes[node]['value']).__name__
+      
+        elif self.graph.out_degree(node) == 0:
+            return f'{node[-1]}={self.graph.nodes[node]['value']}'
+        
+        else:
+            return f'{node[-1]}:{type(self.graph.nodes[node]['value']).__name__}'
