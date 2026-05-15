@@ -1,3 +1,4 @@
+from typing import Sequence
 from .utils import is_data_model
 from .schemas import schema
 from ...functional import ReadableClass
@@ -46,10 +47,10 @@ def _validate_object(field_name, field_type:type, obj):
 
 
 def _validate_list(field_name, args, field_value):    
-    if not isinstance(field_value, (tuple, list)):
+    if not isinstance(field_value, Sequence):
         yield f'{field_value} is not a list or tuple at {field_name}'
     elif len(args) > 0:
         for i, v in enumerate(field_value):
-            invalid_note = _validate_object(f'{field_name} item {i}', args[0], v)
+            invalid_note = _validate_object(f'{field_name}.{i}', args[0], v)
             if invalid_note is not None:
                 yield invalid_note
