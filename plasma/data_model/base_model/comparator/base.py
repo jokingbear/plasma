@@ -14,7 +14,6 @@ Scorer = Callable[[Any, Any], float|bool]
 class Comparator:
     
     def __init__(self):
-        self._sub_comparators = dict[tuple, Scorer]()
         self._primitive_scorers = dict[type, Scorer]([
             (str, score_str),
         ])
@@ -79,3 +78,6 @@ class Comparator:
                 hmean([max(t.score, 0.1) for t in traces]),
                 traces
             )
+
+    def customize[T](self, t:type[T], scorer:Callable[[T, T], bool|float]):
+        self._primitive_scorers[t] = scorer

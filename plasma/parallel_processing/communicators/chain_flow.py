@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, overload
 
 from .async_flow import AsyncFlow
 from .distributors import Distributor
@@ -34,6 +34,12 @@ class BlockChainer:
     def __init__(self, flow:AsyncFlow, block:Callable|Distributor):
         self.flow = flow
         self.block = block
+    
+    @overload
+    def __rshift__(self, other:Queue) -> QueueChainer:...
+
+    @overload
+    def __rshift__(self, other:Callable|Distributor) -> "BlockChainer":...
     
     def __rshift__(self, other:Callable|Distributor|Queue):
         if isinstance(other, Queue):
