@@ -1,26 +1,28 @@
+from enum import Enum
+
 from typing import Sequence
 from .utils import is_data_model
 from .schemas import schema
 from ...functional import ReadableClass
 
 
-class Validator[T](ReadableClass):
+class StrictValidator[T](ReadableClass):
     
     def __init__(self, cls:type[T]):
         super().__init__()
         assert is_data_model(cls), 'only support data model validation'
         
         self.cls = cls
-        self._schema = schema(cls)
+        self.schema = schema(cls)
     
     def __call__(self, object:T):
-        realization = self._schema.realize(object)
+        realization = self.schema.realize(object)
         error_fields = []
         notes = []
         for e in realization.endpoints:
             value = realization.value(e)
-            rep = self._schema.real_to_rep(e)
-            origin, args = self._schema.rep.type(rep)
+            rep = self.schema.real_to_rep(e)
+            origin, args = self.schema.rep.type(rep)
             
             field_name = '.'.join(str(a) for a in e)
             if issubclass(origin, (tuple, list)):
@@ -47,10 +49,10 @@ def _validate_object(field_name, field_type:type, obj):
 
 
 def _validate_list(field_name, args, field_value):    
-    if not isinstance(field_value, Sequence):
+    if not isinstance(field_value, (tuple, list)):
         yield f'{field_value} is not a list or tuple at {field_name}'
     elif len(args) > 0:
         for i, v in enumerate(field_value):
-            invalid_note = _validate_object(f'{field_name}.{i}', args[0], v)
+            invalid_note = _validate_object(f'{field_name} item {i}', args[0], v)
             if invalid_note is not None:
                 yield invalid_note

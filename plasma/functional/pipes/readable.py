@@ -1,7 +1,32 @@
+from rich.tree import Tree
+
+from ...utils import rich_repr
+
+
 class ReadableClass:
     
     def __init__(self):
         self._marked_attributes = []
+    
+    def mark(self, attr:str):
+        assert hasattr(self, attr), f'{type(self)} does not have attribute {attr}'
+        self._marked_attributes.append(attr)
+        return self
+    
+    def _tree(self):
+        tree = Tree(type(self).__name__)
+        
+        for a in self._marked_attributes:
+            val = getattr(self, a)
+            
+            if isinstance(val, ReadableClass):
+                child = val._tree()
+            else:
+                child = repr(val)
+            
+            tree.add(child)
+        
+        return tree
 
     def __setattr__(self, key:str, value):
         if key[0] != '_' and key not in self._marked_attributes:
@@ -10,18 +35,4 @@ class ReadableClass:
         super().__setattr__(key, value)
 
     def __repr__(self):
-        lines = [f'{type(self).__name__}(']
-        indent = ' ' * 2
-        for attr in self._marked_attributes:
-            val = getattr(self, attr)
-            val_rep = repr(val)
-            val_lines = val_rep.split('\n')
-            val_lines[0] = f'{attr}={val_lines[0]}'
-            val_lines[-1] += ','
-            lines.extend(indent + vl for vl in val_lines)
-        
-        if len(lines) == 1:
-            lines[-1] += ')'
-        else:
-            lines.append(')')
-        return '\n'.join(lines)
+        return rich_repr(self._tree())

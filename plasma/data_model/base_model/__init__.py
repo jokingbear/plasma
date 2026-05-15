@@ -5,3 +5,4 @@ from .validator import Validator
 from .utils import is_data_model, get_fields
 from .serializer import Serializer, SerializationProvider
 from .schemas import schema
+from .comparator import Comparator
