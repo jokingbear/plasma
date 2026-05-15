@@ -37,6 +37,9 @@ class Realization(nx.DiGraph):
                 self.__update(rep, s, next_real_node, next_value, expand_none)
 
     def value(self, node):
+        if node not in self:
+            return None
+
         return self.nodes[node]['value']
     
     @cached_property
