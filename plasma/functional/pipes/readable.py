@@ -18,11 +18,7 @@ class ReadableClass:
         
         for a in self._marked_attributes:
             val = getattr(self, a)
-            
-            if isinstance(val, ReadableClass):
-                child = val._tree()
-            else:
-                child = repr(val)
+            child = repr(val).strip()
             
             tree.add(f'{a}={child}')
         
