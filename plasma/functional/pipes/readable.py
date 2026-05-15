@@ -24,7 +24,7 @@ class ReadableClass:
             else:
                 child = repr(val)
             
-            tree.add(child)
+            tree.add(f'{a}={child}')
         
         return tree
 
