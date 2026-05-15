@@ -6,7 +6,6 @@ from rich.tree import Tree
 from typing import get_args
 
 from ..context_graph import ContextGraph, Node
-from .....functional.helpers.color_printer import Color
 
 
 def render_context(graph:ContextGraph, context):
