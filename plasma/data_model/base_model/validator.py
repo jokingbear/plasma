@@ -23,7 +23,7 @@ class Validator[T](ReadableClass):
             origin, args = self._schema.rep.type(rep)
             
             field_name = '.'.join(str(a) for a in e)
-            if issubclass(origin, (tuple, list)):
+            if issubclass(origin, tuple|list):
                 enotes = [*_validate_list(field_name, args, value)]
                 if len(enotes) > 0:
                     error_fields.append(field_name)
