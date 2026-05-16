@@ -20,7 +20,7 @@ class Repr:
         if is_data_model(obj):
             tree = tree.add(f'{field_name}={type(obj).__name__}')
 
-            for a in obj.__annotations__:
+            for a in type(obj).__annotations__:
                 self._render_tree(a, getattr(obj, a), tree)
         elif isinstance(obj, (tuple, list)):
             tree = tree.add(f'{field_name}={type(obj).__name__}')
