@@ -13,19 +13,15 @@ class ReadableClass:
         self._marked_attributes.append(attr)
         return self
     
-    def _tree(self, attr=''):
-        prefix = f'{attr}=' if len(attr) > 0 else attr
-        tree = Tree(f'{prefix}{type(self).__name__}')
-        
+    def _tree(self, tree:Tree):
         for a in self._marked_attributes:
             val = getattr(self, a)
             
             if isinstance(val, ReadableClass):
-                child = val._tree(a)
+                val._tree(tree.add(f'{a}={type(val).__name__}'))
             else:
                 child = f'{a}={repr(val).strip()}'
-            
-            tree.add(child)
+                tree.add(child)
         
         return tree
 
@@ -36,4 +32,5 @@ class ReadableClass:
         super().__setattr__(key, value)
 
     def __repr__(self):
-        return rich_repr(self._tree()).strip()
+        tree = Tree(type(self).__name__)
+        return rich_repr(self._tree(tree))
