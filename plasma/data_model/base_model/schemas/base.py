@@ -1,3 +1,4 @@
+from functools import cached_property
 from .representation import Representation
 from .realization import Realization
 
@@ -6,6 +7,10 @@ class Schema:
     
     def __init__(self, cls:type):
         self.rep = Representation(cls)
+        
+    @cached_property
+    def fields(self):
+        return [n for n in self.rep.nodes if self.rep.out_degree(n) == 0]
 
     def realize(self, obj, expand_none=False):
         return Realization(self.rep, obj, expand_none)
