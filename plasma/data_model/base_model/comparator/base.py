@@ -2,7 +2,7 @@ import itertools
 
 from scipy.stats import hmean
 from typing import Any, Callable, Sequence
-from .traces import StandardTrace, SummaryTrace, Summary
+from .traces import StandardTrace, SummaryTrace, Summary, KeyTrace, BatchSummary
 from .scorers import score_generic, score_str
 from ..utils import is_data_model
 from ..schemas import schema as schema_getter
@@ -18,7 +18,19 @@ class Comparator:
             (str, score_str),
         ])
     
-    def __call__(self, target:Any, ref:Any):
+    def compare_batch[T, R](self, targets:dict[T, Any], refs:dict[R, Any]):
+        assert len(targets) == len(refs)
+        
+        metrics = (
+            ZippedStream((t, targets[t], r, refs[r]) for t, r in zip(targets, refs))
+            .select(lambda t, td, r, rd: (t, r, self.compare(td, rd)))
+            .zip_unwind(lambda t, r, s: ((t, r, field, trace) for field, trace in s.traces.items()))
+            .groupby(lambda _, __, f, ___: f, lambda t, r, _, tr: KeyTrace(t, r, tr))
+        )
+        
+        return BatchSummary(metrics)
+    
+    def compare(self, target:Any, ref:Any):
         assert is_data_model(target)
         assert is_data_model(ref)
         assert type(target) is type(ref)
@@ -71,7 +83,7 @@ class Comparator:
         ) 
 
     def _combine_trace(self, traces:Sequence[StandardTrace|SummaryTrace]):
-        if len(traces) == 0:
+        if len(traces) == 1:
             return traces[0]
         else:
             return SummaryTrace(
