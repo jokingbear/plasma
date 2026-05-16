@@ -19,7 +19,7 @@ class Representation(nx.DiGraph):
         origin, args = _analyze(cls)
         self.add_node(accessor, origin=origin, args=args)
         
-        if issubclass(origin, (list, tuple)) and len(args) > 0 and is_data_model(args[0]):
+        if issubclass(origin, typing.Sequence) and len(args) > 0 and is_data_model(args[0]):
             new_accessor = (*accessor, '@idx')
             self.add_edge(accessor, new_accessor)
             self.__update(new_accessor, args[0])
