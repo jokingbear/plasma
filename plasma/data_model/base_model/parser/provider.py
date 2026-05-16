@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Any
 
 from .base import Parser
 from ....functional import AutoPipe
@@ -14,6 +14,6 @@ class ParsingProvider(AutoPipe):
     def run[T](self, cls:type[T]):
         return Parser[T](cls, self.type_parser)
 
-    def register[T](self, cls:type[T], parser:Callable[[object], T]):
+    def register[T](self, cls:type[T], parser:Callable[[Any], T|None]):
         self.type_parser[cls] = parser
         return self
