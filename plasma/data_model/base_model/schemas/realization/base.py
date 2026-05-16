@@ -44,9 +44,7 @@ class Realization(nx.DiGraph):
     
     @cached_property
     def endpoints(self):
-        for n in self:
-            if self.out_degree(n) == 0:
-                yield n
+        return [n for n in self if self.out_degree(n) == 0]
 
     def mutate(self, node, value):
         self.add_node(node, value=value)

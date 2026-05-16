@@ -31,6 +31,7 @@ class Parser[T](ReadableClass):
         return Initator(self._schema.rep, graph, self._schema.real_to_rep).run()
 
     def _parse(self, graph:nx.DiGraph):
+        exceptions = []
         for n in graph:
             if graph.out_degree(n) == 0: 
                 value = graph.nodes[n]['value']
@@ -41,8 +42,10 @@ class Parser[T](ReadableClass):
                 try:
                     value = parser(value)
                 except Exception as e:
-                    error = AttributeError(value)
                     accessor = '.'.join(str(a) for a in n)
-                    error.add_note(f'error parsing {value} at {accessor}')
+                    e.add_note(f'error parsing {value} at {accessor}')
                 
                 graph.add_node(n, value=value)
+        
+        if len(exceptions) > 0:
+            raise ExceptionGroup('error parsing data', exceptions)
