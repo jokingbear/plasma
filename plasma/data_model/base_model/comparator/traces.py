@@ -120,11 +120,11 @@ class BatchSummary:
             f: float(np.mean([t.trace.score for t in traces])) 
             for f, traces in field_dict.items()
         }
+        self.overall = hmean([max(s, 0.1) for s in self.scores.values()])
         self.fields = {f: FieldSummary(f, traces) for f, traces in field_dict.items()}
     
     def _tree(self, tree:Tree):
-        overall = hmean([*self.scores.values()])
-        tree.add(f'overall_score={overall:.04f}')
+        tree.add(f'overall_score={self.overall:.04f}')
         
         details = tree.add('fields')
         for field, score in sorted(self.scores.items(), key=lambda fs: fs[1]):
