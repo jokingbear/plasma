@@ -14,7 +14,7 @@ class DualMap[S:Hashable, T:Hashable]:
         self._st_map = source_target_map
         self._ts_map = target_source_map
     
-    def get_sources(self, target:T, default:S|Literal['empty']=None) -> Sequence[S|None]:
+    def get_sources(self, target:T, default:S|Literal['empty']|None=None) -> Sequence[S|None]:
         if default == 'empty':
             defaults = []
         else:
@@ -22,7 +22,7 @@ class DualMap[S:Hashable, T:Hashable]:
 
         return tuple(self._ts_map.get(target, defaults))
     
-    def get_targets(self, source:S, default:T|Literal['empty']=None) -> Sequence[T|None]:
+    def get_targets(self, source:S, default:T|Literal['empty']|None=None) -> Sequence[T|None]:
         if default == 'empty':
             defaults = []
         else:
