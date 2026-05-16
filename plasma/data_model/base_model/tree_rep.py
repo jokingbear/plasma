@@ -3,7 +3,7 @@ from .utils import is_data_model
 from ...utils import rich_repr
 
 
-def tree_repr[T](cls:type[T]):
+def tree_repr[T](cls:type[T]) -> type[T]:
     def _tree(self:T, tree:Tree):
         for a in cls.__annotations__:
             _render_tree(a, getattr(self, a), tree)
@@ -12,9 +12,11 @@ def tree_repr[T](cls:type[T]):
     
     def __repr__(self:T):
         tree = Tree(type(self).__name__)
-        return rich_repr(_tree(self, tree))
+        return rich_repr(cls._tree(self, tree)) # type:ignore - python limit
     
-    cls._tree = _tree # type:ignore
+    if not hasattr(cls, '_tree'):
+        cls._tree = _tree # type:ignore
+    
     cls.__repr__ = __repr__
     return cls
 
