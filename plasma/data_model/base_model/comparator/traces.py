@@ -93,7 +93,7 @@ class FieldSummary:
     
     def __init__(self, name:str, traces:Sequence[KeyTrace]):
         self.name = name
-        self.traces = traces
+        self.traces = sorted(traces, key=lambda t:t.trace.score)
         self.score = float(np.mean([t.trace.score for t in traces])) 
     
     def _tree(self, tree:Tree):
