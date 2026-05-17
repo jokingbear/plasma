@@ -101,7 +101,7 @@ class FieldSummary:
         if topk < 0:
             topk = len(self.traces)
 
-        return rich_repr(self._tree(tree, topk))
+        print(rich_repr(self._tree(tree, topk)))
     
     def _tree(self, tree:Tree, topk:int=5):
         tree = Tree(self.name)
