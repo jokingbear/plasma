@@ -6,7 +6,7 @@ from typing import Any, Sequence, Self, Iterable
 from rich.tree import Tree
 from .utils import format_score
 from ..tree_rep import tree_repr
-from ....utils import Formatter
+from ....utils import Formatter, rich_repr
 
 
 @tree_repr
@@ -96,15 +96,22 @@ class FieldSummary:
         self.traces = sorted(traces, key=lambda t:t.trace.score)
         self.score = float(np.mean([t.trace.score for t in traces])) 
     
-    def _tree(self, tree:Tree):
+    def inspect(self, topk:int):
+        tree = Tree(type(self).__name__)
+        if topk < 0:
+            topk = len(self.traces)
+
+        return rich_repr(self._tree(tree, topk))
+    
+    def _tree(self, tree:Tree, topk:int=5):
         tree = Tree(self.name)
         tree.add(f'score={self.score:.04f}')
         
         traces = tree.add('traces')
-        for t in sorted(self.traces, key=lambda t: t.trace.score)[:5]:
+        for t in sorted(self.traces, key=lambda t: t.trace.score)[:topk]:
             t._tree(traces)
 
-        if len(self.traces) > 5:
+        if len(self.traces) > topk:
             traces.add('...')
         
         return tree
