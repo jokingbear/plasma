@@ -12,13 +12,13 @@ from ....utils import Formatter, rich_repr
 @tree_repr
 @dataclass(repr=False)
 class StandardTrace:
-    target:Any
-    ref:Any
+    subject:Any
+    reference:Any
     score:float
     
     def _tree(self, tree:Tree):
-        tree.add(Formatter.BLUE(f'target={self.target}'))
-        tree.add(Formatter.GREEN(f'ref={self.ref}'))
+        tree.add(Formatter.BLUE(f'subject={self.subject}'))
+        tree.add(Formatter.GREEN(f'reference={self.reference}'))
         tree.add(format_score(f'score={self.score:.04f}', self.score))
         return tree
 
@@ -76,13 +76,13 @@ class Summary:
 @tree_repr
 @dataclass
 class KeyTrace[T, R]:
-    target_key:T
-    ref_key:R
+    subject_key:T
+    reference_key:R
     trace:StandardTrace|SummaryTrace
 
     def _tree(self, tree:Tree):
-        tree.add(Formatter.BLUE(f'target={self.target_key}'))
-        tree.add(Formatter.GREEN(f'ref={self.ref_key}'))
+        tree.add(Formatter.BLUE(f'subject={self.subject_key}'))
+        tree.add(Formatter.GREEN(f'reference={self.reference_key}'))
         self.trace._tree(tree.add('trace='))
         
         return tree
