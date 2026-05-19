@@ -1,6 +1,5 @@
 from .helpers import (
-    partials, auto_map, chain,
-    partial_left, partial_right
+    partials, chain
 )
 from .pipes import (
     AutoPipe, Signature, Identity,
@@ -8,4 +7,8 @@ from .pipes import (
     State, Wrapper, ReadableClass, Chain
 ) 
 from . import decorators
-from .chainer import pipe
+# from .chainer import pipe
+from .chainer2 import (
+    pipe, auto_map, 
+    partial_left, partial_right
+)

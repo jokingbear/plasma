@@ -93,3 +93,4 @@ class Comparator:
 
     def customize[T](self, t:type[T], scorer:Callable[[T, T], bool|float]):
         self._primitive_scorers[t] = scorer
+        return self
