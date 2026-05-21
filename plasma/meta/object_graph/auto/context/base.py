@@ -1,13 +1,10 @@
-import pandas as pd
-
-from typing import Sequence
+from typing import Any
 from .render import render_context
 from .inputs import InputDict
 from ..context_graph import ContextGraph, Node
-from .....functional import AutoPipe
 
 
-class Context(AutoPipe):
+class Context:
     
     def __init__(self, graph:ContextGraph, context:str):
         super().__init__()
@@ -16,7 +13,7 @@ class Context(AutoPipe):
         self.name = context
         self.graph = graph
     
-    def run(self, *inputs:str, **kwargs) -> Sequence:
+    def run(self, *inputs:str, **kwargs):
         assert len(inputs) > 0
         
         global_vars = {k: v for k, v in kwargs.items() if '.' not in k}
@@ -30,11 +27,14 @@ class Context(AutoPipe):
         for i in inputs:
             init_object(self.graph, (self.name, i), context_vars, global_vars, type_caches)
 
-        return (
-            pd.Series({i: context_vars[self.name][i] for i in inputs})
-            .loc[list(inputs)].tolist()
-        )
+        return [
+            context_vars[self.name][i]
+            for i in inputs
+        ]
 
+    def __call__(self, *args: Any, **kwds: Any):
+        return self.run(*args, **kwds)
+    
     def inputs(self, *names:str):
         return InputDict(self.graph, self.name, names)
     
