@@ -33,7 +33,15 @@ class Serializer[T](ReadableClass):
         
         for k in r.endpoints:
             value = r.value(k)
-            serializer = self._type_serializer.get(type(value), lambda v:v)
+            rep = self._schema.real_to_rep(k)
+            rep_type = self._schema.rep.raw(rep)
+            
+            serializer_key = (
+                type(value) if type(value) in self._type_serializer
+                else rep_type
+            )
+            serializer = self._type_serializer.get(serializer_key, lambda v:v)
+            
             try:
                 value = serializer(value)
             except Exception as e:
