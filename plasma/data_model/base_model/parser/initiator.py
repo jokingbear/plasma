@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Sequence
 from networkx import DiGraph
 
 from ..schemas import Representation
@@ -30,6 +30,8 @@ class Initator:
         
         rep_node = self.real_to_rep(real_node)
         origin, args = self.rep.type(rep_node)
+        if rep_node == ('party_admission', 'introducers'):
+            print(rep_node, origin)
 
         if is_data_model(origin):
             args = {}
@@ -43,7 +45,7 @@ class Initator:
             
             value = origin(**args)
             self._state[real_node] = value
-        elif issubclass(origin, (list, tuple)) and len(args) > 0 and is_data_model(args[0]):
+        elif issubclass(origin, Sequence) and len(args) > 0 and is_data_model(args[0]):
             value = []
             for s in self.data.successors(real_node):
                 self._iterate(s)
