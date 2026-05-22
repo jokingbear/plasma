@@ -1,19 +1,20 @@
-from typing import Callable
-
+from typing import Callable, Any
 from .base import Serializer
-from ....functional import AutoPipe
 
 
-class SerializationProvider(AutoPipe):
+class SerializationProvider:
     
     def __init__(self):
         super().__init__()
         
-        self.type_serializer = dict[type, Callable[[object], object]]()
+        self.type_serializer = dict[type, Callable[[Any], Any]]()
     
     def run[T](self, cls:type[T], expand_none=False):
         return Serializer[T](cls, self.type_serializer, expand_none)
+    
+    def __call__[T](self, cls:type[T], expand_none=False):
+        return self.run(cls, expand_none)
 
-    def register[T](self, cls:T, serializer:Callable[[T], object]):
+    def register[T](self, cls:type[T], serializer:Callable[[T], object]):
         self.type_serializer[cls] = serializer
         return self
