@@ -50,7 +50,7 @@ class auto_map[O](pipe[tuple|list|dict[str, object], O]):
     def __init__(self, func:Callable[..., O]):
         super().__init__(func)
 
-    def __call__(self, inputs:tuple|list|dict[str, object]):
+    def __call__(self, inputs:tuple|list|dict[str, object]) -> O:
         if isinstance(inputs, (tuple, list)):
             return self.func(*inputs)
         elif isinstance(inputs, dict):
