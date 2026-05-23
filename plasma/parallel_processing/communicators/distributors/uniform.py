@@ -1,7 +1,7 @@
 from .base import Distributor
 
 
-class UniformDistributor(Distributor):
+class UniformDistributor[T](Distributor[T]):
 
     def run(self, data, *queues, **named_queues):
         for q in queues:

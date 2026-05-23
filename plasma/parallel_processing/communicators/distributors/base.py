@@ -1,13 +1,9 @@
-from ....functional import AutoPipe
 from ...queues import Queue
-from abc import abstractmethod
 
 
-class Distributor(AutoPipe):
+class Distributor[T]:
 
-    @abstractmethod
-    def run(self, data, *queues:Queue, **named_queues:Queue):
-        pass
+    def run(self, data:T, *queues:Queue, **named_queues:Queue):...
 
     def __repr__(self):
         return f'{type(self)}'
