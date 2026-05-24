@@ -30,8 +30,6 @@ class Initator:
         
         rep_node = self.real_to_rep(real_node)
         origin, args = self.rep.type(rep_node)
-        if rep_node == ('party_admission', 'introducers'):
-            print(rep_node, origin)
 
         if is_data_model(origin):
             args = {}
