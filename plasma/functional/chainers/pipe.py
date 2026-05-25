@@ -62,18 +62,34 @@ class pipe[I, O]:
 class auto_map[O](pipe[Any, O]):
     
     def __init__(self, func:Callable[..., O]):
-        super().__init__(func)
+        if not isinstance(func, pipe):
+            func = pipe(func)
+            
+        self.pipe = func
 
     def __call__(self, inputs:Any) -> O:
+        funcs = [*self.pipe.func_stack()][::-1]
+        
         if isinstance(inputs, (tuple, list)):
-            return self.func(*inputs)
+            results = funcs[1](*inputs)
         elif isinstance(inputs, dict):
-            return self.func(**inputs) #type:ignore
-        elif inputs is None:
-            return self.func() #type:ignore
+            results = funcs[1](**inputs) #type:ignore
         else:
-            return self.func(inputs)
+            results = funcs[1](inputs)
+        
+        for f in funcs[2:]:
+            results = f(results)
+        return results
+    
+    def chain[T](self, other:Callable[[O], T]):
+        return auto_map(self.pipe.chain(other))
 
+    def partial_left[O1](self, func:Callable[..., O1], *args, **kwargs):
+        return auto_map(self.pipe.partial_left(func, *args, **kwargs))
+
+    def partial_right[O1](self, func:Callable[..., O1], *args, **kwargs):
+        return auto_map(self.pipe.partial_right(func, *args, **kwargs))
+    
 
 class none_propagator[I, O]:
     
