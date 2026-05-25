@@ -14,8 +14,7 @@ class TransferQueue(Queue[Thread]):
         self._receiver = JoinableQueue(qsize)
         self._qsize = qsize
 
-    @decorators.propagate(Signal.IGNORE)
-    def put(self, x):
+    def _put(self, x):
         self._receiver.put(x, block=True)
 
     def _init_state(self):

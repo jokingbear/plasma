@@ -58,9 +58,8 @@ class ProcessQueue(Queue[_State]):
         state.run()
         return state
 
-    def put(self, x):
-        if x is not Signal.IGNORE:
-            self._queue.put(x, block=True, timeout=self.timeout)
+    def _put(self, x):
+        self._queue.put(x, block=True, timeout=self.timeout)
     
     def release(self):
         self._queue.join()
@@ -93,7 +92,10 @@ def _transfer_exception(error_queue:mp.JoinableQueue, data, e:Exception):
     error_queue.put((data, TraceableException(exception=e)))
 
 
-def _handle_exception(error_queue:mp.JoinableQueue, exception_handler:Callable[[Any, Exception]]):
+def _handle_exception(
+        error_queue:mp.JoinableQueue, 
+        exception_handler:Callable[[Any, Exception], None]
+    ):
     signal = error_queue.get()
     if signal is Signal.CANCEL:
         return

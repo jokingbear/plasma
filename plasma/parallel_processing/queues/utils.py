@@ -6,8 +6,8 @@ from .handler import ExceptionHandler
 
 def internal_run(
         queue:Queue, 
-        processor:Callable[[Any]], 
-        exception_handler:Callable[[Any, Exception]]
+        processor:Callable[[Any], None], 
+        exception_handler:Callable[[Any, Exception], None]
     ):
     is_not_cancelled = True
     exception_handler = exception_handler or ExceptionHandler()

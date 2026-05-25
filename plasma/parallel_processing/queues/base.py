@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import Callable, Any
 
+from .signals import Signal
 from .handler import ExceptionHandler
 from ...functional import ReadableClass, pipe
 
@@ -25,11 +26,13 @@ class Queue[T](ReadableClass):
             self._state = self._init_state()
         return self
         
-    @abstractmethod
     def _init_state(self) -> T:...
 
-    @abstractmethod
-    def put(self, x):...
+    def put(self, x):
+        if x is not Signal.IGNORE:
+            self._put(x)
+
+    def _put(self, x):...
 
     def register_callback(self, callback:Callable[[Any], Any]):
         assert not self._running,\
