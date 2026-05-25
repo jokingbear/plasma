@@ -6,6 +6,7 @@ from .signals import Signal
 from .utils import internal_run
 from .base import Queue
 from ...functional import partial_left
+from ...logging import TraceableException
 
 
 class _State(NamedTuple):
@@ -26,6 +27,7 @@ class _State(NamedTuple):
         
         self.error_queue.put(Signal.CANCEL)
         self.error_catcher.join()
+        self.error_queue.close()
     
 
 class ProcessQueue(Queue[_State]):
@@ -63,6 +65,9 @@ class ProcessQueue(Queue[_State]):
     def release(self):
         self._queue.join()
         if self._state is not None:
+            for _ in self._state.processes:
+                self._queue.put(Signal.CANCEL)
+
             self._state.release()
         
         old_queue = self._queue
@@ -71,6 +76,8 @@ class ProcessQueue(Queue[_State]):
         new_queue = mp.JoinableQueue(self._qsize)
         self._queue = new_queue
         del old_queue
+        state = self._state
+        del state
         
         super().release()
 
@@ -83,8 +90,7 @@ class ProcessQueue(Queue[_State]):
 
 
 def _transfer_exception(error_queue:mp.JoinableQueue, data, e:Exception):
-    error_queue.put((data, e))
-    raise e
+    error_queue.put((data, TraceableException(exception=e)))
 
 
 def _handle_exception(error_queue:mp.JoinableQueue, exception_handler:Callable[[Any, Exception]]):
@@ -93,4 +99,8 @@ def _handle_exception(error_queue:mp.JoinableQueue, exception_handler:Callable[[
         return
     
     data, exception = signal
-    exception_handler(data, exception)
+    exception:TraceableException
+    
+    original = exception.original 
+    original.add_note(exception.info) #type:ignore
+    exception_handler(data, original) #type:ignore
