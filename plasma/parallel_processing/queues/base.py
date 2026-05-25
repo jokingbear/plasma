@@ -65,5 +65,5 @@ class Queue[T](ReadableClass):
     def running(self):
         return self._running
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         return False
