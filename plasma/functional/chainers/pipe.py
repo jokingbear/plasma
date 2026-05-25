@@ -1,10 +1,13 @@
 from typing import Any, Callable
-from .identity import identity
+
+
+def identity(x):
+    return x
 
 
 class pipe[I, O]:
     
-    def __init__[T](self, func:Callable[[T], O], prev:Callable[[I], T]=identity):
+    def __init__(self, func:Callable[[Any], O], prev:Callable[[I], Any]=identity):
         self.prev = prev
         self.func = func
 
@@ -40,44 +43,60 @@ class pipe[I, O]:
             return func(a, *args, **kwargs)
         
         return pipe(alt_func, self)
-
+    
+    def automap[O1](self, func:Callable[..., O1]):
+        return self.chain(auto_map(func))
+    
     def __rshift__[T](self, other:Callable[[O], T]):
         return self.chain(other)
 
+    def func_stack(self):
+        p = self
+        while isinstance(p, pipe):
+            yield p.func
+            p = p.prev
+        
+        yield p
+            
 
-class auto_map[O](pipe[tuple|list|dict[str, object], O]):
+class auto_map[O](pipe[Any, O]):
     
     def __init__(self, func:Callable[..., O]):
         super().__init__(func)
 
-    def __call__(self, inputs:tuple|list|dict[str, object]) -> O:
+    def __call__(self, inputs:Any) -> O:
         if isinstance(inputs, (tuple, list)):
             return self.func(*inputs)
         elif isinstance(inputs, dict):
             return self.func(**inputs) #type:ignore
         elif inputs is None:
-            return self.func()
+            return self.func() #type:ignore
         else:
             return self.func(inputs)
 
 
-class partial_left[O](pipe[Any, O]):
+class none_propagator[I, O]:
     
-    def __init__(self, func:Callable[..., O], *args, **kwargs):
-        super().__init__(func)
-        self.args = args
-        self.kwargs = kwargs
+    def __init__(self, func:Callable[[I], O]):
+        if not isinstance(func, pipe):
+            func = pipe(func)
+            
+        self.pipe:pipe[I, O] = func
     
-    def __call__(self, inputs):
-        return self.func(*self.args, inputs, **self.kwargs) #type: ignore lib limit
+    def __call__(self, inputs:I|None) -> O|None:
+        if inputs is None:
+            return
+        
+        return self.pipe(inputs)
+        
+    def chain[O1](self, func:Callable[[O], O1]):
+        return none_propagator(self.pipe.chain(func))
     
+    def automap[O1](self, func:Callable[..., O1]):
+        return none_propagator(self.pipe.automap(func))
 
-class partial_right[O](pipe[Any, O]):
-    
-    def __init__(self, func:Callable[..., O], *args, **kwargs):
-        super().__init__(func)
-        self.args = args
-        self.kwargs = kwargs
-    
-    def __call__(self, inputs):
-        return self.func(inputs, *self.args, **self.kwargs) #type: ignore lib limit
+    def partial_left[O1](self, func:Callable[..., O1], *args, **kwargs):
+        return none_propagator(self.pipe.partial_left(func, *args, **kwargs))
+
+    def partial_right[O1](self, func:Callable[..., O1], *args, **kwargs):
+        return none_propagator(self.pipe.partial_right(func, *args, **kwargs))

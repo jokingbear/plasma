@@ -2,7 +2,7 @@ from .base import Distributor
 from queue import Full
 
 
-class RoundRobin(Distributor):
+class RoundRobin[T](Distributor[T]):
     
     def __init__(self, num_workers:int, verbose=True):
         super().__init__()

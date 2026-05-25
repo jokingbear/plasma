@@ -1,7 +1,12 @@
-from ...functional import AutoPipe
+
+from warnings import deprecated
 
 
-class FlowExceptionHandler(AutoPipe):
+@deprecated('this class will be removed in the future')
+class FlowExceptionHandler:
     
     def run(self, block:str, data, e:Exception):
         raise e
+
+    def __call__(self, block:str, data, e:Exception):
+        return self.run(block, data, e)

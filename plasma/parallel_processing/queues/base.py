@@ -2,10 +2,10 @@ from abc import abstractmethod
 from typing import Callable, Any
 
 from .handler import ExceptionHandler
-from ...functional import State, chain
+from ...functional import ReadableClass, pipe
 
 
-class Queue[T](State):
+class Queue[T](ReadableClass):
 
     def __init__(self, name=None, num_runner=1):
         super().__init__()
@@ -34,14 +34,14 @@ class Queue[T](State):
     def register_callback(self, callback:Callable[[Any], Any]):
         assert not self._running,\
             'queue is already running, please release it to register new function'
-        self._callback = callback
+        self._callback = pipe(callback)
 
         return self
 
     def chain(self, callback:Callable[[Any], Any]):
         assert not self._running, \
             'queue is already running, please release it to chain new function'
-        self._callback = chain(self._callback, callback)
+        self._callback = self._callback.chain(callback)
         return self
 
     def on_exception(self, handler:Callable[[Any, Exception], None]):

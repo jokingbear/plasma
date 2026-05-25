@@ -1,7 +1,8 @@
+from typing import Sequence
 from .base import Distributor
 
 
-class IteratorDistributor(Distributor):
+class IteratorDistributor[T](Distributor[Sequence[T]]):
     
     def run(self, data, *queues, **named_queues):  
         for r in data:
