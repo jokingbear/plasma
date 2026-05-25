@@ -24,9 +24,9 @@ class ThreadQueue(Queue[list[threading.Thread]]):
         [t.start() for t in threads]
         return threads
 
-    @propagate(Signal.IGNORE)
     def put(self, x):
-        self._queue.put(x, block=True, timeout=self.timeout)
+        if x is not Signal.IGNORE:
+            self._queue.put(x, block=True, timeout=self.timeout)
     
     def release(self):
         self._queue.join()
