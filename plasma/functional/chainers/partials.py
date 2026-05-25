@@ -31,7 +31,7 @@ class partial_right[O]:
     
     def __init__(self, func:Callable[..., O], *args, **kwargs):
         if not isinstance(func, pipe):
-            func = pipe[Any, O](func)
+            func = pipe(func)
 
         self.args = args
         self.kwargs = kwargs

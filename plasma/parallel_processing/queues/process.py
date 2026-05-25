@@ -58,9 +58,8 @@ class ProcessQueue(Queue[_State]):
         state.run()
         return state
 
-    def put(self, x):
-        if x is not Signal.IGNORE:
-            self._queue.put(x, block=True, timeout=self.timeout)
+    def _put(self, x):
+        self._queue.put(x, block=True, timeout=self.timeout)
     
     def release(self):
         self._queue.join()
