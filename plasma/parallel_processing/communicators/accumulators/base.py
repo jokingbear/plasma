@@ -1,9 +1,7 @@
 import time
-import multiprocessing as mp
 
-from ....functional import ReadableClass
 from tqdm.auto import tqdm
-from multiprocessing.managers import ValueProxy
+from ....functional import ReadableClass
 from ...queues import Signal
 
 
@@ -21,7 +19,7 @@ class Accumulator[D, A](ReadableClass):
         self.ignore_none = ignore_none
         self.count_none = count_none
     
-    def run(self, data):
+    def __call__(self, data):
         if data is not None or (data is None and self.count_none):
             self._update_step()
 
