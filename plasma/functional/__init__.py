@@ -10,5 +10,5 @@ from . import decorators
 from .chainers import (
     pipe, auto_map, 
     partial_left, partial_right,
-    none_propagator
+    none_propagator, wrap
 )
