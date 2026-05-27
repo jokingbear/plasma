@@ -36,11 +36,11 @@ class Comparator:
         assert type(target) is type(ref)
         
         schema = schema_getter(target)
-        target_realization = schema.realize(target)
+        target_realization = schema.realize(target, expand_none=True)
         target_endpoints = [*target_realization.endpoints]
         num_targets = len({schema.real_to_rep(e) for e in target_endpoints})
         
-        ref_realization = schema.realize(ref)
+        ref_realization = schema.realize(ref, expand_none=True)
         ref_endpoints = [*ref_realization.endpoints]
         num_refs = len({schema.real_to_rep(e) for e in ref_endpoints})
         shared_fields = set(target_endpoints).union(ref_endpoints)
