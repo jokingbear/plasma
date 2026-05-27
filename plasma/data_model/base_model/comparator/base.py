@@ -47,6 +47,7 @@ class Comparator:
         
         traces = dict(
             Stream(shared_fields)
+            .filter(lambda field: schema.rep.out_degree(schema.real_to_rep(field)) == 0)
             .split(lambda n: 
                 (n, target_realization.value(n), ref_realization.value(n))
             )
