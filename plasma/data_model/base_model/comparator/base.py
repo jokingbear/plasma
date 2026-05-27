@@ -68,11 +68,17 @@ class Comparator:
                 .project(lambda t, r: self._compute_score(t, r))
                 .evaluate()
             )
-            
-            precision = hmean([max(t.score, 0.1) for t in item_traces[:len(target)]])
-            recall = sum([t.score for t in item_traces[:len(ref)]], 0) / len(ref)
+            if len(item_traces) > 0:
+                precision = hmean([max(t.score, 0.1) for t in item_traces[:len(target)]])
+            else:
+                precision = float(len(ref) == 0)
+
+            if len(ref) > 0:
+                recall = sum([t.score for t in item_traces[:len(ref)]], 0) / len(ref)
+                score = hmean([precision, recall])
+
             return SummaryTrace(
-                hmean([precision, recall]),
+                score,
                 item_traces
             )
         
