@@ -102,7 +102,9 @@ def _handle_exception(
     
     data, exception = signal
     exception:TraceableException
-    
-    original = exception.original 
-    original.add_note(exception.info) #type:ignore
-    exception_handler(data, original) #type:ignore
+    try:
+        error = ChildProcessError(exception.original)
+        error.add_note(exception.info)
+        raise error
+    except Exception as e:
+        exception_handler(data, e)
