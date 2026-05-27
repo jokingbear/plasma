@@ -73,6 +73,7 @@ class Comparator:
             else:
                 precision = float(len(ref) == 0)
 
+            score = precision
             if len(ref) > 0:
                 recall = sum([t.score for t in item_traces[:len(ref)]], 0) / len(ref)
                 score = hmean([precision, recall])
