@@ -43,3 +43,8 @@ class TransferQueue(Queue[Thread]):
             and self._state is not None 
             and self._state.is_alive()
         )
+
+    def __getstate__(self):
+        state = super().__getstate__()
+        state['_state'] = None #type:ignore - dict like
+        return state
