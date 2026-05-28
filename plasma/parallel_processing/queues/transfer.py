@@ -45,6 +45,7 @@ class TransferQueue(Queue[Thread]):
         )
 
     def __getstate__(self):
-        state = super().__getstate__()
-        state['_state'] = None #type:ignore - dict like
+        state:dict = super().__getstate__() #type:ignore - dict like
+        state = state.copy()
+        state['_state'] = None 
         return state
