@@ -36,17 +36,18 @@ class Comparator:
         assert type(target) is type(ref)
         
         schema = schema_getter(target)
-        target_realization = schema.realize(target)
+        target_realization = schema.realize(target, expand_none=True)
         target_endpoints = [*target_realization.endpoints]
         num_targets = len({schema.real_to_rep(e) for e in target_endpoints})
         
-        ref_realization = schema.realize(ref)
+        ref_realization = schema.realize(ref, expand_none=True)
         ref_endpoints = [*ref_realization.endpoints]
         num_refs = len({schema.real_to_rep(e) for e in ref_endpoints})
         shared_fields = set(target_endpoints).union(ref_endpoints)
         
         traces = dict(
             Stream(shared_fields)
+            .filter(lambda field: schema.rep.out_degree(schema.real_to_rep(field)) == 0)
             .split(lambda n: 
                 (n, target_realization.value(n), ref_realization.value(n))
             )
@@ -68,11 +69,18 @@ class Comparator:
                 .project(lambda t, r: self._compute_score(t, r))
                 .evaluate()
             )
-            
-            precision = hmean([max(t.score, 0.1) for t in item_traces[:len(target)]])
-            recall = sum([t.score for t in item_traces[:len(ref)]], 0) / len(ref)
+            if len(item_traces) > 0:
+                precision = hmean([max(t.score, 0.1) for t in item_traces[:len(target)]])
+            else:
+                precision = float(len(ref) == 0)
+
+            score = precision
+            if len(ref) > 0:
+                recall = sum([t.score for t in item_traces[:len(ref)]], 0) / len(ref)
+                score = hmean([precision, recall])
+
             return SummaryTrace(
-                hmean([precision, recall]),
+                score,
                 item_traces
             )
         

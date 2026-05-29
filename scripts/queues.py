@@ -28,7 +28,7 @@ q.release()
 
 
 def test_process(x):
-    raise RuntimeError('hehe')
+    print(x + 5)
 
 
 if __name__ == '__main__':
