@@ -28,3 +28,6 @@ class wrap[I, O]:
 
     def partial_right[O1](self, func:Callable[..., O1], *args, **kwargs):
         return wrap[I, O1](self.pipe.partial_right(func, *args, **kwargs))
+
+    def automap[O2](self, func:Callable[..., O2]):
+        return wrap[I, O2](self.pipe.automap(func))
