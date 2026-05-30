@@ -59,7 +59,7 @@ class pipe[I, O]:
         yield p
             
 
-class auto_map[O](pipe[Any, O]):
+class auto_map[O]:
     
     def __init__(self, func:Callable[..., O]):
         if not isinstance(func, pipe):
