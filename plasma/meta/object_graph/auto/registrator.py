@@ -1,13 +1,13 @@
-from .context_graph import ContextGraph, Node
-from typing import Callable
+from typing import Callable, Any
 from inspect import signature
-from pathlib import Path
 from warnings import warn
+
+from .context_graph import ContextGraph, Node
 
 
 class Registrator:
     
-    def __init__(self, graph:ContextGraph, context:str, name:str, source:str):
+    def __init__(self, graph:ContextGraph, context:str, name:Any, source:str):
         self.graph = graph
         
         inquirer = self.graph.inquirer
