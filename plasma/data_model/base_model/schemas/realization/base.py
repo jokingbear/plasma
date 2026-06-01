@@ -22,7 +22,9 @@ class Realization(nx.DiGraph):
 
         for s in rep.successors(rep_node):
             if s[-1] == '@idx':
-                assert isinstance(value, Sequence), f'expect Sequence at {'.'.join(str(a) for a in rep_node)}'
+                assert isinstance(value, Sequence) or value is None, f'expect Sequence at {'.'.join(str(a) for a in rep_node)}'
+                value = value or []
+                self.add_node(real_node, value=value)
                 for i, v in enumerate(value):
                     next_real_node = (*real_node, i)
                     self.add_node(next_real_node, value=v)
