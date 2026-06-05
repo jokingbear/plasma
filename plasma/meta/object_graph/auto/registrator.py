@@ -15,6 +15,7 @@ class Registrator:
         if node_id in self.graph and inquirer.type(node_id) is not Node.LEAF:
             file, = inquirer.select(node_id, 'source')
             warn(f'{name} is already registered in {context} in {file}, overriding with {source}')
+            self.graph.remove_node(node_id)
             
         self.node_id = node_id
         self.source = source
