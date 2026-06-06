@@ -1,7 +1,7 @@
 from typing import Sequence
 from .require import Require
 from ..context_graph import Node, ContextGraph
-from .....functional.helpers.color_printer import Color
+from .....utils import Formatter
 
 
 class InputDict(dict):
@@ -51,8 +51,8 @@ def render(data:dict, indent:str, lines:list):
         else:
             value = v
             if isinstance(v, Require):
-                value = Color.RED.render(Require.__name__)
+                value = Formatter.RED.render(Require.__name__)
             else:
-                value = Color.BLUE.render(type(v).__name__)
+                value = Formatter.BLUE.render(type(v).__name__)
 
             lines.append(f'{indent}{k}: {value}')

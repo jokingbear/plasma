@@ -13,12 +13,13 @@ class StructInitGraph(nx.DiGraph):
                  real_to_rep:Callable[[tuple], tuple]):
         super().__init__()
         
-        self.__update(rep, real_to_rep, struct, '')
+        self.__update(rep, real_to_rep, struct, '') #type:ignore - refactor later
         
     def __update(self, rep:Representation, real_to_rep:Callable[[tuple], tuple], 
                  struct, accessor:tuple):
         rep_accessor = real_to_rep(accessor)
         if rep_accessor not in rep:
+            self.remove_node(accessor)
             return
 
         if rep.out_degree(rep_accessor) == 0:

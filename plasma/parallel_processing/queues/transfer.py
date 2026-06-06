@@ -14,8 +14,7 @@ class TransferQueue(Queue[Thread]):
         self._receiver = JoinableQueue(qsize)
         self._qsize = qsize
 
-    @decorators.propagate(Signal.IGNORE)
-    def put(self, x):
+    def _put(self, x):
         self._receiver.put(x, block=True)
 
     def _init_state(self):
@@ -44,3 +43,9 @@ class TransferQueue(Queue[Thread]):
             and self._state is not None 
             and self._state.is_alive()
         )
+
+    def __getstate__(self):
+        state:dict = super().__getstate__() #type:ignore - dict like
+        state = state.copy()
+        state['_state'] = None 
+        return state

@@ -1,7 +1,7 @@
 from warnings import deprecated
 
 from .automap import auto_map
-from .partials import partials
+from .partials import partials, partial_left, partial_right
 from .chain import chain
 from .itertools import groupby
 from .color_printer import Color

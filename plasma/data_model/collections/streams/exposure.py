@@ -150,6 +150,9 @@ class ZippedStream[*T](GenericStream[tuple[*T]]):
     def zip_product[*V](self, data:Iterable[tuple[*V]]):
         return ZippedStream((*d1, *d2) for d1, d2 in product(self, data))
 
+    def enumerate(self):
+        return ZippedStream((i, *d) for i, d in enumerate(self))
+    
     def evaluate(self):
         return list(self)
 

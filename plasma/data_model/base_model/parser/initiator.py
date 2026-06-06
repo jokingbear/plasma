@@ -1,8 +1,8 @@
-from typing import Callable
+from typing import Callable, Sequence
 from networkx import DiGraph
 
 from ..schemas import Representation
-from ..inquirer import is_data_model
+from ..utils import is_data_model
 
 
 class Initator:
@@ -43,7 +43,7 @@ class Initator:
             
             value = origin(**args)
             self._state[real_node] = value
-        elif issubclass(origin, (list, tuple)) and len(args) > 0 and is_data_model(args[0]):
+        elif issubclass(origin, Sequence) and len(args) > 0 and is_data_model(args[0]):
             value = []
             for s in self.data.successors(real_node):
                 self._iterate(s)

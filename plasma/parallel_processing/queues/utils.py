@@ -1,9 +1,14 @@
 from queue import Queue
+from typing import Callable, Any
 from .signals import Signal
 from .handler import ExceptionHandler
 
 
-def internal_run(queue:Queue, processor, exception_handler):
+def internal_run(
+        queue:Queue, 
+        processor:Callable[[Any], None], 
+        exception_handler:Callable[[Any, Exception], None]
+    ):
     is_not_cancelled = True
     exception_handler = exception_handler or ExceptionHandler()
 

@@ -1,13 +1,13 @@
-from .context_graph import ContextGraph, Node
-from typing import Callable
+from typing import Callable, Any
 from inspect import signature
-from pathlib import Path
 from warnings import warn
+
+from .context_graph import ContextGraph, Node
 
 
 class Registrator:
     
-    def __init__(self, graph:ContextGraph, context:str, name:str, source:str):
+    def __init__(self, graph:ContextGraph, context:str, name:Any, source:str):
         self.graph = graph
         
         inquirer = self.graph.inquirer
@@ -15,6 +15,9 @@ class Registrator:
         if node_id in self.graph and inquirer.type(node_id) is not Node.LEAF:
             file, = inquirer.select(node_id, 'source')
             warn(f'{name} is already registered in {context} in {file}, overriding with {source}')
+            predecessors = [*self.graph.predecessors(node_id)]
+            self.graph.remove_node(node_id)
+            self.graph.add_edges_from((p, node_id) for p in predecessors)
             
         self.node_id = node_id
         self.source = source
@@ -25,15 +28,17 @@ class Registrator:
         for param_info in signature(cls).parameters.values():
             child_id = self.node_id[0], param_info.name
             node_type, value = (
-                (Node.LEAF, param_info.annotation )
+                (Node.LEAF, param_info.annotation)
                 if param_info.default is param_info.empty \
                 else (Node.SINGLETON, param_info.default)
             )
             
             add_condition = (
                 child_id not in self.graph 
+                or node_type is Node.SINGLETON
                 or self.graph.inquirer.type(child_id) is Node.LEAF
                 and node_type is not Node.LEAF
+                
             )
             if add_condition:
                 self.graph.add_node(child_id, type=node_type, value=value, source=self.source)

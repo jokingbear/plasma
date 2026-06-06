@@ -9,7 +9,7 @@ from .registrator import Registrator
 
 class Factory:
     
-    def __init__(self, name:str, graph:ContextGraph=None, context:str=None, source:str=None):
+    def __init__(self, name:str, graph:ContextGraph=None, context:str=None, source:str=None): #type:ignore
         self.graph = graph or CONTEXT_GRAPH
         
         if context is None:
@@ -44,8 +44,8 @@ class Factory:
     
     def _trace_context(self, caller_info:FrameInfo):
         file = caller_info.filename
-        package = inspect.getmodule(caller_info.frame).__package__
-        context = self.graph.inquirer.find_context(package)
+        package = inspect.getmodule(caller_info.frame).__package__ #type:ignore
+        context = self.graph.inquirer.find_context(package) #type:ignore
         
         if context is None:
             raise ReferenceError(f'{file} has no context initiated, use init_context')

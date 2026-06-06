@@ -2,7 +2,7 @@ import networkx as nx
 import typing
 
 from .repr import Repr
-from ...inquirer import is_data_model
+from ...utils import is_data_model
 
 
 class Representation(nx.DiGraph):
@@ -17,9 +17,9 @@ class Representation(nx.DiGraph):
     
     def __update(self, accessor, cls:type):
         origin, args = _analyze(cls)
-        self.add_node(accessor, origin=origin, args=args)
+        self.add_node(accessor, origin=origin, args=args, raw=cls)
         
-        if issubclass(origin, (list, tuple)) and len(args) > 0 and is_data_model(args[0]):
+        if issubclass(origin, typing.Sequence) and len(args) > 0 and is_data_model(args[0]):
             new_accessor = (*accessor, '@idx')
             self.add_edge(accessor, new_accessor)
             self.__update(new_accessor, args[0])
@@ -37,6 +37,9 @@ class Representation(nx.DiGraph):
     
     def type(self, node):
         return self.origin(node), self.args(node)
+    
+    def raw(self, node):
+        return self.nodes[node]['raw']
     
     def __repr__(self):
         return Repr(self.root, self, self.type)()

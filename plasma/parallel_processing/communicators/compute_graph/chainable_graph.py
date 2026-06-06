@@ -14,7 +14,7 @@ class ChainableGraph(Graph):
     def chain(self, *chains:tuple[object, Queue, object, Distributor]):
         for head, connector, tail, distributor in chains:            
             assert not isinstance(head, Queue) \
-                    and not isinstance(tail, Queue), f'Queue cannot be used as a block'
+                    and not isinstance(tail, Queue), 'Queue cannot be used as a block'
             
             self.add_block(head)
             self.add_block(tail, distributor)

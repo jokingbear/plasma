@@ -1,11 +1,12 @@
 from abc import abstractmethod
 from typing import Callable, Any
 
+from .signals import Signal
 from .handler import ExceptionHandler
-from ...functional import State, chain
+from ...functional import ReadableClass, pipe
 
 
-class Queue[T](State):
+class Queue[T](ReadableClass):
 
     def __init__(self, name=None, num_runner=1):
         super().__init__()
@@ -25,23 +26,25 @@ class Queue[T](State):
             self._state = self._init_state()
         return self
         
-    @abstractmethod
     def _init_state(self) -> T:...
 
-    @abstractmethod
-    def put(self, x):...
+    def put(self, x):
+        if x is not Signal.IGNORE:
+            self._put(x)
+
+    def _put(self, x):...
 
     def register_callback(self, callback:Callable[[Any], Any]):
         assert not self._running,\
             'queue is already running, please release it to register new function'
-        self._callback = callback
+        self._callback = pipe(callback)
 
         return self
 
     def chain(self, callback:Callable[[Any], Any]):
         assert not self._running, \
             'queue is already running, please release it to chain new function'
-        self._callback = chain(self._callback, callback)
+        self._callback = self._callback.chain(callback)
         return self
 
     def on_exception(self, handler:Callable[[Any, Exception], None]):
@@ -65,5 +68,5 @@ class Queue[T](State):
     def running(self):
         return self._running
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         return False

@@ -1,6 +1,6 @@
 from typing import get_args, get_origin
 
-from ..inquirer import is_data_model, is_list
+from ..utils import is_data_model, is_list
 from ..field import Field
 
 

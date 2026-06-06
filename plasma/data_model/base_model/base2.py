@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 from .constants import MODEL_FLAG, FIELD_FLAG
 from .field import Field, Composite, List
-from .repr import Repr
-from .inquirer import is_list
+from .utils import is_list
 from .schemas import Schema
+from .tree_rep import tree_repr
 
 
 @dataclass_transform()
@@ -14,11 +14,7 @@ def model(cls):
     setattr(cls, MODEL_FLAG, True)
     setattr(cls, MODEL_FLAG, Schema(new_cls))
 
-    def __repr__(self):
-        return Repr()(self)
-    
-    new_cls.__repr__ = __repr__
-    return dataclass(new_cls, repr=False)
+    return tree_repr(dataclass(new_cls, repr=False))
 
 
 def register_field[T](cls:type[T]) -> type[T]:

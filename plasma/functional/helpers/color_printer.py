@@ -1,6 +1,8 @@
 from enum import Enum
+from warnings import deprecated
 
 
+@deprecated('use plasma.utils.Formatter instead')
 class Color(Enum):
     PURPLE = '\033[95m'
     CYAN = '\033[96m'

@@ -1,9 +1,8 @@
 import re
 
 from .file_reader import ReadInputs
-from enum import Enum
-from .....functional.helpers.color_printer import Color
 from ..context import Context
+from .....utils import Formatter
 
 
 class InitiableInputs(ReadInputs):
@@ -12,7 +11,7 @@ class InitiableInputs(ReadInputs):
         if verbose:
             context_rep = repr(context)
             for n in names:
-                context_rep = re.sub(rf'\W({n})\W', lambda m: Color.GREEN(m.group(0)), context_rep)
+                context_rep = re.sub(rf'\W({n})\W', lambda m: Formatter.GREEN(m.group(0)), context_rep)
             
             print(context_rep)
         

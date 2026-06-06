@@ -4,15 +4,14 @@ from .compute_graph import Graph
 from ...functional import State
 from ..queues import Queue
 from typing import Callable
-from ...functional import partials, Identity
+from ...functional import partials, Identity, partial_right, AutoPipe
 from .distributors import Distributor
-from ...functional import Signature, AutoPipe
+from ...functional import Signature
 
 
-class AsyncFlow(Graph, State):
+class AsyncFlow(Graph):
     
     def __init__(self):
-        super(State, self).__init__()
         super(Graph, self).__init__()
 
         self._running = False
@@ -33,8 +32,8 @@ class AsyncFlow(Graph, State):
                     un_named_queues = [nq for nq in next_queues if nq.name is None]
                     named_queues = {nq.name: nq for nq in next_queues if nq.name is not None}
                     q.register_callback(block)\
-                        .chain(partials(distributor, *un_named_queues, **named_queues, pre_apply_before=False))\
-                            .run()
+                    .chain(partial_right(distributor.run, *un_named_queues, **named_queues))\
+                    .run()
 
         self._running = True
         return self
@@ -52,12 +51,10 @@ class AsyncFlow(Graph, State):
     def on_exception(self, handler:Callable[[str, object, Exception], None]):
         for q in self.internal_queues:
             block, = self.successors(q)
-            
             if isinstance(block, AutoPipe):
                 signature = block.signature()
             else:
                 signature = Signature.from_func(block)
-
             signature_repr = f'{signature.name}[({signature.inputs}) -> {signature.outputs}]'
             q.on_exception(partials(handler, signature_repr))
     

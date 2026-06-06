@@ -4,7 +4,6 @@ import queue
 from .signals import Signal
 from .utils import internal_run
 from .base import Queue
-from ...functional.decorators import propagate
 
 
 class ThreadQueue(Queue[list[threading.Thread]]):
@@ -24,8 +23,7 @@ class ThreadQueue(Queue[list[threading.Thread]]):
         [t.start() for t in threads]
         return threads
 
-    @propagate(Signal.IGNORE)
-    def put(self, x):
+    def _put(self, x):
         self._queue.put(x, block=True, timeout=self.timeout)
     
     def release(self):
@@ -53,3 +51,15 @@ class ThreadQueue(Queue[list[threading.Thread]]):
             and self._state is not None
             and any(t.is_alive() for t in self._state)
         )
+    
+    def __getstate__(self):
+        state:dict = super().__getstate__() #type:ignore - dict like
+        state = state.copy()
+        state['qsize'] = self._queue.maxsize
+        state['_state'] = None 
+        state['_queue'] = None 
+        return state
+
+    def __setstate__(self, state:dict):
+        state['_queue'] = queue.Queue(state.pop('qsize'))
+        self.__dict__.update(state)
