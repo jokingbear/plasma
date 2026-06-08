@@ -39,8 +39,6 @@ class Parser[T](ReadableClass):
                 continue 
             
             value = graph.nodes[n]['value']
-            if value is None:
-                continue
             
             rep_node = self._schema.real_to_rep(n)
             raw = self._schema.rep.raw(rep_node)
