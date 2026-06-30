@@ -21,10 +21,10 @@ class partial_left[O]:
         return results
         
     def chain[O1](self, func:Callable[[O], O1]):
-        return partial_left(self.pipe.chain(func))
+        return partial_left(self.pipe.chain(func), *self.args, **self.kwargs)
     
     def automap[O1](self, func:Callable[..., O1]):
-        return partial_left(self.pipe.automap(func))
+        return partial_left(self.pipe.automap(func), *self.args, **self.kwargs)
 
 
 class partial_right[O]:
@@ -46,7 +46,7 @@ class partial_right[O]:
         return results
         
     def chain[O1](self, func:Callable[[O], O1]):
-        return partial_right(self.pipe.chain(func))
+        return partial_right(self.pipe.chain(func), *self.args, **self.kwargs)
     
     def automap[O1](self, func:Callable[..., O1]):
-        return partial_right(self.pipe.automap(func))
+        return partial_right(self.pipe.automap(func), *self.args, **self.kwargs)

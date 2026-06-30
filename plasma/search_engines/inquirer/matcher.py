@@ -39,6 +39,7 @@ def _match(position_path:PositionPath, db_path:tuple[str]):
 
     matches = (
         Stream[set[tuple[int, int]]](nx.connected_components(graph))
+        .filter(lambda s: len(s) == m)
         .groupby(len, min)
         .select(lambda _, comp: min(comp))
     )
