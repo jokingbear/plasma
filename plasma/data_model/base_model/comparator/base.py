@@ -69,7 +69,7 @@ class Comparator:
                 .project(lambda t, r: self._compute_score(t, r))
                 .evaluate()
             )
-            if len(item_traces) > 0:
+            if len(ref) > 0:
                 precision = hmean([max(t.score, 0.1) for t in item_traces[:len(target)]])
             else:
                 precision = float(len(ref) == 0)
