@@ -1,12 +1,13 @@
 import time
 
-from .compute_graph import Graph
-from ...functional import State
-from ..queues import Queue
 from typing import Callable
-from ...functional import partials, Identity, partial_right, AutoPipe
 from .distributors import Distributor
-from ...functional import Signature
+from .compute_graph import Graph
+from ..queues import Queue
+from ...functional import (
+    partials, Identity, partial_right, AutoPipe,
+    Signature
+)
 
 
 class AsyncFlow(Graph):
