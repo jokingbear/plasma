@@ -1,21 +1,21 @@
 import zmq
-import plasma.parallel_processing as pp
 
 from queue import Full
+from ..base import Queue
 from ....serializers import Serializer, Pickler
 
 
-class PubZMQ(pp.Queue):
+class PubZMQ(Queue):
     
     def __init__(self, 
             connection:str, name:str|None=None, 
             serializer:Serializer|None=None,
-            qsize=1, timeout:float|None=None
+            qsize=10, timeout:float|None=None
         ):
         super().__init__(name, 0)
         
         context = zmq.Context()
-        socket = context.socket(zmq.PUB)
+        socket = context.socket(zmq.PUSH)
         
         if qsize > 0:
             socket.setsockopt(zmq.SNDHWM, qsize)

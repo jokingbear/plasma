@@ -9,5 +9,5 @@ from .communicators import (
 )
 from .queues import (
     Queue, ThreadQueue, ProcessQueue,
-    TransferQueue
+    TransferQueue, zmq
 )

@@ -11,15 +11,12 @@ class SubZMQ(Queue[Sequence[threading.Thread]]):
     
     def __init__(self, 
             connection:str, name=None, 
-            num_runner=1, serializer:Serializer=Pickler(),
+            n=1, serializer:Serializer=Pickler(),
         ):
-        super().__init__(name, num_runner)
-        context = zmq.Context()
-        socket = context.socket(zmq.SUB)
-        socket.connect(connection)
-        
+        super().__init__(name, n)
+        context = zmq.Context()        
+        self._context = context
         self.connection = connection
-        self._socket = socket
         self.serializer = serializer
     
     def _put(self, x):
@@ -28,7 +25,7 @@ class SubZMQ(Queue[Sequence[threading.Thread]]):
     def _init_state(self):
         threads = []
         args = [
-            self._socket, self.serializer,
+            self._context, self.connection, self.serializer,
             self._callback, self._exception_handler
         ]
         for _ in range(self.num_runner):
@@ -38,23 +35,32 @@ class SubZMQ(Queue[Sequence[threading.Thread]]):
 
         return threads
     
-    
+    def release(self):
+        return super().release()
+
+
 def _run(
-        socket:zmq.Socket,
+        context:zmq.Context, connection:str,
         serializer:Serializer,
         processor:Callable[..., None], 
         exception_handler:Callable[[Any, Exception], None]
     ):
-    while True:
-        data = serializer.deserialize(socket.recv())
-        
-        try:
-            if data is Signal.CANCEL:
-                break
-            
-            processor(data)
-        except Exception as e:
-            if exception_handler is None:
-                raise e
+    socket = context.socket(zmq.PULL)
+    socket.connect(connection)
+    # socket.setsockopt(zmq.SUBSCRIBE, b"")
+    
+    try:
+        while True:
+            data = serializer.deserialize(socket.recv())
+            try:
+                if data is Signal.CANCEL:
+                    break
+                
+                processor(data)
+            except Exception as e:
+                if exception_handler is None:
+                    raise e
 
-            exception_handler(data, e)
+                exception_handler(data, e)
+    finally:
+        socket.close()
