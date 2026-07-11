@@ -37,9 +37,11 @@ def _match(position_path:PositionPath, db_path:tuple[str]):
         if matching_matrix[i, j] == matching_matrix[i + 1, j + 1] == 1:
             graph.add_edge((i, j), (i + 1, j + 1))
 
+    components = [*nx.connected_components(graph)]
+    max_len = max(len(c) for c in components)
     matches = (
-        Stream[set[tuple[int, int]]](nx.connected_components(graph))
-        .filter(lambda s: len(s) == m)
+        Stream[set[tuple[int, int]]](components)
+        .filter(lambda s: len(s) == max_len)
         .groupby(len, min)
         .select(lambda _, comp: min(comp))
     )
