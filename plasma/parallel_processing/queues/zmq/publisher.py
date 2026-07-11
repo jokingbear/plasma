@@ -1,4 +1,5 @@
 import zmq
+import threading
 
 from queue import Full
 from ..base import Queue
@@ -26,11 +27,13 @@ class PubZMQ(Queue):
         socket.bind(connection)
         self._socket = socket
         self.serializer = serializer or Pickler()
+        self._lock = threading.Lock()
     
     def _put(self, x):
         try:
             contents = self.serializer.serialize(x)
-            self._socket.send(contents)
+            with self._lock:
+                self._socket.send(contents, copy=False)
         except zmq.Again as e:
             raise Full('maximum timeout exceeded') from e 
     
