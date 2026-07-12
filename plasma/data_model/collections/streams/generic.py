@@ -37,11 +37,11 @@ class GenericStream[T](BaseStream[T]):
 
         yield from data.items()
 
-    def max(self, key:Callable[[T], Any]):
-        return max(self, key=key)
+    def max(self, key:Callable[[T], Any], default:T|None=None):
+        return max(self, key=key, default=default)
     
-    def min(self, key:Callable[[T], Any]):
-        return min(self, key=key)
+    def min(self, key:Callable[[T], Any], default:T|None=None):
+        return min(self, key=key, default=default)
 
     def accumulate[D, S](
             self,
