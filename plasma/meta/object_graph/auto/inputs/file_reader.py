@@ -1,8 +1,9 @@
 import yaml
 import json
+import sched
 
-from .base2 import Inputs
 from pathlib import Path
+from .base2 import Inputs
 
 
 class ReadInputs(Inputs):
@@ -11,11 +12,28 @@ class ReadInputs(Inputs):
     def read(cls, file:str):
         path = Path(file)
         if 'yaml' in path.suffix:
-            data = read_yaml(path)
-        elif 'json' in path.suffix:
-            data = read_json(path)
+            data = read_yaml(path) # type:ignore
+        elif 'json' in path.suffix: 
+            data = read_json(path) #type:ignore
+        else:
+            raise NotImplementedError(
+                f'no reader implemented for file type {path.suffix}'
+            )
         
         return cls(data)
+    
+    @classmethod
+    def bind(cls, file:str, refresh_interval:float):
+        args = cls.read(file)
+        
+        scheduler = sched.scheduler()
+        def reload():
+            new_args = cls.read(file)
+            args.__setstate__(new_args.__getstate__()) # type:ignore - copy attribute
+            scheduler.enter(refresh_interval, 0, reload)
+        
+        scheduler.enter(refresh_interval, 0, reload)
+        return args
 
 
 def read_yaml(file:str):
