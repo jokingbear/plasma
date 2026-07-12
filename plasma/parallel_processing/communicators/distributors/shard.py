@@ -13,8 +13,8 @@ class RoundRobinSharder(ReadableClass):
         self._scheduler = None
     
     def __call__(self, data):
-        rng = random.Random()
         queues = self.queues
+        rng = random.Random()
         counter = rng.choice(range(len(queues)))
         while True:
             try:
