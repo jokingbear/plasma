@@ -1,6 +1,5 @@
 import yaml
 import json
-import sched
 
 from pathlib import Path
 from .base2 import Inputs
@@ -8,6 +7,11 @@ from .base2 import Inputs
 
 class ReadInputs(Inputs):
     
+    def __init__(self, cfg_file:str, data: dict={}):
+        super().__init__(data)
+        
+        self.cfg_file = cfg_file
+        
     @classmethod
     def read(cls, file:str):
         path = Path(file)
@@ -19,21 +23,8 @@ class ReadInputs(Inputs):
             raise NotImplementedError(
                 f'no reader implemented for file type {path.suffix}'
             )
-        
-        return cls(data)
-    
-    @classmethod
-    def bind(cls, file:str, refresh_interval:float):
-        args = cls.read(file)
-        
-        scheduler = sched.scheduler()
-        def reload():
-            new_args = cls.read(file)
-            args.__setstate__(new_args.__getstate__()) # type:ignore - copy attribute
-            scheduler.enter(refresh_interval, 0, reload)
-        
-        scheduler.enter(refresh_interval, 0, reload)
-        return args
+        cls.cfg_file = file
+        return cls(file, data)
 
 
 def read_yaml(file:str):
