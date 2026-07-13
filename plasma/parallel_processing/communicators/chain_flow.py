@@ -1,4 +1,4 @@
-from typing import Callable, overload
+from typing import Callable, overload, Iterable
 
 from .async_flow import AsyncFlow
 from .distributors import Distributor
@@ -16,6 +16,10 @@ class ChainFlow(AsyncFlow):
 
         return BlockChainer(self, other)
 
+    def loop(self, data:Iterable):
+        for d in data:
+            self.input.put(d)
+            
 
 class QueueChainer:
     
