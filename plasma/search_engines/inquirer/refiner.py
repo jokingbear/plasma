@@ -1,15 +1,13 @@
 import numpy as np
-import itertools
 
-from collections import defaultdict, Counter
+from collections import Counter
 from .position_path import PositionPath
-from .segment import Segment, Match
-from ...functional import AutoPipe
+from .segment import Segment
 
 
-class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
+class SegmentRefiner:
     
-    def run(self, segments:list[Segment]):
+    def __call__(self, segments:list[Segment]):
         unique_segments = dict[tuple, Segment]()
         for s in segments:
             key = tuple(s.position_path)
@@ -33,9 +31,9 @@ class SegmentRefiner(AutoPipe[[list[Segment]], list[Segment]]):
         return [segments[a] for a in unbound_args]
 
 
-class PathRefiner(AutoPipe[[list[PositionPath]], list[PositionPath]]):
+class PathRefiner:
     
-    def run(self, data:list[PositionPath]):
+    def __call__(self, data:list[PositionPath]):
         interval_counts = Counter()
         intervals = []
         for p in data:

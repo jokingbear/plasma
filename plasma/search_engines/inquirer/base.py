@@ -40,11 +40,11 @@ class PathInquirer(ReadableClass):
         paths = [*position_graph.generate_paths()]
         if len(paths) > 0:
             paths = self._path_refiner(paths)
-
-        segments = list[Segment]()
+        
         solver = Solver(position_graph, self.index.get_path_args)
-        for position_path in paths:
-            segments.extend(solver(position_path))
+        segments = list(
+            Stream(paths).unwind(solver)
+        )
 
         if len(segments) > 0:
             segments = self._segment_refiner(segments)
