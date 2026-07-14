@@ -6,6 +6,7 @@ from .index import Index
 from .regex_tokenizer import RegexTokenizer
 from .inquirer import PathInquirer, Match
 from .token_matcher import TokenMatcher
+from ..data_model.collections import ZippedStream
 
 
 class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
@@ -28,10 +29,21 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
     
     def run(self, query:str):
         contexts = self.context_splitter(query)
-        data = list[Match]()
-        for start, end, context in contexts.itertuples(index=False):
-            matches = self.path_inquirer(context).select(lambda m:m.update(start))
-            data.extend(matches)
+        data = (
+            ZippedStream[int, int, str](contexts.itertuples(index=False))
+            .unwind(lambda start, end, context:
+                self.path_inquirer(context)
+                .select(lambda m:m.update(start))
+            )
+            .split(lambda m:
+                (
+                    m.query.start, m.query.end,
+                    m.db.arg, m.db.start, m.db.end, m.db.value, 
+                    m.score.substring, m.score.coverage,
+                    m.score.token_len, m.score.harmonic
+                )
+            )
+        )
         
         columns = [
             'query_start_idx', 'query_end_idx',

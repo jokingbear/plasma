@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import NamedTuple, Iterable
 from .position_path import PositionPath
 
@@ -14,25 +15,45 @@ class Segment(NamedTuple):
     def qtoken_end(self):
         return self.position_path.offset(-1) + 1
 
-
-class Match(NamedTuple):
-    qchar_start:int
-    qchar_end:int
-    
-    db_arg:int
-    db_char_start:int
-    db_char_end:int
-    db_value:str
-    
-    matching_score:float
-    coverage_score:float
-    matched_len:int
-    harmonic_score:float
+@dataclass
+class Match:
+    query:"QueryMatch"
+    db:"DBMatch"
+    score:"Score"
     
     def update(self, offset:int):
-        qstart, qend, *remaining = self
         return Match(
-            qstart + offset,
-            qend + offset,
-            *remaining # type: ignore
+            QueryMatch(
+                offset + self.query.start,
+                offset + self.query.end
+            ),
+            self.db, self.score,
         )
+
+
+@dataclass
+class QueryMatch:
+    start:int
+    end:int
+    
+    def slice(self, query:str):
+        return query[self.start:self.end]
+
+
+@dataclass
+class DBMatch:
+    arg:int
+    start:int
+    end:int
+    value:str
+    
+    def slice(self):
+        return self.value[self.start:self.end]
+
+
+@dataclass
+class Score:
+    substring:float
+    coverage:float
+    token_len:int
+    harmonic:float
