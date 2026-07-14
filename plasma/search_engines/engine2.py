@@ -12,7 +12,7 @@ class StreamIndex:
             self, 
             data:Sequence[str],
             group_splitter=r'[^\.\n]+', tokenizer=r'\w+',
-            token_threshold=0.7, topk=5,
+            token_threshold=0.7
         ):
         super().__init__()
         
@@ -22,7 +22,7 @@ class StreamIndex:
         
         self._index = index
         self.context_splitter = RegexTokenizer(group_splitter)
-        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher, topk)
+        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher)
     
     def __call__(self, query:str):
         contexts = self.context_splitter(query)
@@ -30,7 +30,9 @@ class StreamIndex:
             ZippedStream[int, int, str](contexts.itertuples(index=False))
             .unwind(lambda start, end, context:
                 self.path_inquirer(context)
-                .select(lambda m:m.update(start))
+                .select(lambda q, ms:
+                    (q, ms.select(lambda m:m.update(start)))
+                )
             )
         )
 

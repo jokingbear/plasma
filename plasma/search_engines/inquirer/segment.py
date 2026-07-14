@@ -31,7 +31,7 @@ class Match:
         )
 
 
-@dataclass
+@dataclass(frozen=True, unsafe_hash=True)
 class QueryMatch:
     start:int
     end:int

@@ -1,15 +1,15 @@
-import plasma.functional as F
 import pandas as pd
 
 from typing import Sequence
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
-from .inquirer import PathInquirer, Match
+from .inquirer import PathInquirer
 from .token_matcher import TokenMatcher
 from ..data_model.collections import ZippedStream
+from ..functional import ReadableClass
 
 
-class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
+class GraphIndexer(ReadableClass):
     
     def __init__(
             self, 
@@ -25,7 +25,8 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
         
         self._index = index
         self.context_splitter = RegexTokenizer(group_splitter)
-        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher, topk)
+        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher)
+        self.topk = topk
     
     def run(self, query:str):
         contexts = self.context_splitter(query)
@@ -33,7 +34,9 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
             ZippedStream[int, int, str](contexts.itertuples(index=False))
             .unwind(lambda start, end, context:
                 self.path_inquirer(context)
-                .select(lambda m:m.update(start))
+                .unwind(lambda _, ms: 
+                    ms.take(self.topk).select(lambda m:m.update(start))
+                )
             )
             .split(lambda m:
                 (

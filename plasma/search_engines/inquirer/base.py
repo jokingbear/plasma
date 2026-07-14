@@ -5,10 +5,10 @@ from .matcher import SegmentMatch
 from .solver import Solver
 from .position_graph import PositionGraph
 from .refiner import SegmentRefiner, PathRefiner
-from .segment import Match
+from .segment import Match, QueryMatch
 from ..index import Index
 from ...functional import ReadableClass
-from ...data_model.collections import Stream
+from ...data_model.collections import Stream, ZippedStream
 
 
 class PathInquirer(ReadableClass):
@@ -17,14 +17,12 @@ class PathInquirer(ReadableClass):
             index:Index, 
             tokenizer:Callable[[str], pd.DataFrame],
             token_matcher:Callable[[list[str]], dict[str, dict[str, float]]],
-            topk:int,
         ):
         super().__init__()
         
         self.index = index
         self.tokenizer = tokenizer
         self.token_matcher = token_matcher
-        self.topk = topk
         self._path_refiner = PathRefiner()
         self._segment_refiner = SegmentRefiner()
         self._segment2match = SegmentMatch()
@@ -48,8 +46,8 @@ class PathInquirer(ReadableClass):
             segments = self._segment_refiner(segments)
             return (
                 Stream(segments)
-                .groupby(lambda s: (s.qtoken_start, s.qtoken_end), lambda s:s)
-                .unwind(lambda _, gs: 
+                .groupby(lambda s: QueryMatch(s.qtoken_start, s.qtoken_end), lambda s:s)
+                .select(lambda _, gs:
                     Stream(gs)
                     .unwind(lambda s:self._segment2match(s, qtoken_frame, self.index))
                     .sort(
@@ -59,4 +57,4 @@ class PathInquirer(ReadableClass):
                 )
             )
 
-        return Stream[Match]([])
+        return ZippedStream[QueryMatch, Stream[Match]]([])
