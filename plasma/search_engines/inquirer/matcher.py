@@ -50,7 +50,7 @@ def _match(position_path:PositionPath, db_path:tuple[str]):
         return
     
     size, offsets = max(matches)
-    return difflib.Match(*offsets, size)
+    return difflib.Match(*offsets, size) #type:ignpre
 
 
 def _construct(
@@ -77,6 +77,6 @@ def _construct(
     coverage_score = match.size / len(db_path)
     score = Score(
         substring_score, coverage_score, match.size,
-        hmean([substring_score, coverage_score])
+        float(hmean([substring_score, coverage_score]))
     )
     return Match(query_match, db_match, score)

@@ -30,10 +30,8 @@ class StreamIndex:
             ZippedStream[int, int, str](contexts.itertuples(index=False))
             .unwind(lambda start, end, context:
                 self.path_inquirer(context)
-                .select(lambda q, ms:
-                    (q, ms.select(lambda m:m.update(start)))
-                )
-            )
+                .select(lambda m:m.update(start))
+            ).groupby(lambda m: m.query, lambda m: m)
         )
 
     def run(self, query:str):
