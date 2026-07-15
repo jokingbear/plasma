@@ -5,7 +5,7 @@ from .regex_tokenizer import RegexTokenizer
 from .inquirer import PathInquirer, QueryMatch, Match
 from .token_matcher import TokenMatcher
 from ..data_model.collections import (
-    ZippedStream, GroupStream, Stream
+    ZippedStream, Stream
 )
 from ..functional import ReadableClass
 from ..utils import Formatter
@@ -63,6 +63,7 @@ class QueryResults(ReadableClass):
             .select(lambda qm, ms: 
                 (qm, ms.filter(lambda m: filter(qm, m)))
             )
+            .filter(lambda _, ms: not ms.empty)
         )
     
     def sort(self, key:Callable[[QueryMatch, Match], Any], descending=True):

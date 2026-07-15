@@ -34,11 +34,8 @@ class GraphIndexer(ReadableClass):
             ZippedStream[int, int, str](contexts.itertuples(index=False))
             .unwind(lambda start, end, context:
                 self.path_inquirer(context)
-                .unwind(lambda _, ms: 
-                    ms.take(self.topk).select(lambda m:m.update(start))
-                )
-            )
-            .split(lambda m:
+                .select(lambda m: m.update(start))
+            ).split(lambda m:
                 (
                     m.query.start, m.query.end,
                     m.db.arg, m.db.start, m.db.end, m.db.value, 
