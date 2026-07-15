@@ -70,6 +70,11 @@ class QueryResults(ReadableClass):
             )
             qtree = match_repr.add(rep)
             for m in matches.take(5):
-                qtree.add(f'{m.db.arg} - {m.db.slice()} - {m.db.value}')
+                mtree = qtree.add(f'{m.db.arg} - {m.db.slice()} - {m.db.value}')
+                mtree.add(
+                    f'substring:{m.score.substring:.4f}'
+                    f'- match len: {m.score.token_len}'
+                    f'- harmonic: {m.score.harmonic:.4f}'
+                )
 
         return tree
