@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Callable, Any
 
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
@@ -38,6 +38,7 @@ class StreamIndex(ReadableClass):
                 self.path_inquirer(context)
                 .select(lambda m:m.update(start))
             ).groupby(lambda m: m.query, lambda m: m)
+            .select(lambda qm, ms: Stream(ms))
         )
 
     def run(self, query:str):
@@ -48,15 +49,35 @@ class QueryResults(ReadableClass):
     
     def __init__(self, 
             query:str,
-            group_results:GroupStream[QueryMatch, Match]
+            group_results:ZippedStream[QueryMatch, Stream[Match]]
         ):
         super().__init__()
 
         self.query = query
-        self._stream = (
-            group_results.select(lambda qm, ms:
-                Stream(ms)
+        self.stream = group_results
+    
+    def filter_pergroup(self, filter:Callable[[QueryMatch, Match], bool]):
+        return QueryResults(
+            self.query,
+            self.stream
+            .select(lambda qm, ms: 
+                (qm, ms.filter(lambda m: filter(qm, m)))
             )
+        )
+    
+    def sort(self, key:Callable[[QueryMatch, Match], Any], descending=True):
+        return QueryResults(
+            self.query,
+            self.stream
+            .select(lambda qm, ms: 
+                (qm, ms.sort(lambda m: key(qm, m), reverse=descending))
+            )
+        )
+    
+    def top(self, k:int):
+        return QueryResults(
+            self.query,
+            self.stream.select(lambda qm, ms: (qm, ms.take(k)))
         )
     
     def _tree(self, tree):
@@ -64,7 +85,7 @@ class QueryResults(ReadableClass):
         tree.add(f'query={query}')
         
         match_repr = tree.add('matches')
-        for qmatch, matches in self._stream.take(10):
+        for qmatch, matches in self.stream.take(10):
             rep = Formatter.BOLD(
                 f'{qmatch.start} - {qmatch.end}: {qmatch.slice(query)}'
             )
