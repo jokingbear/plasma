@@ -8,3 +8,4 @@ setuptools
 huggingface_hub
 rich
 pyzmq
+intervaltree
