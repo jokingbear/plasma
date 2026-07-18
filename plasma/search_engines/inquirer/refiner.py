@@ -1,49 +1,55 @@
-import numpy as np
-
-from collections import Counter
+from intervaltree import Interval, IntervalTree
 from .position_path import PositionPath
 from .segment import Segment
+from ...data_model.collections import Stream, ZippedStream
 
 
 class SegmentRefiner:
     
     def __call__(self, segments:list[Segment]):
-        unique_segments = dict[tuple, Segment]()
+        interval_map = dict[tuple, list[Segment]]()
         for s in segments:
-            key = tuple(s.position_path)
-            if key not in unique_segments:
-                unique_segments[key] = s
+            p = s.position_path
+            start, _ = p[0]
+            if len(p) == 1:
+                end = start + 1
+            else:
+                end, _ = p[-1]
+                end += 1
 
-        interval_counts = Counter()
-        intervals = list[list]()
-        segments = []
-        for s in unique_segments.values():
-            interval_counts[s.qtoken_start, s.qtoken_end] += 1
-            intervals.append([s.qtoken_start, s.qtoken_end])
-            segments.append(s)
-        
-        intervals = np.array(intervals)
-        bounds = (intervals[:, 0] <= intervals[:, [0]]) & (intervals[:, [1]] <= intervals[:, 1])
-        bound_counts = bounds.sum(axis=1)
-        limits = np.array([interval_counts[s, e] for s, e in intervals])
-        unbound_args, = np.where(bound_counts == limits)
+            interval_map.setdefault((start, end), []).append(s)
 
-        return [segments[a] for a in unbound_args]
+        return _remove_contained(interval_map)
 
 
 class PathRefiner:
     
     def __call__(self, data:list[PositionPath]):
-        interval_counts = Counter()
-        intervals = []
+        interval_map = dict[tuple, list[PositionPath]]()
         for p in data:
-            interval_counts[p.offset(0), p.offset(-1)] += 1
-            intervals.append([p.offset(0), p.offset(-1)])
-        
-        intervals = np.array(intervals)
-        bounds = (intervals[:, 0] <= intervals[:, [0]]) & (intervals[:, [1]] <= intervals[:, 1])
-        bound_counts = bounds.sum(axis=1)
-        limits = np.array([interval_counts[s, e] for s, e in intervals])
-        unbound_args, = np.where(bound_counts == limits)
+            start, _ = p[0]
+            if len(p) == 1:
+                end = start + 1
+            else:
+                end, _ = p[-1]
+                end += 1
 
-        return [data[a] for a in unbound_args]
+            interval_map.setdefault((start, end), []).append(p)
+
+        return _remove_contained(interval_map)
+
+
+def _remove_contained[T](interval_map:dict[tuple, list[T]]):
+    interval_index = IntervalTree(Interval(s, e) for s, e in interval_map)
+    return (
+        ZippedStream[int, int](interval_map)
+        .filter(lambda s, e:
+            Stream[Interval](interval_index.overlap(s, e))
+            .split(lambda i: (i.begin, i.end))
+            .filter(
+                lambda cs, ce: cs <= s and e <= ce,
+                lambda cs, ce: cs != s or ce != e,
+            ).empty
+        ).
+        unwind(lambda s, e: interval_map[s, e])
+    )

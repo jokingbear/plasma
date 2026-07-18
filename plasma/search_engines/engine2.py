@@ -56,7 +56,7 @@ class QueryResults(ReadableClass):
         self.query = query
         self.stream = group_results
     
-    def filter_pergroup(self, filter:Callable[[QueryMatch, Match], bool]):
+    def filter(self, filter:Callable[[QueryMatch, Match], bool]):
         return QueryResults(
             self.query,
             self.stream
@@ -92,7 +92,8 @@ class QueryResults(ReadableClass):
             )
             qtree = match_repr.add(rep)
             for m in matches.take(5):
-                mtree = qtree.add(f'{m.db.arg} - {m.db.slice()} - {m.db.value}')
+                formatted = f'id:{m.db.arg} - {m.db.slice()} - {m.db.value}'
+                mtree = qtree.add(formatted)
                 mtree.add(
                     f'substring:{m.score.substring:.4f}'
                     f'- match len: {m.score.token_len}'

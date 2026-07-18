@@ -45,7 +45,7 @@ class PathInquirer(ReadableClass):
         if len(segments) > 0:
             segments = self._segment_refiner(segments)
             return (
-                Stream(segments)
+                segments
                 .groupby(lambda s: (s.qtoken_start, s.qtoken_end), lambda s:s)
                 .unwind(lambda _, gs:
                     Stream(gs)
