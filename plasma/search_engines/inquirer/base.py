@@ -1,13 +1,11 @@
 import pandas as pd
-import itertools
 
 from typing import Callable
-
 from .matcher import SegmentMatch
 from .solver import Solver
 from .position_graph import PositionGraph
 from .refiner import SegmentRefiner, PathRefiner
-from .segment import Match, Segment
+from .segment import Match
 from ..index import Index
 from ...functional import ReadableClass
 from ...data_model.collections import Stream
@@ -16,24 +14,22 @@ from ...data_model.collections import Stream
 class PathInquirer(ReadableClass):
     
     def __init__(self, 
-                index:Index, 
-                tokenizer:Callable[[str], pd.DataFrame],
-                token_matcher:Callable[[list[str]], dict[str, dict[str, float]]],
-                topk:int,
-            ):
+            index:Index, 
+            tokenizer:Callable[[str], pd.DataFrame],
+            token_matcher:Callable[[list[str]], dict[str, dict[str, float]]],
+        ):
         super().__init__()
         
         self.index = index
         self.tokenizer = tokenizer
         self.token_matcher = token_matcher
-        self.topk = topk
         self._path_refiner = PathRefiner()
         self._segment_refiner = SegmentRefiner()
         self._segment2match = SegmentMatch()
     
     def __call__(self, query:str):
-        query = query.lower()
-        qtoken_frame = self.tokenizer(query)
+        processed_query = query.lower()
+        qtoken_frame = self.tokenizer(processed_query)
         qtoken_2_dbtokens = self.token_matcher(qtoken_frame['token'].unique().tolist())
         position_graph = PositionGraph(self.index, qtoken_frame, qtoken_2_dbtokens)
         
@@ -49,18 +45,16 @@ class PathInquirer(ReadableClass):
         if len(segments) > 0:
             segments = self._segment_refiner(segments)
             return (
-                Stream(segments)
+                segments
                 .groupby(lambda s: (s.qtoken_start, s.qtoken_end), lambda s:s)
-                .map_value(lambda _, gs: 
+                .unwind(lambda _, gs:
                     Stream(gs)
                     .unwind(lambda s:self._segment2match(s, qtoken_frame, self.index))
                     .sort(
-                        lambda m:(m.matching_score, m.matched_len, m.coverage_score), 
+                        lambda m:(m.score.substring, m.score.token_len, m.score.coverage), 
                         reverse=True
                     )
-                    .take(self.topk)
                 )
-                .unwind(lambda _, ms: ms)
             )
 
         return Stream[Match]([])

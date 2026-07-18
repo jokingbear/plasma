@@ -1,14 +1,20 @@
-import plasma.functional as F
 import pandas as pd
 
 from typing import Sequence
+from warnings import deprecated
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
-from .inquirer import PathInquirer, Match
+from .inquirer import PathInquirer
 from .token_matcher import TokenMatcher
+from ..data_model.collections import ZippedStream
+from ..functional import ReadableClass
 
 
-class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
+@deprecated(
+    'this class is deprecated, use StreamIndex for better data model supports',
+    stacklevel=2
+)
+class GraphIndexer(ReadableClass):
     
     def __init__(
             self, 
@@ -24,14 +30,25 @@ class GraphIndexer(F.AutoPipe[[str], pd.DataFrame]):
         
         self._index = index
         self.context_splitter = RegexTokenizer(group_splitter)
-        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher, topk)
+        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher)
+        self.topk = topk
     
     def run(self, query:str):
         contexts = self.context_splitter(query)
-        data = list[Match]()
-        for start, end, context in contexts.itertuples(index=False):
-            matches = self.path_inquirer(context).select(lambda m:m.update(start))
-            data.extend(matches)
+        data = (
+            ZippedStream[int, int, str](contexts.itertuples(index=False))
+            .unwind(lambda start, end, context:
+                self.path_inquirer(context)
+                .select(lambda m: m.update(start))
+            ).split(lambda m:
+                (
+                    m.query.start, m.query.end,
+                    m.db.arg, m.db.start, m.db.end, m.db.value, 
+                    m.score.substring, m.score.coverage,
+                    m.score.token_len, m.score.harmonic
+                )
+            )
+        )
         
         columns = [
             'query_start_idx', 'query_end_idx',

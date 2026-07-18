@@ -4,7 +4,7 @@ import networkx as nx
 import pandas as pd
 
 from scipy.stats import hmean
-from .segment import Match
+from .segment import Match, QueryMatch, DBMatch, Score
 from .position_path import PositionPath
 from .segment import Segment
 from ..index import Index
@@ -50,7 +50,7 @@ def _match(position_path:PositionPath, db_path:tuple[str]):
         return
     
     size, offsets = max(matches)
-    return difflib.Match(*offsets, size)
+    return difflib.Match(*offsets, size) #type:ignpre
 
 
 def _construct(
@@ -60,19 +60,23 @@ def _construct(
         qtoken_frame:pd.DataFrame, 
         index:Index
     ):
-    db_path = index.get_path(db_path_arg)
-    coverage_score = match.size / len(db_path)
+    query_match = QueryMatch(
+        qtoken_frame.iloc[position_path.offset(match.a)]['start_idx'],
+        qtoken_frame.iloc[position_path.offset(match.a + match.size - 1)]['end_idx'],
+    )
     
     db_char_start, _ = index.get_char_interval(db_path_arg, match.b)
     _, db_char_end = index.get_char_interval(db_path_arg, match.b + match.size - 1)
-    score = hmean([position_path.score(a) for a in range(match.a, match.a + match.size)])
-    return Match(
-        qtoken_frame.iloc[position_path.offset(match.a)]['start_idx'], 
-        qtoken_frame.iloc[position_path.offset(match.a + match.size - 1)]['end_idx'],
-        db_path_arg,
-        db_char_start,
-        db_char_end,
-        index.get_data(db_path_arg),
-        score, coverage_score, match.size,
-        hmean([score, coverage_score])
+    db_match = DBMatch(
+        db_path_arg, db_char_start, db_char_end, 
+        index.get_data(db_path_arg)
     )
+    
+    db_path = index.get_path(db_path_arg)
+    substring_score = hmean([position_path.score(a) for a in range(match.a, match.a + match.size)])
+    coverage_score = match.size / len(db_path)
+    score = Score(
+        substring_score, coverage_score, match.size,
+        float(hmean([substring_score, coverage_score]))
+    )
+    return Match(query_match, db_match, score)
