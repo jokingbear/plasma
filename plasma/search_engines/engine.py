@@ -1,6 +1,7 @@
 import pandas as pd
 
 from typing import Sequence
+from warnings import deprecated
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
 from .inquirer import PathInquirer
@@ -9,6 +10,10 @@ from ..data_model.collections import ZippedStream
 from ..functional import ReadableClass
 
 
+@deprecated(
+    'this class is deprecated, use StreamIndex for better data model supports',
+    stacklevel=2
+)
 class GraphIndexer(ReadableClass):
     
     def __init__(
