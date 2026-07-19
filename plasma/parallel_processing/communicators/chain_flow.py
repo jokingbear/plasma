@@ -10,6 +10,12 @@ class ChainFlow(AsyncFlow):
     def __init__(self):
         super().__init__()
 
+    @overload
+    def __matmul__(self, other:Queue) -> "QueueChainer":...
+    
+    @overload
+    def __matmul__(self, other:Callable) -> "BlockChainer":...
+    
     def __matmul__(self, other:Queue|Callable):
         if isinstance(other, Queue):
             return QueueChainer(self, other)

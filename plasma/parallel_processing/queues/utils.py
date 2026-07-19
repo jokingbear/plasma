@@ -10,16 +10,14 @@ def internal_run(
     ):
     while True:
         data = queue.get()
-
-        if data is Signal.CANCEL:
-            break
-        
         try:
+            if data is Signal.CANCEL:
+                break
+
             processor(data)
         except Exception as e:
             if exception_handler is None:
                 raise e
-
             exception_handler(data, e)
         finally:
             queue.task_done()
