@@ -9,7 +9,7 @@ class TimeIO:
     def __init__(self, name:str):
         self.name = name
         self._start = time.time()
-        self._end:float = None
+        self._end:float|None = None
         self._args = []
         self._kwargs = {}
 
