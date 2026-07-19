@@ -16,7 +16,7 @@ class ParallelStream[I]:
     def select[O](self, func:Callable[[I], O]):
         return ParallelStream(self.__data, self.__pool.map(func))
 
-    def thread_select[O](self, 
+    def select_by_thread[O](self, 
             func:Callable[[I], O], *,
             num_worker:int, qsize:int=100
         ):
@@ -25,7 +25,7 @@ class ParallelStream[I]:
             self.__pool.thread_map(func, num_worker, qsize)
         )
 
-    def process_select[O](self,             
+    def select_by_process[O](self,             
             func:Callable[[I], O], *,
             num_worker:int, qsize:int=100
         ):
@@ -34,7 +34,7 @@ class ParallelStream[I]:
             self.__pool.process_map(func, num_worker, qsize)
         )
 
-    def evaluate(self, **tqdm_kwargs):
+    def stream(self, verbose=False, **tqdm_kwargs):
         accumulator = DynamicAccumulator[Any, list[I]](ignore_none=False)
         
         flow = (
@@ -42,7 +42,8 @@ class ParallelStream[I]:
             .compile()
         )
         counter = 0
-        print(flow)
+        if verbose:
+            print(flow)
         with flow:
             for d in self.__data:
                 flow.put(d)
