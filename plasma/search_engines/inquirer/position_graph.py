@@ -2,9 +2,9 @@ import networkx as nx
 import pandas as pd
 import itertools
 
-from scipy.stats import hmean
-from ..index import Index
 from .position_path import PositionPath
+from ..index import Index
+from ...data_model.collections import Stream
 
 
 class PositionGraph(nx.DiGraph):
@@ -27,10 +27,21 @@ class PositionGraph(nx.DiGraph):
             )
     
     def generate_paths(self):
-        roots = (n for n in self if self.in_degree(n) == 0)
-        leaves = [n for n in self if self.out_degree(n) == 0]
+        return (
+            Stream(nx.connected_components(self.to_undirected()))
+            .split(lambda c:(
+                    [n for n in c if self.in_degree(n) == 0],
+                    [n for n in c if self.out_degree(n) == 0]
+                )
+            ).unwind(lambda rs, ls:
+                Stream(rs)
+                .unwind(lambda r: nx.all_simple_paths(self, r, ls))
+                .select(lambda p:
+                    PositionPath(
+                        p,
+                        {n[1]: self.nodes[n]['score'] for n in p}
+                    )
+                )
+            )
+        )
 
-        for r in roots:
-            for p in nx.all_simple_paths(self, r, leaves):
-                scores = dict[str, float]((itk[1], self.nodes[itk]['score']) for itk in p)
-                yield PositionPath(p, scores)
