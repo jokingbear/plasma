@@ -23,10 +23,10 @@ class BiMap[S:Hashable, T:Hashable](ReadableClass):
         self._st_map = source_target_map
         self._ts_map = target_source_map
     
-    def get_sources(self, target:T, default:S|None=None):
+    def get_source(self, target:T, default:S|None=None):
         return self._ts_map.get(target, default)
     
-    def get_targets(self, source:S, default:T|Literal['empty']|None=None):
+    def get_target(self, source:S, default:T|None=None):
         return self._st_map.get(source, default)
     
     @property

@@ -37,7 +37,7 @@ class PathInquirer(ReadableClass):
         if len(paths) > 0:
             paths = self._path_refiner(paths)
         
-        solver = Solver(position_graph, self.index.get_path_args)
+        solver = Solver(self.index, position_graph, self.index.get_path_args)
         segments = list(
             Stream(paths).unwind(solver)
         )
