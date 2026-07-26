@@ -65,7 +65,7 @@ class GenericStream[T](BaseStream[T]):
     def sample(self, n:int, seed:int|None=None, replace=False):
         data = self._data
         if not isinstance(data, Sequence):
-            data = [*data]
+            data = [*self]
         
         rng = np.random.default_rng(seed)
         args = rng.choice(len(data), size=n, replace=replace)
