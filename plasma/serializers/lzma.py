@@ -1,21 +1,21 @@
-import pickle
 import lzma
 
-from .protocols import Serializer
+from .pickle import Pickler
 
 
-class Lzma(Serializer):
+class Lzma(Pickler):
     
     def __init__(self, preset:int|None=None):
         super().__init__()
         self.preset = preset
 
     def serialize(self, x):
-        contents = pickle.dumps(x)
+        contents = super().serialize(x)
         return lzma.compress(
             contents, preset=self.preset
         )
 
     def deserialize(self, x):
         contents = lzma.decompress(x)
-        return pickle.loads(contents)
+        return super().deserialize(contents)
+
