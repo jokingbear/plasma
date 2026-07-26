@@ -1,4 +1,7 @@
-from typing import Any, Callable, Iterable
+import numpy as np
+
+from typing import Any, cast
+from collections.abc import Callable, Iterable, Sequence
 
 from .base import BaseStream
 
@@ -58,3 +61,15 @@ class GenericStream[T](BaseStream[T]):
                 state = new_state
 
         return state
+
+    def sample(self, n:int, seed:int|None=None, replace=False):
+        data = self._data
+        if not isinstance(data, Sequence):
+            data = [*self]
+        
+        rng = np.random.default_rng(seed)
+        args = rng.choice(len(data), size=n, replace=replace)
+        
+        for a in args:
+            yield cast(T, data[a])
+

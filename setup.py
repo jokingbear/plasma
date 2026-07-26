@@ -1,8 +1,9 @@
-import re
 import os
+import re
 
-from setuptools import setup
 from pathlib import Path
+from setuptools import setup
+
 
 packages = [re.sub(r'\\|\/', '.', str(p.parent)) for p in Path('plasma').rglob('__init__.py')]
 
@@ -14,7 +15,7 @@ with open(requirement_path) as f:
 
 setup(
     name='plasma',
-    version='4.31.6a2',
+    version='4.31.14a0',
     packages=[*packages],
     license='MIT',
     author='jokingbear',

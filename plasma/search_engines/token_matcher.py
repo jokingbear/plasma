@@ -1,11 +1,10 @@
 import difflib
 
-from ..functional import AutoPipe
-from collections import defaultdict
 from .index import Index
+from ..data_model.collections import Stream
 
 
-class TokenMatcher(AutoPipe[[list[str]], dict[str, dict[str, float]]]):
+class TokenMatcher:
 
     def __init__(self, index:Index, threshold:float):
         super().__init__()
@@ -13,12 +12,11 @@ class TokenMatcher(AutoPipe[[list[str]], dict[str, dict[str, float]]]):
         self._index = index
         self.threshold = threshold
     
-    def run(self, tokens:list[str]):
-        matches = defaultdict(lambda: {})
-        for qtk in tokens:
-            for db_tk in self._index.tokens:
-                score = difflib.SequenceMatcher(None, qtk, db_tk).ratio()
-                if score >= self.threshold:
-                    matches[qtk][db_tk] = score
-
-        return matches
+    def __call__(self, tokens:list[str]):
+        return dict(
+            Stream(tokens).product(self._index.tokens)
+            .groupby(
+                lambda qtk, _: qtk, 
+                lambda qtk, rtk: (rtk, difflib.SequenceMatcher(None, qtk, rtk))
+            ).select(lambda _, ms: {qtk: m.ratio() for qtk, m in ms})
+        )
