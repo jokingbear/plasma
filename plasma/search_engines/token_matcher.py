@@ -12,7 +12,7 @@ class TokenMatcher:
         self._index = index
         self.threshold = threshold
     
-    def run(self, tokens:list[str]):
+    def __call__(self, tokens:list[str]):
         return dict(
             Stream(tokens).product(self._index.tokens)
             .groupby(
