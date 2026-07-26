@@ -1,5 +1,6 @@
 from itertools import chain, product
-from typing import Any, Callable, Iterable, Sequence
+from typing import Any
+from collections.abc import Callable, Iterable, Sequence
 
 from .generic import GenericStream
 from ....functional import auto_map
@@ -39,6 +40,9 @@ class Stream[T](GenericStream[T]):
     
     def zip_product[*V](self, data:Iterable[tuple[*V]]):
         return ZippedStream((d1, *d2) for d1, d2 in product(self, data))
+    
+    def sample(self, n: int, seed: int | None = None, replace=False):
+        return Stream(super().sample(n, seed, replace))
     
     def evaluate(self):
         return list(self)
@@ -109,6 +113,9 @@ class GroupStream[K, V](GenericStream[tuple[K, Sequence[V]]]):
             stateful=True
         ):
         return super().accumulate(intial_state, auto_map(selector), accumulator, stateful)
+    
+    def sample(self, n: int, seed: int | None = None, replace=False):
+        return GroupStream(super().sample(n, seed, replace))
 
 
 class ZippedStream[*T](GenericStream[tuple[*T]]):
@@ -163,3 +170,6 @@ class ZippedStream[*T](GenericStream[tuple[*T]]):
             stateful=True
         ):
         return super().accumulate(intial_state, auto_map(selector), accumulator, stateful)
+
+    def sample(self, n: int, seed: int | None = None, replace=False):
+        return ZippedStream(super().sample(n, seed, replace))

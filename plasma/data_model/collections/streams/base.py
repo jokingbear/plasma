@@ -1,5 +1,5 @@
 from itertools import tee
-from typing import Iterable
+from collections.abc import Iterable
 
 
 class BaseStream[T]:
@@ -20,5 +20,4 @@ class BaseStream[T]:
         return iter2
 
     def __iter__(self):
-        for d in self._clone():
-            yield d
+        yield from self._clone()
