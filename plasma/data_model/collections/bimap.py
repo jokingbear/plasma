@@ -1,4 +1,4 @@
-from typing import Iterable, Hashable, Literal
+from collections.abc import Iterable, Hashable
 from warnings import warn
 
 from ...functional import ReadableClass
