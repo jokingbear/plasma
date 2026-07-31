@@ -17,16 +17,17 @@ class StreamIndex(ReadableClass):
             group_splitter=r"[^\.\n]+",
             tokenizer=r"\w+",
             token_threshold=0.7,
+            token_topk=5,
         ):
         super().__init__()
 
         tokenizer = RegexTokenizer(tokenizer)
         index = Index(data, tokenizer)
-        token_matcher = TokenMatcher(index, token_threshold)
+        token_matcher = TokenMatcher(index, token_threshold, token_topk)
 
         self._index = index
         self.context_splitter = RegexTokenizer(group_splitter)
-        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher)
+        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher) #type:ignore
 
     def __call__(self, query: str):
         contexts = self.context_splitter(query)
