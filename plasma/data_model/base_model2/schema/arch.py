@@ -1,0 +1,1 @@
+SCHEMA = '__schema'
