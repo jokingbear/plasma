@@ -26,7 +26,7 @@ class GraphIndexer(ReadableClass):
         
         tokenizer = RegexTokenizer(tokenizer)
         index = Index(data, tokenizer)
-        token_matcher = TokenMatcher(index, token_threshold)
+        token_matcher = TokenMatcher(index, token_threshold, topk)
         
         self._index = index
         self.context_splitter = RegexTokenizer(group_splitter)

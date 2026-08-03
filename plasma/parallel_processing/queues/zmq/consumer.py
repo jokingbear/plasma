@@ -2,7 +2,6 @@ import zmq
 import threading
 
 from dataclasses import dataclass
-from typing import Sequence
 from ..base import Queue
 from ..signals import Signal
 from ..thread import ThreadQueue
@@ -13,12 +12,14 @@ class SubZMQ(Queue["_State"]):
     
     def __init__(self, 
             connection:str, name=None, 
-            n=1, serializer:Serializer=Pickler(),
+            n=1, prefetch=1,
+            serializer:Serializer|None=None,
         ):
         super().__init__(name, n)
 
+        self.prefetch = prefetch
         self.connection = connection
-        self.serializer = serializer
+        self.serializer = serializer or Pickler()
     
     def _put(self, x):
         raise NotImplementedError('consumer queue cannot be put')
@@ -27,9 +28,9 @@ class SubZMQ(Queue["_State"]):
         return _State(
             zmq.Context(), self.connection,
             self.serializer,
-            ThreadQueue(n=self.num_runner, qsize=1)
+            ThreadQueue(n=self.num_runner, qsize=self.prefetch)
                 .register_callback(self._callback)
-                .on_exception(self._exception_handler)
+                .on_exception(self._exception_handler) # type:ignore
                 .run()
         ).start()
     
@@ -52,19 +53,22 @@ class _State:
         return self
     
     def _run(self):
-        socket = self.context.socket(zmq.PULL)
+        socket:zmq.Socket = self.context.socket(zmq.PULL)
         socket.bind(self.connection)
         
         while True:
             data = self.serializer.deserialize(socket.recv())
-            self.workers.put(data)
-            
             if data is Signal.CANCEL:
                 break
-    
+
+            self.workers.put(data)
+        
+        socket.close(0)
+        
     def release(self):
         socket = self.context.socket(zmq.PUSH)
         socket.connect(self.connection)
         socket.send(
             self.serializer.serialize(Signal.CANCEL)
         )
+        self.workers.release()
