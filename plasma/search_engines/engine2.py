@@ -25,7 +25,6 @@ class StreamIndex(ReadableClass):
         index = Index(data, tokenizer)
         token_matcher = TokenMatcher(index, token_threshold, token_topk)
 
-        self._index = index
         self.context_splitter = RegexTokenizer(group_splitter)
         self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher) #type:ignore
 
@@ -35,22 +34,20 @@ class StreamIndex(ReadableClass):
             query,
             ZippedStream[int, int, str](contexts.itertuples(index=False))
             .unwind(
-                lambda start, end, context: self.path_inquirer(context).select(
-                    lambda m: m.update(start)
-                )
-            )
-            .groupby(lambda m: m.query, lambda m: m)
+                lambda start, _, context: 
+                    self.path_inquirer(context).select(
+                        lambda m: m.update(start)
+                    )
+            ).groupby(lambda m: m.query, lambda m: m)
             .select(lambda qm, ms: Stream(ms)),
         )
 
-    def run(self, query: str):
-        return self(query)
-
 
 class QueryResults(ReadableClass):
-    def __init__(
-        self, query: str, group_results: ZippedStream[QueryMatch, Stream[Match]]
-    ):
+    def __init__(self, 
+            query: str, 
+            group_results: ZippedStream[QueryMatch, Stream[Match]]
+        ):
         super().__init__()
 
         self.query = query
@@ -64,7 +61,7 @@ class QueryResults(ReadableClass):
             ).filter(lambda _, ms: not ms.empty),
         )
 
-    def sort(self, key: Callable[[QueryMatch, Match], Any], descending=True):
+    def sort(self, key:Callable[[QueryMatch, Match], Any], descending=True):
         return QueryResults(
             self.query,
             self.stream.select(
@@ -72,7 +69,7 @@ class QueryResults(ReadableClass):
             ),
         )
 
-    def top(self, k: int):
+    def top(self, k:int):
         return QueryResults(
             self.query, self.stream.select(lambda qm, ms: (qm, ms.take(k)))
         )
