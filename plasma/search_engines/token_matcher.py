@@ -2,9 +2,10 @@ import difflib
 
 from .index import Index
 from ..data_model.collections import Stream, ZippedStream
+from ..functional import ReadableClass
 
 
-class TokenMatcher:
+class TokenMatcher(ReadableClass):
 
     def __init__(self, index:Index, threshold:float, topk:int|None):
         super().__init__()

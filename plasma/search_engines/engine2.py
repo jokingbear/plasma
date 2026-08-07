@@ -26,7 +26,7 @@ class StreamIndex(ReadableClass):
         token_matcher = TokenMatcher(index, token_threshold, token_topk)
 
         self.context_splitter = RegexTokenizer(group_splitter)
-        self.path_inquirer = PathInquirer(self._index, tokenizer, token_matcher) #type:ignore
+        self.path_inquirer = PathInquirer(index, tokenizer, token_matcher) #type:ignore
 
     def __call__(self, query: str):
         contexts = self.context_splitter(query)

@@ -1,14 +1,15 @@
 import networkx as nx
 
+from rich.markup import escape
 from rich.tree import Tree
 from rich.console import Console
-from typing import Any, Callable, Sequence
+from typing import Any
+from collections.abc import Callable, Sequence
 
 
 class Repr:
     
-    def __init__(
-            self, 
+    def __init__(self, 
             root, graph:nx.DiGraph, 
             type_getter:Callable[[Any], tuple[type, Sequence[type]]]
         ):
@@ -25,12 +26,12 @@ class Repr:
                 console.print(tree.children[0])    
             return capture.get()[1:]
 
-    def _iterate(self, node, tree:Tree): #type:ignore
+    def _iterate(self, node, tree:Tree):
         origin, args = self.type_getter(node)
         
         type_str = origin.__name__
         if len(args) > 0:
-            type_str += f'\[{','.join(a.__name__ for a in args)}]' #type:ignore
+            type_str += escape(f'[{','.join(a.__name__ for a in args)}]')
         key = '' if len(node) == 0 else node[-1]
         tree = tree.add(f'{key}:{type_str}')
 
