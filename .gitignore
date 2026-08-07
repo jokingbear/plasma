@@ -50,3 +50,4 @@ dependencies
 *.egg-info
 
 *.db
+*.pkl
