@@ -18,5 +18,4 @@ class SqliteStorage:
         return self._init_connection(thread_id)
     
     def _init_connection(self, thread_id):
-        print('test')
         return Connection(self.filepath)
