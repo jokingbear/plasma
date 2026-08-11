@@ -1,7 +1,7 @@
 import random
 import sched
 
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 from ...queues import Queue, Full
 from ....functional import ReadableClass
 
@@ -9,6 +9,8 @@ from ....functional import ReadableClass
 class RoundRobinSharder(ReadableClass):
     
     def __init__(self, *queues:Queue):
+        super().__init__()
+
         self.queues = queues
         self._scheduler = None
     
