@@ -1,5 +1,4 @@
-import zstd
-
+from compression import zstd
 from .pickle import Pickler
 
 
