@@ -20,7 +20,12 @@ class SqliteStorage:
     
     def query(self, statement:str):
         return Query(self, statement)
-
+    
+    def execute(self, *statements:str):
+        with self.connection as conn:
+            for s in statements:
+                conn.execute(s)
+            
 
 def _init_connection(filepath:str, thread_id:int):
     return Connection(filepath)
@@ -32,7 +37,8 @@ class Query:
         self.storage = storage
         self.query = query
     
-    def executemany(self, params):
+    def executemany(self, params=None):
+        params =  params or []
         with self.storage.connection as conn:
             conn.executemany(self.query, params)
     
