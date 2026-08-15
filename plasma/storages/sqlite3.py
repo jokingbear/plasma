@@ -12,12 +12,11 @@ class SqliteStorage:
         
         connection_initator = lru_cache(maxsize=max_connection)(_init_connection)
         connection_initator = partial_right(connection_initator, filepath)
-        self._init_connection = connection_initator
 
     @property
     def connection(self):
         thread_id = threading.get_ident()
-        return self._init_connection(thread_id)
+        return _init_connection(self.filepath, thread_id)
     
     def query(self, statement:str):
         return Query(self, statement)

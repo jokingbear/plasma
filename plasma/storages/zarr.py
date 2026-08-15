@@ -1,12 +1,14 @@
 import zarr
 import numpy as np
+import os
+import shutil
 
 from collections.abc import Sequence, Iterable
-from typing import cast
+from typing import cast, Any
 from zarr.codecs import BloscCodec
 
 
-class Tensor:
+class TensorStorage:
     
     def __init__(self, 
             filepath:str, 
@@ -42,7 +44,7 @@ class Tensor:
         values = [v for v in values]
         batch_size = values[0].shape[0] if len(values[0].shape) > 1 else 1
         
-        values = np.concat([v.reshape(batch_size, -1) for v in values])
+        values = np.concat([v.reshape(batch_size, -1) for v in values], axis=-1)
         if isinstance(key, int):
             key = [key]
         
@@ -67,27 +69,33 @@ class Tensor:
         )
         return self
     
+    def __repr__(self):
+        return f'{type(self).__name__}(shapes={self._root.shape[0], *self.shapes})'
+    
     @staticmethod
     def construct(
-            filepath:str, 
+            filepath:str, dtype:Any,
             component_shapes:Sequence[Sequence[int]],
             num_data:int, chunk:int, shard:int,
             compression:int,
         ):
+        if os.path.exists(filepath):
+            shutil.rmtree(filepath)
+
         dim_size = sum(_flattened_shapes(component_shapes))
         codec = BloscCodec(clevel=compression, shuffle='shuffle')
         zarr.create_array(
-            filepath, 
+            filepath, dtype=dtype,
             shape=[num_data, dim_size],
             chunks=[chunk, dim_size],
             shards=(shard, dim_size),
             compressors=codec
         )
         
-        return Tensor(filepath, component_shapes)
+        return TensorStorage(filepath, component_shapes)
 
 
 def _flattened_shapes(shapes:Sequence[Sequence[int]]):
     for s in shapes:
         s = np.prod(s)
-        yield cast(int, s)
+        yield int(s)
