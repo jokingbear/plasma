@@ -36,9 +36,10 @@ class Query:
         with self.storage.connection as conn:
             conn.executemany(self.query, params)
     
-    def execute(self, params):
+    def execute(self, params=None):
+        params = params or []
         with self.storage.connection as conn:
-            return conn.execute(self.query, params)
+            yield from conn.execute(self.query, params)
     
     def __repr__(self):
         return self.query
