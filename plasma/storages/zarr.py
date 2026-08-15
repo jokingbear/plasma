@@ -23,7 +23,7 @@ class Tensor:
     def shard(self) -> int:
         return self._root.shards[0] #type:ignore
     
-    def __getitem__(self, args):
+    def get(self, args:int|list[int]|slice):
         array = cast(np.ndarray, self._root[args])
         flattend_shapes = _flattened_shapes(self.shapes)
         offset = 0
@@ -35,7 +35,10 @@ class Tensor:
             else:
                 yield array[:, slice_args].reshape(-1, *shape)
     
-    def __setitem__(self, key:int|list[int]|slice, values:Iterable[np.ndarray]):
+    def __getitem__(self, args:int|list[int]|slice):
+        return self.get(args)
+    
+    def set(self, key:int|list[int]|slice, values:Iterable[np.ndarray]):
         values = [v for v in values]
         batch_size = values[0].shape[0] if len(values[0].shape) > 1 else 1
         
@@ -45,6 +48,9 @@ class Tensor:
         
         self._root[key] = values
     
+    def __setitem__(self, key:int|list[int]|slice, values:Iterable[np.ndarray]):
+        self.set(key, values)
+
     def reconfig(self, chunk:int, shard:int, compression:int):
         codec = BloscCodec(clevel=compression, shuffle='shuffle')
         shape = self._root.shape
