@@ -10,12 +10,10 @@ from zarr.codecs import BloscCodec
 
 class TensorStorage:
     
-    def __init__(self, 
-            filepath:str, 
-            component_shapes:Sequence[Sequence[int]]
-        ):
-        self._root = zarr.open_array(filepath)
-        self.shapes = component_shapes
+    def __init__(self, filepath:str):
+        array = zarr.open_array(filepath)
+        self._root = array
+        self.shapes = cast(Sequence[Sequence[int]], array.attrs['component_shapes'])
     
     @property
     def chunk(self):
@@ -89,10 +87,11 @@ class TensorStorage:
             shape=[num_data, dim_size],
             chunks=[chunk, dim_size],
             shards=(shard, dim_size),
-            compressors=codec
+            compressors=codec,
+            attributes={'component_shapes': component_shapes},
         )
         
-        return TensorStorage(filepath, component_shapes)
+        return TensorStorage(filepath)
 
 
 def _flattened_shapes(shapes:Sequence[Sequence[int]]):
