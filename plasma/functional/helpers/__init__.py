@@ -7,6 +7,13 @@ from .itertools import groupby
 from .color_printer import Color
 
 
-@deprecated('this class is deprecated, use auto_map instead')
+@deprecated('this class is deprecated, use auto_map instead', stacklevel=2)
 def auto_map_func(func):
     return auto_map(func)
+
+
+def callable_name(func):
+    return (
+        func.__qualname__ if hasattr(func, '__qualname__')
+        else type(func).__name__
+    )

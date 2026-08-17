@@ -1,8 +1,10 @@
-from typing import Callable
+from collections.abc import Callable
+from warnings import deprecated
 from ..pipes import AutoPipe
 from ..signature import Signature
 
 
+@deprecated('this class is deprecated, use pipe', stacklevel=2)
 class chain(AutoPipe):
 
     def __init__(self, *funcs:Callable):

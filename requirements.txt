@@ -10,3 +10,4 @@ rich
 pyzmq
 intervaltree
 sqlite-spellfix
+zarr
