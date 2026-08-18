@@ -1,36 +1,16 @@
 import multiprocessing as mp
 import threading
 
-from typing import Sequence, NamedTuple, Callable, Any
+from typing import NamedTuple, Any
+from collections.abc import Sequence, Callable
 from .signals import Signal
 from .utils import internal_run
 from .base import Queue
 from ...functional import partial_left
 from ...logging import TraceableException
-
-
-class _State(NamedTuple):
-    processes:Sequence[mp.Process]
-    error_queue:mp.JoinableQueue
-    error_catcher:threading.Thread
-    
-    def run(self):
-        for p in self.processes:
-            p.start()
-        
-        self.error_catcher.start()
-    
-    def release(self):
-        for p in self.processes:
-            p.join()
-            p.terminate()
-        
-        self.error_queue.put(Signal.CANCEL)
-        self.error_catcher.join()
-        self.error_queue.close()
     
 
-class ProcessQueue(Queue[_State]):
+class ProcessQueue(Queue['_State']):
 
     def __init__(self, n=1, name=None, qsize=0, timeout=None):
         super().__init__(name, n)
@@ -49,8 +29,7 @@ class ProcessQueue(Queue[_State]):
                         self._queue, self._callback, 
                         partial_left(_transfer_exception, error_queue)
                     )
-                ) 
-                for _ in range(self.num_runner)
+                ) for _ in range(self.num_runner)
             ],
             error_queue,
             threading.Thread(target=_handle_exception, args=(error_queue, self._exception_handler))
@@ -77,7 +56,6 @@ class ProcessQueue(Queue[_State]):
         del old_queue
         state = self._state
         del state
-        
         super().release()
 
     def is_alive(self):        
@@ -106,5 +84,26 @@ def _handle_exception(
         error = ChildProcessError(exception.original)
         error.add_note(exception.info)
         raise error
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         exception_handler(data, e)
+
+
+class _State(NamedTuple):
+    processes:Sequence[mp.Process]
+    error_queue:mp.JoinableQueue
+    error_catcher:threading.Thread
+    
+    def run(self):
+        for p in self.processes:
+            p.start()
+        
+        self.error_catcher.start()
+    
+    def release(self):
+        for p in self.processes:
+            p.join()
+            p.terminate()
+        
+        self.error_queue.put(Signal.CANCEL)
+        self.error_catcher.join()
+        self.error_queue.close()
