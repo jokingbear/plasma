@@ -1,6 +1,6 @@
 import pandas as pd
 
-from typing import Sequence
+from typing import Any, Sequence
 from warnings import deprecated
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
@@ -65,3 +65,6 @@ class GraphIndexer(ReadableClass):
             .set_index(['query_start_idx', 'query_end_idx'])
             .sort_values(sort_columns,ascending=[True, True, False, False, False])
         )
+
+    def __call__(self, query:str):
+        return self.run(query)
