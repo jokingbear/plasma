@@ -53,6 +53,7 @@ class TensorStorage:
 
     def reconfig(self, chunk:int, shard:int, compression:int):
         codec = BloscCodec(clevel=compression, shuffle='shuffle')
+        attributes = {k: v for k, v in self._root.attrs.items()}
         shape = self._root.shape
         storage = self._root.store
         self._root.store_path.delete_sync()
@@ -63,6 +64,7 @@ class TensorStorage:
             shards=(shard, *shape[1:]),
             dtype=np.float32,
             compressors=codec,
+            attributes=attributes,
             overwrite=True,
         )
         return self
