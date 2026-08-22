@@ -70,6 +70,7 @@ def _transfer_exception(error_queue:mp.JoinableQueue, data, e:Exception):
     error_queue.put((data, TraceableException(exception=e)))
 
 
+
 def _handle_exception(
         error_queue:mp.JoinableQueue, 
         exception_handler:Callable[[Any, Exception], None]
@@ -80,12 +81,13 @@ def _handle_exception(
     
     data, exception = signal
     exception:TraceableException
-    try:
-        error = ChildProcessError(exception.original)
-        error.add_note(exception.info)
-        raise error
-    except Exception as e:  # noqa: BLE001
-        exception_handler(data, e)
+    original_exception = exception.original
+    original_exception.add_note(exception.info) #type:ignore
+    
+    if exception_handler is None:
+        raise original_exception
+    else:
+        exception_handler(data, original_exception) #type:ignore
 
 
 class _State(NamedTuple):
