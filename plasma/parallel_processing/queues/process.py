@@ -20,7 +20,7 @@ class ProcessQueue(Queue['_State']):
         self._qsize = qsize
 
     def _init_state(self):
-        error_queue = mp.JoinableQueue()
+        error_queue = mp.SimpleQueue()
         state = _State(
             [
                 mp.Process(
@@ -70,29 +70,29 @@ def _transfer_exception(error_queue:mp.JoinableQueue, data, e:Exception):
     error_queue.put((data, TraceableException(exception=e)))
 
 
-
 def _handle_exception(
-        error_queue:mp.JoinableQueue, 
+        error_queue:mp.SimpleQueue, 
         exception_handler:Callable[[Any, Exception], None]
     ):
-    signal = error_queue.get()
-    if signal is Signal.CANCEL:
-        return
-    
-    data, exception = signal
-    exception:TraceableException
-    original_exception = exception.original
-    original_exception.add_note(exception.info) #type:ignore
-    
-    if exception_handler is None:
-        raise original_exception
-    else:
-        exception_handler(data, original_exception) #type:ignore
+    while True:
+        signal = error_queue.get()
+        if signal is Signal.CANCEL:
+            break
+        
+        data, exception = signal
+        exception:TraceableException
+        original_exception = exception.original
+        original_exception.add_note(exception.info) #type:ignore
+        
+        if exception_handler is None:
+            raise original_exception
+        else:
+            exception_handler(data, original_exception) #type:ignore
 
 
 class _State(NamedTuple):
     processes:Sequence[mp.Process]
-    error_queue:mp.JoinableQueue
+    error_queue:mp.SimpleQueue
     error_catcher:threading.Thread
     
     def run(self):
