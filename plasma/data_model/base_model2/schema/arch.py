@@ -1,1 +1,0 @@
-SCHEMA = '__schema'
