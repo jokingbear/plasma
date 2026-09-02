@@ -1,5 +1,6 @@
 from queue import Queue
-from typing import Callable, Any
+from typing import Any
+from collections.abc import Callable
 from .signals import Signal
 
 
@@ -17,7 +18,8 @@ def internal_run(
             processor(data)
         except Exception as e:
             if exception_handler is None:
-                raise e
+                raise
+
             exception_handler(data, e)
         finally:
             queue.task_done()

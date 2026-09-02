@@ -27,6 +27,10 @@ class ReadableClass:
                 tree.add(child)
         
         return tree
+    
+    def _full_tree(self):
+        root = Tree(self._root_repr())
+        return self._tree(root)
 
     def __setattr__(self, key:str, value):
         if key[0] != '_' and key not in self._marked_attributes:
@@ -35,5 +39,4 @@ class ReadableClass:
         super().__setattr__(key, value)
 
     def __repr__(self):
-        root = Tree(self._root_repr())
-        return rich_repr(self._tree(root))
+        return rich_repr(self._full_tree())

@@ -1,36 +1,16 @@
 import multiprocessing as mp
 import threading
 
-from typing import Sequence, NamedTuple, Callable, Any
+from typing import NamedTuple, Any
+from collections.abc import Sequence, Callable
 from .signals import Signal
 from .utils import internal_run
 from .base import Queue
 from ...functional import partial_left
 from ...logging import TraceableException
-
-
-class _State(NamedTuple):
-    processes:Sequence[mp.Process]
-    error_queue:mp.JoinableQueue
-    error_catcher:threading.Thread
-    
-    def run(self):
-        for p in self.processes:
-            p.start()
-        
-        self.error_catcher.start()
-    
-    def release(self):
-        for p in self.processes:
-            p.join()
-            p.terminate()
-        
-        self.error_queue.put(Signal.CANCEL)
-        self.error_catcher.join()
-        self.error_queue.close()
     
 
-class ProcessQueue(Queue[_State]):
+class ProcessQueue(Queue['_State']):
 
     def __init__(self, n=1, name=None, qsize=0, timeout=None):
         super().__init__(name, n)
@@ -40,7 +20,7 @@ class ProcessQueue(Queue[_State]):
         self._qsize = qsize
 
     def _init_state(self):
-        error_queue = mp.JoinableQueue()
+        error_queue = mp.SimpleQueue()
         state = _State(
             [
                 mp.Process(
@@ -49,8 +29,7 @@ class ProcessQueue(Queue[_State]):
                         self._queue, self._callback, 
                         partial_left(_transfer_exception, error_queue)
                     )
-                ) 
-                for _ in range(self.num_runner)
+                ) for _ in range(self.num_runner)
             ],
             error_queue,
             threading.Thread(target=_handle_exception, args=(error_queue, self._exception_handler))
@@ -77,7 +56,6 @@ class ProcessQueue(Queue[_State]):
         del old_queue
         state = self._state
         del state
-        
         super().release()
 
     def is_alive(self):        
@@ -93,18 +71,41 @@ def _transfer_exception(error_queue:mp.JoinableQueue, data, e:Exception):
 
 
 def _handle_exception(
-        error_queue:mp.JoinableQueue, 
+        error_queue:mp.SimpleQueue, 
         exception_handler:Callable[[Any, Exception], None]
     ):
-    signal = error_queue.get()
-    if signal is Signal.CANCEL:
-        return
+    while True:
+        signal = error_queue.get()
+        if signal is Signal.CANCEL:
+            break
+        
+        data, exception = signal
+        exception:TraceableException
+        original_exception = exception.original
+        original_exception.add_note(exception.info) #type:ignore
+        
+        if exception_handler is None:
+            raise original_exception
+        else:
+            exception_handler(data, original_exception) #type:ignore
+
+
+class _State(NamedTuple):
+    processes:Sequence[mp.Process]
+    error_queue:mp.SimpleQueue
+    error_catcher:threading.Thread
     
-    data, exception = signal
-    exception:TraceableException
-    try:
-        error = ChildProcessError(exception.original)
-        error.add_note(exception.info)
-        raise error
-    except Exception as e:
-        exception_handler(data, e)
+    def run(self):
+        for p in self.processes:
+            p.start()
+        
+        self.error_catcher.start()
+    
+    def release(self):
+        for p in self.processes:
+            p.join()
+            p.terminate()
+        
+        self.error_queue.put(Signal.CANCEL)
+        self.error_catcher.join()
+        self.error_queue.close()
