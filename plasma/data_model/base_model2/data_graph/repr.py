@@ -2,8 +2,8 @@ from rich.tree import Tree
 from rich.markup import escape
 from typing import get_origin
 
-from ..arch import ITEM_PREFIX, SCHEMA_FIELD
 from ..accessor import Accessor
+from ..arch import ITEM_PREFIX, SCHEMA_FIELD
 from ....functional import ReadableClass
 
 

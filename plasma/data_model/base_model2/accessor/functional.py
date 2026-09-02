@@ -29,3 +29,8 @@ def build(name:str, t:type):
         children = [build(aname, atype) for aname, atype in t.__annotations__.items()]
     
     return Accessor(name, t, None, children)
+
+
+def from_str(str_rep:str, value):
+    accessors = str_rep.split('.')
+    pass

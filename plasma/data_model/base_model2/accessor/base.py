@@ -1,19 +1,19 @@
 from collections.abc import Sequence
-from typing import final
+from typing import final, Any
 
 
 @final
 class Accessor:
     
     def __init__(self,
-            name:str, t:type,
+            name:str, value:Any,
             parent:'Accessor|None'=None,
             children:Sequence['Accessor']=(),
         ):
         assert ' ' not in name, 'accessor name cannot contain space'
 
         self._name = name
-        self._type = t
+        self._value = value
         self._parent = parent
         
         for c in children:
@@ -22,7 +22,7 @@ class Accessor:
 
     def clone(self):
         return Accessor(
-            self._name, self._type, None,
+            self._name, self._value, None,
             [a.clone() for a in self._children.values()]
         )
     
@@ -30,7 +30,7 @@ class Accessor:
         names = []
         accessor = self
         while True:
-            name = accessor._name or accessor._type.__name__
+            name = accessor._name or accessor._value.__name__
             names.insert(0, name)
             
             if accessor._parent is None:
@@ -67,8 +67,8 @@ class Accessor:
         return a._parent
 
     @staticmethod
-    def get_type(a:'Accessor'):
-        return a._type
+    def get_value(a:'Accessor'):
+        return a._value
 
     @staticmethod
     def get_children(a:'Accessor'):
