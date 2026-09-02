@@ -1,43 +1,34 @@
 from collections.abc import Sequence
-from typing import final, Any
+from collections import deque
+from typing import final
 
 
 @final
 class Accessor:
     
     def __init__(self,
-            name:str, value:Any,
-            parent:'Accessor|None'=None,
+            name:str, parent:'Accessor|None'=None,
             children:Sequence['Accessor']=(),
         ):
         assert ' ' not in name, 'accessor name cannot contain space'
 
         self._name = name
-        self._value = value
         self._parent = parent
         
         for c in children:
             c._parent = self
         self._children = {a._name: a for a in children if a._name is not None}
-
-    def clone(self):
-        return Accessor(
-            self._name, self._value, None,
-            [a.clone() for a in self._children.values()]
-        )
     
     def __repr__(self):
-        names = []
+        names = deque()
         accessor = self
         while True:
-            name = accessor._name or accessor._value.__name__
-            names.insert(0, name)
+            names.appendleft(accessor._name)
             
             if accessor._parent is None:
                 break
 
             accessor = accessor._parent
-            
         return '.'.join(names)
     
     def __getattr__(self, name):
@@ -65,10 +56,6 @@ class Accessor:
     @staticmethod
     def get_parent(a:'Accessor'):
         return a._parent
-
-    @staticmethod
-    def get_value(a:'Accessor'):
-        return a._value
 
     @staticmethod
     def get_children(a:'Accessor'):
