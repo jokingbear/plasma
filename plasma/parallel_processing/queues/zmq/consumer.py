@@ -11,12 +11,14 @@ from ....serializers import Serializer, Pickler
 class SubZMQ(Queue["_State"]):
     
     def __init__(self, 
-            connection:str, name=None, 
-            n=1, prefetch=1,
-            serializer:Serializer|None=None,
+            context:zmq.Context,
+            connection:str, name:str|None, 
+            n:int, prefetch:int,
+            serializer:Serializer,
         ):
         super().__init__(name, n)
 
+        self.context = context
         self.prefetch = prefetch
         self.connection = connection
         self.serializer = serializer or Pickler()
@@ -26,7 +28,7 @@ class SubZMQ(Queue["_State"]):
     
     def _init_state(self):
         return _State(
-            zmq.Context(), self.connection,
+            self.context, self.connection,
             self.serializer,
             ThreadQueue(n=self.num_runner, qsize=self.prefetch)
                 .register_callback(self._callback)

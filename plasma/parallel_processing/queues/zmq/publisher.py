@@ -3,20 +3,19 @@ import threading
 
 from queue import Full
 from ..base import Queue
-from ....serializers import Serializer, Pickler
+from ....serializers import Serializer
 
 
 class PubZMQ(Queue):
     
-    def __init__(self, 
-            connection:str, name:str|None=None, 
-            qsize:int=10, timeout:float=0,
-            serializer:Serializer|None=None,
+    def __init__(self,
+            context:zmq.Context, connection:str, name:str|None, 
+            qsize:int, timeout:float,
+            serializer:Serializer,
         ):
         super().__init__(name, 0)        
-        context = zmq.Context()
-        socket = context.socket(zmq.PUSH)
-        
+
+        socket:zmq.Socket = context.socket(zmq.PUSH)
         if qsize > 0:
             socket.setsockopt(zmq.SNDHWM, qsize)
         
@@ -26,7 +25,7 @@ class PubZMQ(Queue):
         socket.connect(connection)
         self._socket = socket
         self.qsize = qsize
-        self.serializer = serializer or Pickler()
+        self.serializer = serializer
         self._lock = threading.Lock()
     
     def _put(self, x):
