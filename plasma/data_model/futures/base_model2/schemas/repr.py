@@ -4,7 +4,7 @@ from typing import get_origin
 
 from ..arch import ITEM_PREFIX, SCHEMA_FIELD
 from ..accessor import Accessor
-from ....functional import ReadableClass
+from .....functional import ReadableClass
 
 
 class Repr(ReadableClass):
