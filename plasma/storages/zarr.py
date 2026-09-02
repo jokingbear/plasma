@@ -4,14 +4,33 @@ import os
 import shutil
 
 from collections.abc import Sequence, Iterable
-from typing import cast, Any
+from typing import cast, Any, Literal
 from zarr.codecs import BloscCodec
+from zarr.experimental.cache_store import CacheStore
+from zarr.storage import MemoryStore, LocalStore
 
 
 class TensorStorage:
     
-    def __init__(self, filepath:str):
-        array = zarr.open_array(filepath)
+    def __init__(self, 
+            filepath:str, *, 
+            cache:bool=False, 
+            cache_expiration_seconds:int|Literal['infinity']=24 * 3600,
+            cache_size_mb:int=256,
+        ):
+        if cache:
+            memory = MemoryStore()
+            physical = LocalStore(filepath)
+            store = CacheStore(
+                physical, 
+                cache_store=memory, 
+                max_age_seconds=cache_expiration_seconds,
+                max_size=cache_size_mb * 1024 * 1024
+            )
+        else:
+            store = filepath
+
+        array = zarr.open_array(store)
         self._root = array
         self.shapes = cast(Sequence[Sequence[int]], array.attrs['component_shapes'])
     
@@ -23,7 +42,7 @@ class TensorStorage:
     def shard(self) -> int:
         return self._root.shards[0] #type:ignore
     
-    def get(self, args:int|list[int]|slice):
+    def get(self, args:int|list[int]|slice|np.ndarray):
         array = cast(np.ndarray, self._root[args])
         flattend_shapes = _flattened_shapes(self.shapes)
         offset = 0
@@ -35,10 +54,10 @@ class TensorStorage:
             else:
                 yield array[:, slice_args].reshape(-1, *shape)
     
-    def __getitem__(self, args:int|list[int]|slice):
+    def __getitem__(self, args:int|list[int]|slice|np.ndarray):
         return self.get(args)
     
-    def set(self, key:int|list[int]|slice, values:Iterable[np.ndarray]):
+    def set(self, key:int|list[int]|slice|np.ndarray, values:Iterable[np.ndarray]):
         values = [v for v in values]
         batch_size = values[0].shape[0] if len(values[0].shape) > 1 else 1
         
@@ -48,7 +67,7 @@ class TensorStorage:
         
         self._root[key] = values
     
-    def __setitem__(self, key:int|list[int]|slice, values:Iterable[np.ndarray]):
+    def __setitem__(self, key:int|list[int]|slice|np.ndarray, values:Iterable[np.ndarray]):
         self.set(key, values)
 
     def reconfig(self, chunk:int, shard:int, compression:int):
