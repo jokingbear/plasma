@@ -46,23 +46,27 @@ class TensorStorage:
     
     def get(self, args:int|list[int]|slice|np.ndarray):
         array = cast(np.ndarray, self._root[args])
-        flattend_shapes = _flattened_shapes(self.shapes)
-        offset = 0
-        for fshape, shape in zip(flattend_shapes, self.shapes):
-            slice_args = slice(offset, offset + fshape)
+        flattened_shapes = _flattened_shapes(self.shapes)
+        
+        start = 0
+        for fshape, shape in zip(flattened_shapes, self.shapes):
+            end = start + fshape
+            slice_args = slice(start, end)
             if len(array.shape) == 1:
                 yield array[slice_args].reshape(*shape)
             else:
                 yield array[:, slice_args].reshape(-1, *shape)
-                    
+            start = end
+
     def __getitem__(self, args:int|list[int]|slice|np.ndarray):
         return self.get(args)
     
     def set(self, key:int|list[int]|slice|np.ndarray, values:Iterable[np.ndarray]):
-        values = [v for v in values]
-        batch_size = values[0].shape[0] if len(values[0].shape) > 1 else 1
-        
-        values = np.concat([v.reshape(batch_size, -1) for v in values], axis=-1)
+        flattened_values = [
+            v.reshape(-1, fs) for fs, v 
+            in zip(_flattened_shapes(self.shapes), values)
+        ]        
+        values = np.concat(flattened_values, axis=-1)
         if isinstance(key, int):
             key = [key]
         
