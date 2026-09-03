@@ -1,7 +1,6 @@
 import random
-import sched
 
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from ...queues import Queue, Full
 from ....functional import ReadableClass
 
@@ -27,16 +26,5 @@ class RoundRobinSharder(ReadableClass):
             finally:
                 counter = (counter + 1) % len(queues)
     
-    def schedule(self, 
-            refresher:Callable[[],Sequence[Queue]],
-            interval:float
-        ):
-        assert self._scheduler is None
-
-        scheduler = sched.scheduler()
-        def self_loop():
-            self.queues = refresher()
-            scheduler.enter(interval, 0, self_loop)
-        
-        self._scheduler = scheduler # ref so gc wont collect
-        self_loop()
+    def refresh(self, new_queues:Sequence[Queue]):
+        self.queues = new_queues
