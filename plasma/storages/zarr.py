@@ -33,7 +33,7 @@ class TensorStorage:
         self._root = array
     
     @property
-    def chunk(self):
+    def chunk(self) -> int:
         return self._root.chunks[0]
     
     @property
