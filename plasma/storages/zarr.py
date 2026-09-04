@@ -80,13 +80,14 @@ class TensorStorage:
         attributes = {k: v for k, v in self._root.attrs.items()}
         shape = self._root.shape
         storage = self._root.store
+        dtype = self._root.dtype
         self._root.store_path.delete_sync()
         
         self._root = zarr.create_array(
             storage, shape=shape,
             chunks=(chunk, *shape[1:]),
             shards=(shard, *shape[1:]),
-            dtype=np.float32,
+            dtype=dtype,
             compressors=codec,
             attributes=attributes,
             overwrite=True,
