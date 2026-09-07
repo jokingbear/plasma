@@ -11,11 +11,11 @@ lib_folder = os.path.dirname(os.path.realpath(__file__))
 requirement_path = f"{lib_folder}/requirements.txt"
 
 with open(requirement_path) as f:
-        install_requires = f.readlines()
+    install_requires = f.readlines()
 
 setup(
     name='plasma',
-    version='4.34.0a0',
+    version='4.34.3a0',
     packages=[*packages],
     license='MIT',
     author='jokingbear',

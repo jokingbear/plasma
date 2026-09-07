@@ -1,10 +1,16 @@
 import threading
 
-from sqlite3 import Connection
 from functools import lru_cache
+from sqlite3 import Connection
+from warnings import deprecated
+
 from ..functional import partial_right
 
 
+@deprecated(
+    'this class is deprecated, use SqlStorage instead', 
+    stacklevel=2
+)
 class SqliteStorage:
     
     def __init__(self, filepath:str, max_connection:int=32):
