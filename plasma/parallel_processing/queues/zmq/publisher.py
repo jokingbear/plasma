@@ -21,7 +21,13 @@ class PubZMQ(Queue):
         
         if timeout > 0:
             socket.setsockopt(zmq.SNDTIMEO, int(timeout * 1000))
-
+        
+        if 'tcp' in connection:
+            socket.setsockopt(zmq.TCP_KEEPALIVE, 1)
+            socket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 600)  # Pulse at 10 mins (Docker cuts at 15)
+            socket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 30)  # Retry every 30s if quiet
+            socket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 3)   
+        
         socket.connect(connection)
         self._socket = socket
         self.qsize = qsize
