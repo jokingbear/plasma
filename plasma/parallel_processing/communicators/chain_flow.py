@@ -51,10 +51,16 @@ class BlockChainer:
     @overload
     def __rshift__(self, other:Callable|Distributor) -> "BlockChainer":...
     
-    def __rshift__(self, other:Callable|Distributor|Queue):
+    @overload
+    def __rshift__(self, other:AsyncFlow) -> None:...
+    
+    def __rshift__(self, other:Callable|Distributor|Queue|AsyncFlow):
         if isinstance(other, Queue):
             self.flow.chain((self.block, other))
             return QueueChainer(self.flow, other)
+        
+        elif isinstance(other, AsyncFlow):
+            self.flow.chain((self.block, other))
         
         elif id(other) in self.flow.graph:
             self.flow.chain((self.block, other))
