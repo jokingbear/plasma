@@ -1,4 +1,5 @@
-from typing import Callable, overload, Iterable
+from typing import overload
+from collections.abc import Callable, Iterable
 
 from .async_flow import AsyncFlow
 from .distributors import Distributor
