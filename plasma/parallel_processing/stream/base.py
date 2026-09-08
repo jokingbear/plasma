@@ -1,4 +1,5 @@
-from typing import Iterable, Callable, Any
+from typing import Any
+from collections.abc import Iterable, Callable
 from .pool import ThreadPool, ProcessPool
 from ..communicators import DynamicAccumulator
 from ...data_model.collections import Stream
