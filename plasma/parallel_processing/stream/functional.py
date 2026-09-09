@@ -1,4 +1,4 @@
-from typing import Iterable
+from collections.abc import Iterable
 from .base import ParallelStream
 from .pool import ThreadPool
 from ...functional import pipe

@@ -1,16 +1,19 @@
-from .timeio import TimeIO
-from typing import Callable
+from collections.abc import Callable
 from functools import wraps
+from .timeio import TimeIO
 
 
 class Timer:
 
     IO = TimeIO
 
-    def __init__(self, log_func:Callable[[TimeIO], None]=None, name=None) -> None:
+    def __init__(self, 
+            log_func:Callable[[TimeIO], None]|None=None, 
+            name:str|None=None
+        ):
         self.log_func = log_func
         self.name = name or ''
-        self._io:TimeIO = None
+        self._io:TimeIO|None = None
     
     def init(self):
         timeio = TimeIO(self.name)
@@ -21,6 +24,9 @@ class Timer:
         return self.init()
 
     def __exit__(self, *_):
+        if self._io is None:
+            return
+
         self._io.finalize()
         log_func = self.log_func or print
         log_func(self._io)

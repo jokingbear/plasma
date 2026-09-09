@@ -1,5 +1,6 @@
 import time
 
+from collections.abc import Sequence
 from types import MappingProxyType
 from datetime import datetime
 
@@ -22,7 +23,7 @@ class TimeIO:
         end = self._end or time.time()
         return Counter(self._start, end)
     
-    def update_params(self, args:list, kwargs:dict):
+    def update_params(self, args:Sequence, kwargs:dict):
         self._args = args
         self._kwargs = kwargs
     
@@ -47,8 +48,8 @@ class TimeIO:
 class Counter:
     
     def __init__(self, start:float, end:float):
-        self.start = datetime.fromtimestamp(start)
-        self.end = datetime.fromtimestamp(end)
+        self.start = datetime.fromtimestamp(start)  # noqa: DTZ006
+        self.end = datetime.fromtimestamp(end)  # noqa: DTZ006
     
     @property
     def duration(self):
