@@ -1,6 +1,7 @@
 from functools import wraps
 from dataclasses import dataclass
 from typing import Callable, Any
+from warnings import deprecated
 
 
 @dataclass
@@ -11,6 +12,7 @@ class ExceptionIO:
     exception:Exception
 
 
+@deprecated('deprecated class', stacklevel=2)
 class ExceptionLogger[V]:
 
     IO = ExceptionIO

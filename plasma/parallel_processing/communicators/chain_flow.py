@@ -1,4 +1,5 @@
-from typing import Callable, overload
+from typing import overload
+from collections.abc import Callable, Iterable
 
 from .async_flow import AsyncFlow
 from .distributors import Distributor
@@ -10,12 +11,22 @@ class ChainFlow(AsyncFlow):
     def __init__(self):
         super().__init__()
 
+    @overload
+    def __matmul__(self, other:Queue) -> "QueueChainer":...
+    
+    @overload
+    def __matmul__(self, other:Callable) -> "BlockChainer":...
+    
     def __matmul__(self, other:Queue|Callable):
         if isinstance(other, Queue):
             return QueueChainer(self, other)
 
         return BlockChainer(self, other)
 
+    def loop(self, data:Iterable):
+        for d in data:
+            self.input.put(d)
+            
 
 class QueueChainer:
     
@@ -41,10 +52,16 @@ class BlockChainer:
     @overload
     def __rshift__(self, other:Callable|Distributor) -> "BlockChainer":...
     
-    def __rshift__(self, other:Callable|Distributor|Queue):
+    @overload
+    def __rshift__(self, other:AsyncFlow) -> None:...
+    
+    def __rshift__(self, other:Callable|Distributor|Queue|AsyncFlow):
         if isinstance(other, Queue):
             self.flow.chain((self.block, other))
             return QueueChainer(self.flow, other)
+        
+        elif isinstance(other, AsyncFlow):
+            self.flow.chain((self.block, other))
         
         elif id(other) in self.flow.graph:
             self.flow.chain((self.block, other))

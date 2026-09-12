@@ -1,12 +1,12 @@
 import time
 
-from .compute_graph import Graph
-from ...functional import State
-from ..queues import Queue
-from typing import Callable
-from ...functional import partials, Identity, partial_right, AutoPipe
+from collections.abc import Callable
 from .distributors import Distributor
-from ...functional import Signature
+from .compute_graph import Graph
+from ..queues import Queue
+from ...functional import (
+    partials, Identity, partial_right
+)
 
 
 class AsyncFlow(Graph):
@@ -51,12 +51,11 @@ class AsyncFlow(Graph):
     def on_exception(self, handler:Callable[[str, object, Exception], None]):
         for q in self.internal_queues:
             block, = self.successors(q)
-            if isinstance(block, AutoPipe):
-                signature = block.signature()
-            else:
-                signature = Signature.from_func(block)
-            signature_repr = f'{signature.name}[({signature.inputs}) -> {signature.outputs}]'
-            q.on_exception(partials(handler, signature_repr))
+            signature = (
+                 block.__qualname__ if hasattr(block, '__qualname__') 
+                 else type(block).__name__
+            )
+            q.on_exception(partials(handler, signature))
     
     @property
     def running(self):

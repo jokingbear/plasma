@@ -1,5 +1,8 @@
-from .base import Distributor
+import random
+
 from queue import Full
+from .base import Distributor
+
 
 
 class RoundRobin[T](Distributor[T]):
@@ -8,17 +11,16 @@ class RoundRobin[T](Distributor[T]):
         super().__init__()
         
         self.num_workers = num_workers
-        self._counters = 0
         self.verbose = verbose
     
     def run(self, data, *queues, **named_queues):
-        is_pushing = True
-        while is_pushing:
+        rng = random.Random()
+        counter = rng.choice(range(self.num_workers))
+        while True:
             try:
-                queues[self._counters].put(data)
-                is_pushing = False
+                queues[counter].put(data)
+                break
             except Full:
                 print('load balancing') if self.verbose else None
             finally:
-                self._counters = (self._counters + 1) % self.num_workers
-        
+                counter = (counter + 1) % self.num_workers

@@ -1,2 +1,2 @@
 from .base import PathInquirer
-from .segment import Match
+from .segment import Match, QueryMatch

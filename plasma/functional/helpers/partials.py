@@ -1,6 +1,11 @@
-from typing import Callable
+from collections.abc import Callable
+from warnings import deprecated
 
 
+@deprecated(
+    'this method is deprecated, use partial_left/right instead', 
+    stacklevel=2
+)
 class partials[O]:
 
     def __init__(self, func:Callable[..., O], *args, pre_apply_before=True, **kwargs):

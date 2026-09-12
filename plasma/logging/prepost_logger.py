@@ -2,6 +2,7 @@ from functools import wraps
 from collections import namedtuple
 from ..functional import Identity
 from dataclasses import dataclass
+from warnings import deprecated
 
 
 @dataclass(frozen=True)
@@ -12,6 +13,7 @@ class FuncIO:
     outputs:object
 
 
+@deprecated('deprecated class', stacklevel=2)
 class PrePostLogger:
     IO = FuncIO
 

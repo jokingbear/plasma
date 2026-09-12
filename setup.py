@@ -1,8 +1,9 @@
-import re
 import os
+import re
 
-from setuptools import setup
 from pathlib import Path
+from setuptools import setup
+
 
 packages = [re.sub(r'\\|\/', '.', str(p.parent)) for p in Path('plasma').rglob('__init__.py')]
 
@@ -10,11 +11,11 @@ lib_folder = os.path.dirname(os.path.realpath(__file__))
 requirement_path = f"{lib_folder}/requirements.txt"
 
 with open(requirement_path) as f:
-        install_requires = f.readlines()
+    install_requires = f.readlines()
 
 setup(
     name='plasma',
-    version='4.27.95post4',
+    version='4.34.8',
     packages=[*packages],
     license='MIT',
     author='jokingbear',

@@ -1,7 +1,7 @@
 from queue import Queue
-from typing import Callable, Any
+from typing import Any
+from collections.abc import Callable
 from .signals import Signal
-from .handler import ExceptionHandler
 
 
 def internal_run(
@@ -9,17 +9,17 @@ def internal_run(
         processor:Callable[[Any], None], 
         exception_handler:Callable[[Any, Exception], None]
     ):
-    is_not_cancelled = True
-    exception_handler = exception_handler or ExceptionHandler()
-
-    while is_not_cancelled:
+    while True:
         data = queue.get()
-
-        is_not_cancelled = data is not Signal.CANCEL
         try:
-            if is_not_cancelled:
-                processor(data)
+            if data is Signal.CANCEL:
+                break
+
+            processor(data)
         except Exception as e:
+            if exception_handler is None:
+                raise
+
             exception_handler(data, e)
         finally:
             queue.task_done()

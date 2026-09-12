@@ -6,7 +6,6 @@ from rich.tree import Tree
 from .adaptable_graph import AdaptableGraph
 from ..distributors import UniformDistributor
 from ...queues import Queue
-from ....functional import AutoPipe, Signature
 
 
 class ReadableGraph(AdaptableGraph):
@@ -39,13 +38,8 @@ class ReadableGraph(AdaptableGraph):
             line = f'[#6c6c6c]{line}[/#6c6c6c]'
         else:
             obj = node_attributes['object']
-            
-            if isinstance(obj, AutoPipe):
-                signature = obj.signature()
-            else:
-                signature = Signature.from_func(obj)
-
-            line = f'{signature.name}([({signature.inputs}) -> {signature.outputs}], id={key})'
+            signature = obj.__qualname__ if hasattr(obj, '__qualname__') else type(obj).__name__
+            line = f'{signature}(id={key})'
             distributor = node_attributes['distributor']
             if not isinstance(distributor, UniformDistributor):
                 line = f'{line}-{type(distributor).__name__}'

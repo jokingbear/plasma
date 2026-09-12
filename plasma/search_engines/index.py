@@ -13,6 +13,7 @@ class Index:
         assert len(data) == len(set(data)), 'data must be unique'
         
         token2positions = defaultdict[str, dict[TokenPosition, tuple[int, int]]](dict)
+        edge_arg_map = dict[tuple, set]()
         graph = nx.DiGraph()
         path_args = {}
         paths:list[tuple[str]] = []
@@ -23,11 +24,14 @@ class Index:
                 position = TokenPosition(i, token_arg)
                 token2positions[token][position] = start, end
             
+            for cur, nxt in zip(path[:-1], path[1:]):
+                edge_arg_map.setdefault((cur, nxt), set()).add(i)
             nx.add_path(graph, path)
             path_args[path] = i
             paths.append(path)
         
         self._token2positions = token2positions
+        self._edge_arg_map = edge_arg_map
         self._graph = graph
         self._paths = paths
         self._data = data
@@ -35,6 +39,10 @@ class Index:
     def get_path_args(self, token:str) -> Stream[int]:
         positions = self._token2positions.get(token, {})
         return Stream(p.path_arg for p in positions)
+    
+    def get_consecutive_candidates(self, cur_token:str, nxt_token:str):
+        edge_candidates = self._edge_arg_map[cur_token, nxt_token]
+        return edge_candidates
     
     def get_char_interval(self, path_arg:int, token_offset:int):
         token = self._paths[path_arg][token_offset]

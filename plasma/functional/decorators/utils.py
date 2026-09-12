@@ -1,7 +1,7 @@
 import inspect
 
 from functools import wraps
-from typing import Callable
+from collections.abc import Callable
 
 
 class propagate[T]:

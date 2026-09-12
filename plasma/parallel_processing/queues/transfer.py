@@ -1,15 +1,17 @@
-from .base import Queue
 from multiprocessing import JoinableQueue
-from ...functional import partials, decorators
-from .utils import internal_run
 from threading import Thread
+from typing import Sequence
+
+from .base import Queue
 from .signals import Signal
+from .utils import internal_run
+from ...functional import partials
 
 
-class TransferQueue(Queue[Thread]):
+class TransferQueue(Queue[Sequence[Thread]]):
 
-    def __init__(self, name=None, qsize=0):
-        super().__init__(name)
+    def __init__(self, name=None, n=1, qsize=0):
+        super().__init__(name, n)
 
         self._receiver = JoinableQueue(qsize)
         self._qsize = qsize
@@ -19,14 +21,17 @@ class TransferQueue(Queue[Thread]):
 
     def _init_state(self):
         runner = partials(internal_run, self._receiver, self._callback, self._exception_handler)
-        thread = Thread(target=runner) 
-        thread.start()
-        return thread
+        threads = [Thread(target=runner)  for _ in range(self.num_runner)]
+        [t.start() for t in threads]
+        return threads
 
     def release(self):
         assert self._state is not None, 'queue has not been run'
-        self._receiver.put(Signal.CANCEL)
-        self._state.join()
+        for t in self._state:
+            self._receiver.put(Signal.CANCEL)
+        
+        for t in self._state:
+            t.join()
 
         old_queue = self._receiver
         old_queue.close()
@@ -41,7 +46,7 @@ class TransferQueue(Queue[Thread]):
         return (
             self.running
             and self._state is not None 
-            and self._state.is_alive()
+            and any(t.is_alive() for t in self._state)
         )
 
     def __getstate__(self):

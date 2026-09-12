@@ -1,8 +1,6 @@
-from abc import abstractmethod
 from typing import Callable, Any
 
 from .signals import Signal
-from .handler import ExceptionHandler
 from ...functional import ReadableClass, pipe
 
 
@@ -15,7 +13,7 @@ class Queue[T](ReadableClass):
         self.num_runner = num_runner
         self._running = False
         self.__clean_state()
-        self._exception_handler = ExceptionHandler()
+        self._exception_handler = None
 
     def run(self):
         if self._callback is None:
