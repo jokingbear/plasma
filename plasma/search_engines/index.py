@@ -1,10 +1,12 @@
 import pandas as pd
 import networkx as nx
 
-from typing import Callable, Iterable, NamedTuple, Sequence
+from typing import NamedTuple
+from collections.abc import Callable, Iterable, Sequence
 from collections import defaultdict
 
 from ..data_model.collections import Stream
+import itertools
 
 
 class Index:
@@ -24,7 +26,7 @@ class Index:
                 position = TokenPosition(i, token_arg)
                 token2positions[token][position] = start, end
             
-            for cur, nxt in zip(path[:-1], path[1:]):
+            for cur, nxt in itertools.pairwise(path):
                 edge_arg_map.setdefault((cur, nxt), set()).add(i)
             nx.add_path(graph, path)
             path_args[path] = i
@@ -60,8 +62,7 @@ class Index:
 
     @property
     def tokens(self) -> Iterable[str]:
-        for token in self._token2positions:
-            yield token
+        yield from self._token2positions
 
 
 class TokenPosition(NamedTuple):
