@@ -1,0 +1,12 @@
+numpy
+pandas
+scipy
+tqdm
+networkx
+pyyaml
+setuptools
+huggingface_hub
+rich
+pyzmq
+intervaltree
+zarr
