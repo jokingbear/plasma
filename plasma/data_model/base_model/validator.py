@@ -1,4 +1,6 @@
-from typing import Sequence, get_origin, get_args, Union, Optional
+from typing import get_origin, get_args
+from collections.abc import Sequence
+
 from .utils import is_data_model
 from .schemas import schema
 from ...functional import ReadableClass
@@ -50,14 +52,13 @@ class Validator[T](ReadableClass):
         valid_condition |= obj is None and not self.strict
         
         if not valid_condition:
-            types = [origin, *args]
             return f'{obj} is not of instance {raw} at field {field_name}'
 
     def _validate_list(self, field_name, args, field_value):    
         if not isinstance(field_value, Sequence):
             yield f'{field_value} is not a list or tuple at {field_name}'
         elif len(args) > 0:
-            origin = get_origin(args[0])
+            origin = get_origin(args[0]) or args[0]
             generic_args = get_args(args[0])
             for i, v in enumerate(field_value):
                 invalid_note = self._validate_object(f'{field_name}.{i}', v, args[0], origin, generic_args)
