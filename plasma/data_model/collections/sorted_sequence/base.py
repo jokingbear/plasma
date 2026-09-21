@@ -1,9 +1,8 @@
-import numpy as np
-
-from typing import Callable, NamedTuple, Sequence
+from typing import NamedTuple
+from collections.abc import Callable, Sequence
 from ..pseudo_tuple import PseudoTuple
 from ...abc import Comparable
-from ....functional import partials, chain, pipe
+from ....functional import pipe
 
 
 class Nearest[D, K](NamedTuple):
@@ -26,9 +25,12 @@ class MetrizableIndex[D, K:Comparable](PseudoTuple[D]):
         self.key = key
         self.metric = metric
     
-    def nearest(self, *, data:D=None, key:K|None=None) -> Nearest[D, K]:
-        assert (data is not None) != (key is not None), \
-                'either data or key must not be None'
+    def nearest(self, *, data:D=None, key:K|None=None) -> Nearest[D, K]|None:
+        if len(self) == 0:
+            return
+
+        if (data is not None) != (key is not None):
+            raise ValueError('either data or key must not be None')
         
         if key is not None:
             data_key = key
@@ -49,7 +51,7 @@ class MetrizableIndex[D, K:Comparable](PseudoTuple[D]):
             elif data_key > anchor_key:
                 start = arg
         
-        dist = pipe(self.key) >> partials(self.metric, data_key)
+        dist = pipe(self.key).partial_left(self.metric, data_key)
         arg = min([start, end], key=lambda a: dist(self[a]))
         value = self[arg]
         return Nearest(arg, value, self.key(value), dist(value)) 
