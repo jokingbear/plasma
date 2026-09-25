@@ -5,7 +5,7 @@ from .distributors import Distributor
 from .compute_graph import Graph
 from ..queues import Queue
 from ...functional import (
-    partials, Identity, partial_right
+    Identity, partial_right, partial_left
 )
 
 
@@ -51,11 +51,11 @@ class AsyncFlow(Graph):
     def on_exception(self, handler:Callable[[str, object, Exception], None]):
         for q in self.internal_queues:
             block, = self.successors(q)
-            signature = (
+            block_name = (
                  block.__qualname__ if hasattr(block, '__qualname__') 
                  else type(block).__name__
             )
-            q.on_exception(partials(handler, signature))
+            q.on_exception(partial_left(handler, block_name))
     
     @property
     def running(self):
