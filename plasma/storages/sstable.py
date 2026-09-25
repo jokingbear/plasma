@@ -1,10 +1,12 @@
 from collections.abc import Iterable
 from typing import Protocol
 
+from ..data_model.collections import ZippedStream
+
 
 class SSTable[K, V]:
     
-    def __init__(self, storage:DiskStorage[K, V], max_num_retention:int):
+    def __init__(self, storage:IOMap[K, V], max_num_retention:int):
         self.storage = storage
         self.max_num_retention = max_num_retention
         self._data = dict[K, V]()
@@ -16,7 +18,7 @@ class SSTable[K, V]:
 
         data = self._data
         if k not in data:
-            value, = self.storage.get([k]).values()
+            (_, value), = self.storage.get([k])
         else:
             value = data[k]
         
@@ -49,10 +51,10 @@ class SSTable[K, V]:
             self._data = {}
 
 
-class DiskStorage[K, V](Protocol):
+class IOMap[K, V](Protocol):
     
     def put(self, data:Iterable[tuple[K, V]]) -> None:...
     
     def delete(self, data:Iterable[K]) -> None:...
     
-    def get(self, data:Iterable[K]) -> dict[K, V|None]:...
+    def get(self, data:Iterable[K]) -> ZippedStream[K, V|None]:...
