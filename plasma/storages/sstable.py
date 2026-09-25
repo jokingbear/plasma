@@ -1,6 +1,8 @@
 from collections.abc import Iterable
 from typing import Protocol
 
+from ..data_model.collections import ZippedStream
+
 
 class SSTable[K, V]:
     
@@ -16,7 +18,7 @@ class SSTable[K, V]:
 
         data = self._data
         if k not in data:
-            value, = self.storage.get([k]).values()
+            (_, value), = self.storage.get([k])
         else:
             value = data[k]
         
@@ -55,4 +57,4 @@ class IOMap[K, V](Protocol):
     
     def delete(self, data:Iterable[K]) -> None:...
     
-    def get(self, data:Iterable[K]) -> dict[K, V|None]:...
+    def get(self, data:Iterable[K]) -> ZippedStream[K, V|None]:...
