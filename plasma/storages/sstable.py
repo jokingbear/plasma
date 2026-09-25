@@ -4,7 +4,7 @@ from typing import Protocol
 
 class SSTable[K, V]:
     
-    def __init__(self, storage:DiskStorage[K, V], max_num_retention:int):
+    def __init__(self, storage:DiskMap[K, V], max_num_retention:int):
         self.storage = storage
         self.max_num_retention = max_num_retention
         self._data = dict[K, V]()
@@ -49,7 +49,7 @@ class SSTable[K, V]:
             self._data = {}
 
 
-class DiskStorage[K, V](Protocol):
+class DiskMap[K, V](Protocol):
     
     def put(self, data:Iterable[tuple[K, V]]) -> None:...
     
