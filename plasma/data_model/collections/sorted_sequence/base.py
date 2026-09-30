@@ -29,7 +29,7 @@ class MetrizableIndex[D, K:Comparable](PseudoTuple[D]):
         if len(self) == 0:
             return
 
-        if (data is not None) != (key is not None):
+        if (data is not None) == (key is not None):
             raise ValueError('either data or key must not be None')
         
         if key is not None:

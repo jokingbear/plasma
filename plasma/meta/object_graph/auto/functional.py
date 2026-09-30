@@ -5,11 +5,22 @@ from ...utils import get_caller_frame
 from .functional_context import FunctionalContext
 
 
-def init_context():
+def init_context(inherit:bool=False):
     caller = get_caller_frame()    
-    package = inspect.getmodule(caller.frame).__package__ #type:ignore 
+    package:str = inspect.getmodule(caller.frame).__package__ #type:ignore 
     
-    return FunctionalContext(CONTEXT_GRAPH, package) # type:ignore
+    if inherit:
+        hierachy_names = package.split('.')
+        for i, _ in enumerate(hierachy_names[::-1]):
+            if i == 0:
+                continue
+            
+            parent = '.'.join(hierachy_names[:-i])
+            if CONTEXT_GRAPH.has_context(parent):
+                package = parent
+                break
+        
+    return FunctionalContext(CONTEXT_GRAPH, package)
 
 
 def register(**blocks:type|object):

@@ -1,6 +1,5 @@
 import networkx as nx
 
-from typing import Hashable
 from .meta import Meta
 from .inquirer import Inquirer
 from .render import render
@@ -19,6 +18,9 @@ class ContextGraph(nx.DiGraph):
 
     def init_context(self, context):
         self._meta.init(context)
+    
+    def has_context(self, context:str):
+        return context in self._meta
     
     @property
     def inquirer(self):

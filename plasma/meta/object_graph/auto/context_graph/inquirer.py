@@ -11,8 +11,7 @@ class Inquirer:
         self.meta = meta
     
     def list_context(self):
-        for m in self.meta:
-            yield m
+        yield from self.meta
     
     def find_context(self, path:str):
         candidates = [p for p in self.meta if p in path]
@@ -29,8 +28,7 @@ class Inquirer:
         return self.graph.nodes[node_id]['type']
 
     def node_names(self, context):
-        for n in self.meta[context]:
-            yield n
+        yield from self.meta[context]
 
     def context_in_degree(self, n):
         in_context_predecessors = [m for m in self.graph.predecessors(n) if m[0] == n[0]]
