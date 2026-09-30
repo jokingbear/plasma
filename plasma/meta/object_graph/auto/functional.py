@@ -16,10 +16,9 @@ def init_context(inherit:bool=False):
                 continue
             
             parent = '.'.join(hierachy_names[:-i])
-            if parent not in CONTEXT_GRAPH:
-                continue
-            package = parent
-            break
+            if CONTEXT_GRAPH.has_context(parent):
+                package = parent
+                break
         
     return FunctionalContext(CONTEXT_GRAPH, package)
 

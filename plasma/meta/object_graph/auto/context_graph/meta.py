@@ -1,7 +1,3 @@
-from typing import Hashable
-from pathlib import Path
-
-
 class Meta:
     
     def __init__(self):
@@ -15,8 +11,7 @@ class Meta:
         self._contexts[context].add(name)
     
     def __iter__(self):
-        for c in self._contexts:
-            yield c
+        yield from self._contexts
     
     def __getitem__(self, context:str):
         return self._contexts[context]
