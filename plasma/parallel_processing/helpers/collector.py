@@ -5,7 +5,7 @@ from ...functional import ReadableClass
 
 class GarbageCollector(ReadableClass):
     
-    def __init__(self, threshold:int=1000):
+    def __init__(self, *, threshold:int=1000):
         super().__init__()
         
         self.threshold = threshold
