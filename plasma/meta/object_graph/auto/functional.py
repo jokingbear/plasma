@@ -5,7 +5,7 @@ from ...utils import get_caller_frame
 from .functional_context import FunctionalContext
 
 
-def init_context(inherit:bool=False):
+def init_context(*, inherit:bool=False):
     caller = get_caller_frame()    
     package:str = inspect.getmodule(caller.frame).__package__ #type:ignore 
     
