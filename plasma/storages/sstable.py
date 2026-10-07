@@ -59,9 +59,15 @@ class SSTable[K, V]:
         with self._lock:
             data = self._data
             self._data = {}
+            
+            deleted = self._deleted
+            self._deleted = set()
 
         if len(data) > 0:
             self.storage.put(self._data.items())
+        
+        if len(deleted) > 0:
+            self.storage.delete(deleted)
 
 
 class IOMap[K, V](Protocol):
