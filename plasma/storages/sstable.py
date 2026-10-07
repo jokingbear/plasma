@@ -1,16 +1,27 @@
+from apscheduler.schedulers.background import BackgroundScheduler
 from collections.abc import Iterable
 from typing import Protocol
+from threading import Lock
 
-from ..data_model.collections import ZippedStream
+from ..data_model.collections import ZippedStream, Stream
 
 
 class SSTable[K, V]:
     
-    def __init__(self, storage:IOMap[K, V], max_num_retention:int):
+    def __init__(self, 
+            storage:Storage[K, V], max_num_retention:int, 
+            sync_interval_seconds:float
+        ):
         self.storage = storage
         self.max_num_retention = max_num_retention
         self._data = dict[K, V]()
         self._deleted = set()
+        
+        self._lock = Lock()
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(self._sync, 'interval', seconds=sync_interval_seconds)
+        scheduler.start()
+        self._scheduler = scheduler
     
     def get(self, k:K):
         if k in self._deleted:
@@ -23,35 +34,43 @@ class SSTable[K, V]:
             value = data[k]
         
         return value
-    
-    def set(self, k:K, v:V):
-        self._data[k] = v
         
-        if k in self._deleted:
-            self._deleted.remove(k)
+    def multi_get(self, *keys:K):
+        data = self._data
+        inmem_values = {k: data[k] for k in keys if k in data}
+        stored_values = dict(self.storage.get(k for k in keys if k not in data))
+        
+        return (
+            Stream(keys)
+            .split(lambda k: (k, inmem_values.get(k, stored_values.get(k, None))))
+        )
 
-        if len(self._data) >= self.max_num_retention:
-            self.storage.put(self._data.items())
-            self._data = {}
+    def set(self, k:K, v:V):
+        with self._lock:
+            self._data[k] = v
+            self._deleted.discard(k)
     
     def delete(self, key:K):
-        self._data.pop(key, None)
-        self._deleted.add(key)
-        
-        if len(self._deleted) > self.max_num_retention:
-            self.storage.delete(self._deleted)
-            self._deleted = set()
+        with self._lock:
+            self._data.pop(key, None)
+            self._deleted.add(key)
     
-    def multi_get(self, *keys:K):
-        return self.storage.get(keys)
-    
-    def dump(self):
-        if len(self._data) > 0:
-            self.storage.put(self._data.items())
+    def _sync(self):
+        with self._lock:
+            data = self._data
             self._data = {}
+            
+            deleted = self._deleted
+            self._deleted = set()
+
+        if len(data) > 0:
+            self.storage.put(self._data.items())
+        
+        if len(deleted) > 0:
+            self.storage.delete(deleted)
 
 
-class IOMap[K, V](Protocol):
+class Storage[K, V](Protocol):
     
     def put(self, data:Iterable[tuple[K, V]]) -> None:...
     
