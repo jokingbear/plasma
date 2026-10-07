@@ -9,7 +9,7 @@ from ..data_model.collections import ZippedStream, Stream
 class SSTable[K, V]:
     
     def __init__(self, 
-            storage:IOMap[K, V], max_num_retention:int, 
+            storage:Storage[K, V], max_num_retention:int, 
             sync_interval_seconds:float
         ):
         self.storage = storage
@@ -70,7 +70,7 @@ class SSTable[K, V]:
             self.storage.delete(deleted)
 
 
-class IOMap[K, V](Protocol):
+class Storage[K, V](Protocol):
     
     def put(self, data:Iterable[tuple[K, V]]) -> None:...
     
