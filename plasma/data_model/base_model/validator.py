@@ -45,10 +45,14 @@ class Validator[T](ReadableClass):
             raise error
 
     def _validate_object(self, field_name, obj, raw, origin, args):
-        valid_condition = (
-            isinstance(obj, origin) or 
-            (len(args) > 0 and isinstance(obj, args))
-        )
+        try:
+            valid_condition = (
+                isinstance(obj, origin) or 
+                (len(args) > 0 and isinstance(obj, args))
+            )
+        except Exception as e:
+            raise RuntimeError(f'error when validating field {field_name}') from e
+
         valid_condition |= obj is None and not self.strict
         
         if not valid_condition:
