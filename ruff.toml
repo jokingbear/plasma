@@ -1,7 +1,10 @@
 target-version = "py314"
 
-[lint]
-ignore = ["I001"]
-
 [lint.per-file-ignores]
 "**/__init__.py" = ["F401"]
+
+[lint]
+extend-select = ["I"]
+
+[lint.isort]
+relative-imports-order = "closest-to-furthest"
