@@ -48,7 +48,7 @@ class Validator[T](ReadableClass):
         try:
             valid_condition = (
                 isinstance(obj, origin) or 
-                (len(args) > 0 and isinstance(obj, args))
+                (len(args) > 0 and isinstance(obj, tuple(get_origin(a) or a for a in args)))
             )
         except Exception as e:
             raise RuntimeError(f'error when validating field {field_name}') from e
