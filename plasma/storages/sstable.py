@@ -9,11 +9,10 @@ from ..data_model.collections import ZippedStream, Stream
 class SSTable[K, V]:
     
     def __init__(self, 
-            storage:Storage[K, V], max_num_retention:int, 
+            storage:Storage[K, V], *, 
             sync_interval_seconds:float
         ):
         self.storage = storage
-        self.max_num_retention = max_num_retention
         self._data = dict[K, V]()
         self._deleted = set()
         
