@@ -25,7 +25,7 @@ class SqliteStorage:
         return _init_connection(self.filepath, thread_id)
     
     def query(self, statement:str):
-        return Query(self, statement)
+        return Statement(self, statement)
     
     def execute(self, *statements:str):
         with self.connection as conn:
@@ -37,7 +37,7 @@ def _init_connection(filepath:str, thread_id:int):
     return Connection(filepath)
 
 
-class Query:
+class Statement:
     
     def __init__(self, storage:SqliteStorage, query:str):
         self.storage = storage

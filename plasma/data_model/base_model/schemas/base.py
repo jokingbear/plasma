@@ -23,5 +23,13 @@ class Schema:
                              else a for a in real_node)
             return rep_node
     
+    @property
+    def leaves(self):
+        for n in self.rep:
+            if self.rep.out_degree(n) > 0:
+                continue
+            
+            yield n
+    
     def __repr__(self):
         return repr(self.rep)

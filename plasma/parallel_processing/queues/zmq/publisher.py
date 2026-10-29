@@ -10,8 +10,7 @@ class PubZMQ(Queue):
     
     def __init__(self,
             context:zmq.Context, connection:str, name:str|None, 
-            qsize:int, timeout:float,
-            serializer:Serializer,
+            qsize:int, timeout:float, serializer:Serializer,
         ):
         super().__init__(name, 0)        
 
@@ -27,7 +26,7 @@ class PubZMQ(Queue):
             socket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 600)  # Pulse at 10 mins (Docker cuts at 15)
             socket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 30)  # Retry every 30s if quiet
             socket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 3)   
-        
+
         socket.connect(connection)
         self._socket = socket
         self.qsize = qsize

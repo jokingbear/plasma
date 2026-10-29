@@ -19,7 +19,7 @@ class SqlStorage:
         return self._connection_initiator(self.filepath, thread_id)
     
     def statement(self, text:str):
-        return Statement(text, [], False)
+        return Statement(text, [], {}, False)
     
     def execute(self, *statements:Statement):
         with self.connection as conn:

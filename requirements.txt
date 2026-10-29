@@ -10,3 +10,4 @@ rich
 pyzmq
 intervaltree
 zarr
+apscheduler
