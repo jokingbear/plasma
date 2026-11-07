@@ -1,11 +1,11 @@
 from warnings import warn
-from .context_graph import Node, ContextGraph
+
+from .context_graph import ContextGraph
 from .context import Context
-from ....functional import AutoPipe
 from .delegator import Delegator
 
 
-class Linker(AutoPipe):
+class Linker:
     
     def __init__(self, graph:ContextGraph):
         super().__init__()
@@ -30,5 +30,5 @@ class Linker(AutoPipe):
             warn('empty map')
         
         delegator = Delegator(self.graph, current_context, source)
-        for source, target in map.items():
-            delegator.run(source, linking_context, target)
+        for s, t in map.items():
+            delegator.run(s, linking_context, t)
