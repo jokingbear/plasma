@@ -1,11 +1,13 @@
-from typing import Iterable, Callable
+from collections.abc import Iterable, Callable
 from collections import defaultdict
+from warnings import deprecated
 
 
 def _identity[T](x:T):
     return x
 
 
+@deprecated('use stream instead', stacklevel=2)
 class groupby[K, V](dict[K, tuple[V]]):
     
     def __init__[D](self, 
