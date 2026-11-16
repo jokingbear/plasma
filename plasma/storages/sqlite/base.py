@@ -21,7 +21,7 @@ class SqliteStorage(SQLDriver[Connection, SqliteStatement]): # type: ignore
         return self._connection_initiator(self.filepath, thread_id)
     
     def statement(self, contents:str):
-        return SqliteStatement(contents, [], False)
+        return SqliteStatement(contents, [])
 
 
 def _init_connection(filepath:str, thread_id:int):
