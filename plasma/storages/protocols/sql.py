@@ -22,12 +22,13 @@ class Statement[C](Protocol):
     text:str
     params:Sequence
     kwarg_params:dict[str, Any]
-    dml:bool
     execute_many:bool
     
+    @property
+    def dml(self) -> bool:...
+    
     def parameterize(self, 
-        *params, dml:bool=False, 
-        execute_many:bool=False, 
+        *params, execute_many:bool=False, 
         **kwargs
     ) -> Statement[C]:...
     
