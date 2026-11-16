@@ -2,10 +2,12 @@ import threading
 
 from sqlite3 import Connection
 from functools import lru_cache
-from .statement import Statement
+
+from .statement import SqliteStatement
+from ..protocols import SQLDriver
 
 
-class SqlStorage:
+class SqlStorage(SQLDriver[Connection, SqliteStatement]): # type: ignore
     
     def __init__(self, filepath:str, max_connection:int=32):
         self.filepath = filepath
@@ -14,20 +16,12 @@ class SqlStorage:
         self._connection_initiator = connection_initator
 
     @property
-    def connection(self):
+    def connector(self):
         thread_id = threading.get_ident()
         return self._connection_initiator(self.filepath, thread_id)
     
-    def statement(self, text:str):
-        return Statement(text, [], {}, False)
-    
-    def execute(self, *statements:Statement):
-        with self.connection as conn:
-            supports = statements[:-1]
-            main = statements[-1]
-            for s in supports:
-                s.execute(conn)
-            return [*main.execute(conn)]
+    def statement(self, contents:str):
+        return SqliteStatement(contents, [], False)
 
 
 def _init_connection(filepath:str, thread_id:int):

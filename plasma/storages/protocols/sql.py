@@ -1,15 +1,15 @@
 from collections.abc import Sequence, Iterable
-from typing import Protocol, Any
+from typing import Protocol, Any, Self
 
 
-class SQLDriver[C:Connector](Protocol):
+class SQLDriver[C:Connector, S:SqlStatement](Protocol):
     
     @property
     def connector(self) -> C:...
     
-    def statement(self, contents:str) -> Statement[C]:...
+    def statement(self, contents:str) -> S:...
     
-    def execute(self, *statements:Statement[C]):
+    def execute(self, *statements:S):
         with self.connector as conn:
             supports = statements[:-1]
             main = statements[-1]
@@ -18,19 +18,18 @@ class SQLDriver[C:Connector](Protocol):
             return [*main.execute(conn)]
 
 
-class Statement[C](Protocol):
+class SqlStatement[C](Protocol):
     text:str
-    params:Sequence
-    kwarg_params:dict[str, Any]
+    args:Sequence | dict[str,Any]
     execute_many:bool
     
     @property
     def dml(self) -> bool:...
     
     def parameterize(self, 
-        *params, execute_many:bool=False, 
+        *args, execute_many:bool|None=None, 
         **kwargs
-    ) -> Statement[C]:...
+    ) -> Self:...
     
     def execute(self, connector:C) -> Iterable: ...
 

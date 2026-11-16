@@ -1,1 +1,1 @@
-from .sql import SQLDriver, Statement
+from .sql import SQLDriver, SqlStatement
