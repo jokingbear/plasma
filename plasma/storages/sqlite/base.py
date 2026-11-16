@@ -7,7 +7,7 @@ from .statement import SqliteStatement
 from ..protocols import SQLDriver
 
 
-class SqlStorage(SQLDriver[Connection, SqliteStatement]): # type: ignore
+class SqliteStorage(SQLDriver[Connection, SqliteStatement]): # type: ignore
     
     def __init__(self, filepath:str, max_connection:int=32):
         self.filepath = filepath
