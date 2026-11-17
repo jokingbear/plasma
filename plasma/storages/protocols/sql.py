@@ -1,3 +1,5 @@
+import re
+
 from collections.abc import Sequence, Iterable
 from typing import Protocol, Any, Self
 
@@ -24,7 +26,8 @@ class SqlStatement[C](Protocol):
     execute_many:bool
     
     @property
-    def dml(self) -> bool:...
+    def dml(self):
+        return re.search('INSERT|UPDATE|CREATE', self.text) is not None
     
     def parameterize(self, 
         *args, execute_many:bool|None=None, 

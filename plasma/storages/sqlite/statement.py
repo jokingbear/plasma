@@ -1,7 +1,4 @@
-import re
-
 from collections.abc import Sequence
-from dataclasses import dataclass
 from sqlite3 import Connection
 from typing import Any
 
@@ -9,16 +6,19 @@ from ..protocols import SqlStatement
 from ...functional import ReadableClass
 
 
-@dataclass
 class SqliteStatement(SqlStatement[Connection], ReadableClass):
-    text:str
-    args:Sequence | dict[str, Any]
-    execute_many:bool = False
     
-    @property
-    def dml(self):
-        return re.search('INSERT|UPDATE|CREATE', self.text) is not None
-
+    def __init__(
+            self, text:str, 
+            args:Sequence|dict[str,Any], 
+            execute_many:bool=False
+        ):
+        ReadableClass.__init__(self)
+        
+        self.text = text
+        self.args = args
+        self.execute_many = execute_many
+    
     def parameterize(self, *args, execute_many:bool|None = None, **kwargs):
         assert len(args) == 0 or len(kwargs) == 0, 'cant have both args and kwargs'
 
