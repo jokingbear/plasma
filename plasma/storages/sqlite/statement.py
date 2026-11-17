@@ -1,39 +1,48 @@
 from collections.abc import Sequence
 from sqlite3 import Connection
+from typing import Any
 
+from ..protocols import SqlStatement
 from ...functional import ReadableClass
 
 
-class Statement(ReadableClass):
+class SqliteStatement(SqlStatement[Connection], ReadableClass):
     
-    def __init__(self, 
-            text:str, params:Sequence,
-            keyword_params:dict, 
-            execute_many:bool
+    def __init__(
+            self, text:str, 
+            args:Sequence|dict[str,Any], 
+            execute_many:bool=False
         ):
-        super().__init__()        
-        assert len(params) == 0 or len(keyword_params) == 0, 'params and keyword params are mutually exclusive'
+        ReadableClass.__init__(self)
         
         self.text = text
-        self.params = params
-        self.keyword_params = keyword_params
-        self.many_strategy = execute_many
+        self.args = args
+        self.execute_many = execute_many
     
-    def parameterize(self, *params, execute_many:bool|None=False, **keyword_params):
-        execute_many = self.many_strategy if execute_many is None else execute_many
-        return Statement(self.text, params, keyword_params, execute_many)
+    def parameterize(self, *args, execute_many:bool|None = None, **kwargs):
+        assert len(args) == 0 or len(kwargs) == 0, 'cant have both args and kwargs'
 
-    def execute(self, connection:Connection):
-        if self.many_strategy:
-            return connection.executemany(self.text, self.params)
-        else:
-            return connection.execute(self.text, self.params)
+        if len(args) == 0 and len(kwargs) == 0:
+            args = self.args
+        elif len(args) == 0:
+            args = kwargs
+            
+        execute_many = self.execute_many if execute_many is None else execute_many
+        return SqliteStatement(
+            self.text, args, execute_many
+        )
+
+    def execute(self, connector: Connection):
+        if self.execute_many:
+            return [*connector.executemany(self.text, self.args)]
+        
+        return connector.execute(self.text, self.args)
 
     def _tree(self, tree):
+        tree.add(f'dml={self.dml}')
         tree.add(f'statement\n{self.text.strip()}')
-        
-        if len(self.params) > 0:
-            params = tree.add('params')
-            params.add(f'{self.params[:5]}')
+        if len(self.args) > 0:
+            params = tree.add('args')
+            params.add(f'{self.args}')
 
         return tree

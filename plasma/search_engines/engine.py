@@ -1,7 +1,8 @@
 import pandas as pd
 
-from typing import Any, Sequence
+from collections.abc import Sequence
 from warnings import deprecated
+
 from .index import Index
 from .regex_tokenizer import RegexTokenizer
 from .inquirer import PathInquirer

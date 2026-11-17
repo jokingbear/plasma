@@ -1,1 +1,1 @@
-from .base import SqlStorage
+from .base import SqliteStorage
