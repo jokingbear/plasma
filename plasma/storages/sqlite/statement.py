@@ -39,8 +39,8 @@ class SqliteStatement(SqlStatement[Connection], ReadableClass):
         return connector.execute(self.text, self.args)
 
     def _tree(self, tree):
+        tree.add(f'dml={self.dml}')
         tree.add(f'statement\n{self.text.strip()}')
-        
         if len(self.args) > 0:
             params = tree.add('args')
             params.add(f'{self.args}')
